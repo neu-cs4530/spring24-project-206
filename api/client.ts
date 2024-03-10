@@ -3,7 +3,8 @@ import { MongoClient, ServerApiVersion } from 'mongodb';
 
 dotenv.config();
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
-export const client: MongoClient = new MongoClient(process.env.DB_CONN_STRING || '', {
+export const client = new MongoClient('mongodb+srv://sanjana:S6Zyn6JW1Mgfd83O@personal-pet-collection.hbmnsu4.mongodb.net/?retryWrites=true&w=majority&appName=personal-pet-collection', 
+{
   serverApi: {
     version: ServerApiVersion.v1,
     strict: true,
@@ -24,6 +25,7 @@ export async function run() {
   }
 }
 
-export function getDatabase() {
+export async function getDatabase() {
+  await client.connect();
   return client.db('personal-pet-collection');
 }

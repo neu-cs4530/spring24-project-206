@@ -1,7 +1,9 @@
 import { getDatabase } from "./client";
 
-export async function getPets() {
-    const db = getDatabase();
+export async function pets() {
+    const db = await getDatabase();
     const pets = db.collection('pet');
-    return await pets.find({}).toArray();
+    const res = await pets.find({}).toArray();
+    console.log("result in getPets:", res);
+    return res;
 }

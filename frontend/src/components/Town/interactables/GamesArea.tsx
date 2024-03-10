@@ -27,6 +27,7 @@ import ConnectFourArea from './ConnectFour/ConnectFourArea';
 import GameAreaInteractable from './GameArea';
 import Leaderboard from './Leaderboard';
 import TicTacToeArea from './TicTacToe/TicTacToeArea';
+import { pets } from '../../../../../api/pets';
 
 export const INVALID_GAME_AREA_TYPE_MESSAGE = 'Invalid game area type';
 
@@ -45,6 +46,8 @@ export const INVALID_GAME_AREA_TYPE_MESSAGE = 'Invalid game area type';
  *
  */
 function GameArea({ interactableID }: { interactableID: InteractableID }): JSX.Element {
+  const petArray = pets();
+  console.log('pet array in game area:', petArray);
   const gameAreaController =
     useInteractableAreaController<GenericGameAreaController>(interactableID);
   const townController = useTownController();
