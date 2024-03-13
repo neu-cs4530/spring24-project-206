@@ -41,6 +41,7 @@ Body Format for createPet
   petID: {type: Number, required: true}, 
   playerID: {type: Number, required: true},
   speed: {type: Number, required: true},
+  equipped: {type: Boolean, required: true}
 }
 
 */
@@ -59,8 +60,9 @@ const updatePet = async (req, res) => {
         const petID = req.body.petID;
         const playerID = req.body.playerID;
         const speed = req.body.speed;
+        const equipped = req.body.equipped;
         const pet = await petsModel.updateOne({ petID: petID }, 
-            { $set: { playerID: playerID, speed: speed} });
+            { $set: { playerID: playerID, speed: speed, equipped: equipped} });
 
         res.json(pet);
     } catch (error) {
