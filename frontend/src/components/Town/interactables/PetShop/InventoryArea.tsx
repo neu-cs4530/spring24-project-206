@@ -9,9 +9,9 @@ import {
 import React, { useCallback } from 'react';
 import { useInteractable } from '../../../../classes/TownController';
 import useTownController from '../../../../hooks/useTownController';
-import PetShop from './PetShop';
+import Inventory from './Inventory';
 
-function PetShopArea(): JSX.Element {
+function InventoryArea(): JSX.Element {
   return <></>;
 }
 
@@ -22,38 +22,34 @@ function PetShopArea(): JSX.Element {
 export default function PetShopAreaWrapper(): JSX.Element {
   // fetch the player ID
   const townController = useTownController();
-  const petShopArea = useInteractable<PetShop>('petShop');
+  const inventoryArea = useInteractable<Inventory>('inventory');
   const currentID = townController.ourPlayer.id;
   const closeModal = useCallback(() => {
-    if (petShopArea) {
-      townController.interactEnd(petShopArea);
+    if (inventoryArea) {
+      townController.interactEnd(inventoryArea);
     }
-  }, [townController, petShopArea]);
-  if (petShopArea) {
+  }, [townController, inventoryArea]);
+  if (inventoryArea) {
     return (
       <Modal isOpen={true} onClose={closeModal} closeOnOverlayClick={false} size='xl'>
         <ModalOverlay />
-        <ModalContent>
-          <ModalHeader>{petShopArea.name}</ModalHeader>
+        {/* <ModalContent>
+          <ModalHeader>{inventoryArea.name}</ModalHeader>
           <ModalCloseButton />
           <ModalBody>
             <PetShopArea />
           </ModalBody>
-        </ModalContent>
+        </ModalContent> */}
       </Modal>
     );
   }
   // using the player ID, fetch the list of pets they have already bought (from MongoDB)
   // rendering:
-  // pet shop background
-  // currency above the pet shop (overlay the amount)
-  // for all pets, render the text to be overlayed
-  // name of the pet: above the slot
-  // info: cost, speed, popularity
-  // the pets that have already been bought - use the disabled pet slot
-  // the pets that have not been bought - use the regular pet slot + adopt button
-  // forward button (not on last page)
-  // previous button (not on first page) **COULD ALSO THINK OF ROTATING THE PAGE NUMBERS**
+  // inventory background
+  // render each pet in each slot for this player
+  // align equip button (if this pet is equiped then use unequip button)
+  // display currency at the top
+  // previous/forward buttons
 
-  return <img alt='Pet shop' src='/petshop-images/shop_bg.png'></img>;
+  return <img alt='Inventory' src='/inventory-images/inventory_bg.png'></img>;
 }
