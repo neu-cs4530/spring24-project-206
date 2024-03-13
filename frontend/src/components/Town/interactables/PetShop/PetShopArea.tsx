@@ -1,4 +1,12 @@
 import {
+  Box,
+  Button,
+  chakra,
+  ComponentWithAs,
+  Container,
+  ContainerProps,
+  Grid,
+  Image,
   Modal,
   ModalBody,
   ModalCloseButton,
@@ -10,9 +18,24 @@ import React, { useCallback } from 'react';
 import { useInteractable } from '../../../../classes/TownController';
 import useTownController from '../../../../hooks/useTownController';
 import PetShop from './PetShop';
+import shopBackground from './petshop-images/shop_bg.png';
+import closeButton from './petshop-images/x_btn.png';
+
+let bgColour = 'red';
+function myClick(): void {
+  if (bgColour == 'red') {
+    bgColour = 'yellow';
+  } else {
+    bgColour = 'red';
+  }
+  console.log('clicked!!!');
+}
 
 function PetShopArea(): JSX.Element {
-  return <></>;
+  console.log(shopBackground);
+  const petShopGrid = <Image src={shopBackground.src} boxSize='lg'></Image>;
+  // return <PetShopContainer></PetShopContainer>;
+  return petShopGrid;
 }
 
 /**
@@ -29,16 +52,24 @@ export default function PetShopAreaWrapper(): JSX.Element {
       townController.interactEnd(petShopArea);
     }
   }, [townController, petShopArea]);
-  if (petShopArea) {
+  const open = true;
+  if (open) {
     return (
       <Modal isOpen={true} onClose={closeModal} closeOnOverlayClick={false} size='xl'>
         <ModalOverlay />
-        <ModalContent>
-          <ModalHeader>{petShopArea.name}</ModalHeader>
-          <ModalCloseButton />
-          <ModalBody>
-            <PetShopArea />
-          </ModalBody>
+        <ModalContent bgColor='transparent'>
+          {/* <ModalHeader>Pet Shop</ModalHeader> */}
+          <ModalCloseButton
+            bgImage={closeButton.src}
+            objectFit='fill'
+            bgSize='contain'
+            onClick={closeModal}
+          />
+          {/* <Image src={closeButton.src} onClick={closeModal} /> */}
+          <PetShopArea />
+          {/* <ModalBody>
+            <Image src={shop_bg} boxSize='lg' onClick={() => console.log('clicked!')}></Image>
+          </ModalBody> */}
         </ModalContent>
       </Modal>
     );
