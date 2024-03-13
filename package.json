@@ -39,11 +39,20 @@
     },
     "dependencies": {
         "@types/ramda": "^0.27.34",
+        "connect-mongo": "^5.1.0",
+        "express": "^4.18.3",
+        "express-session": "^1.18.0",
+        "mongoose": "^8.2.1",
+        "dotenv": "^16.4.5",
+        "mongodb": "^6.5.0",
+        "dotenv": "^16.4.5",
+        "mongodb": "^6.5.0",
         "ramda": "^0.27.1",
         "typescript-is": "^0.17.0"
     },
     "files": [
-	    "frontend/src/classes/interactable/ConnectFourAreaController.ts",
+        "frontend/src/classes/interactable/ConnectFourAreaController.ts",
+        "frontend/src/classes/interactable/ConnectFourAreaController.ts",
         "frontend/src/classes/interactable/InteractableAreaController.ts",
         "frontend/src/components/Town/interactables/ConnectFour/ConnectFourArea.tsx",
         "frontend/src/components/Town/interactables/ConnectFour/ConnectFourBoard.tsx",
@@ -51,3 +60,5 @@
         "frontend/src/components/SocialSidebar/InteractableAreasList.tsx"
     ]
 }
+
+
