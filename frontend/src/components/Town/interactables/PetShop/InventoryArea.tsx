@@ -83,12 +83,12 @@ function InventoryArea(): JSX.Element {
 
       {/* back button */}
       <Box position='absolute' left='0' top='400' boxSize='50px'>
-        <Image src={back_btn.src} />
+        <IconButton icon={<Image src={back_btn.src} />} aria-label={''} />;
       </Box>
 
       {/* forward button */}
       <Box position='absolute' right='0' top='400' boxSize='50px'>
-        <Image src={forward_btn.src} />
+        <IconButton icon={<Image src={forward_btn.src} />} aria-label={''} />;
       </Box>
     </Box>
   );
