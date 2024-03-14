@@ -19,6 +19,7 @@ import { useInteractable } from '../../../../classes/TownController';
 import useTownController from '../../../../hooks/useTownController';
 import PetShop from './PetShop';
 import shopBackground from './petshop-images/shop_bg.png';
+import slot from './petshop-images/pet_slot_bg.png';
 import closeButton from './petshop-images/x_btn.png';
 
 let bgColour = 'red';
@@ -31,11 +32,30 @@ function myClick(): void {
   console.log('clicked!!!');
 }
 
+// function PetShopArea(): JSX.Element {
+//   console.log(shopBackground);
+//   const petShopGrid = <Image src={shopBackground.src} boxSize='lg'></Image>;
+//   // return <PetShopContainer></PetShopContainer>;
+//   return petShopGrid;
+// }
+
 function PetShopArea(): JSX.Element {
-  console.log(shopBackground);
-  const petShopGrid = <Image src={shopBackground.src} boxSize='lg'></Image>;
-  // return <PetShopContainer></PetShopContainer>;
-  return petShopGrid;
+  // Array of pets
+  const imageSources = [slot, slot, slot];
+
+  return (
+    <Box position='relative'>
+      {/* Background Image */}
+      <Image src={shopBackground.src} position='absolute' top='0' left='0' zIndex='-1' />
+
+      {/* Grid of Images */}
+      <Grid templateColumns='repeat(3, 1fr)' gap={4}>
+        {imageSources.map((im, index) => (
+          <Image src={im.src} key={index} position='relative' top='100px'></Image>
+        ))}
+      </Grid>
+    </Box>
+  );
 }
 
 /**
