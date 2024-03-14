@@ -11,6 +11,7 @@ import ChatWindow from '../VideoCall/VideoFrontend/components/ChatWindow/ChatWin
 import clsx from 'clsx';
 import { createStyles, makeStyles, Theme } from '@material-ui/core';
 import PetShopAreaWrapper from './interactables/PetShop/PetShopArea';
+import InventoryAreaWrapper from './interactables/PetShop/InventoryArea';
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -86,7 +87,7 @@ export default function TownMap(): JSX.Element {
     <div id='app-container'>
       <NewConversationModal />
       <GameAreaWrapper />
-      <PetShopAreaWrapper />
+      <InventoryAreaWrapper />
       <aside className={clsx(classes.chatWindowContainer, { [classes.hide]: !isChatWindowOpen })}>
         <ChatWindow />
       </aside>

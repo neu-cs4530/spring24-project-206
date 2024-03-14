@@ -72,7 +72,7 @@ export default function PetShopAreaWrapper(): JSX.Element {
       townController.interactEnd(petShopArea);
     }
   }, [townController, petShopArea]);
-  const open = true;
+  const open = false;
   if (open) {
     return (
       <Modal isOpen={true} onClose={closeModal} closeOnOverlayClick={false} size='xl'>
