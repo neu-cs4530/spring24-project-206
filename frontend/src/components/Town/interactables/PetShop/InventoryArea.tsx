@@ -1,17 +1,11 @@
 import {
   Box,
-  Button,
-  chakra,
-  ComponentWithAs,
-  Container,
-  ContainerProps,
   Grid,
+  IconButton,
   Image,
   Modal,
-  ModalBody,
   ModalCloseButton,
   ModalContent,
-  ModalHeader,
   ModalOverlay,
 } from '@chakra-ui/react';
 import React, { useCallback } from 'react';
@@ -24,49 +18,78 @@ import unequippedSlot from './inventory-images/inventory_slot_bg.png';
 import equippedSlot from './inventory-images/inventory_slot_bg_equipped.png';
 import { Pet } from './types/pet';
 import emptyPet from './inventory-images/inventory_slot_bg_empty.png';
-import dog from './inventory-images/coin_count.png';
+import dog from './inventory-images/pet.png';
 import equippedButton from './inventory-images/equip_btn.png';
 import unequippedButton from './inventory-images/unequip_btn.png';
+import coin_count from './inventory-images/coin_count.png';
+import forward_btn from './inventory-images/forward_btn.png';
+import back_btn from './inventory-images/back_btn.png';
 
 function PetInventorySlot({ type, equipped }: Pet): JSX.Element {
   let petImage = <Image src={emptyPet.src} />;
   let slotImage = <></>;
   let equipButton = <></>;
   if (equipped) {
-    equipButton = <Image src={unequippedButton.src}></Image>;
+    equipButton = <IconButton icon={<Image src={unequippedButton.src} />} aria-label={''} />;
     slotImage = <Image src={equippedSlot.src} />;
   } else {
-    equipButton = <Image src={equippedButton.src}></Image>;
+    equipButton = <IconButton icon={<Image src={equippedButton.src} />} aria-label={''} />;
     slotImage = <Image src={unequippedSlot.src} />;
   }
   if (type === 'dog') {
-    petImage = <Image src={dog.src} bgImage={equippedSlot.src} bgSize='initial'></Image>;
+    petImage = <Image src={dog.src} boxSize='50px'></Image>;
   }
 
   return (
-    <Box position='relative'>
-      {petImage}
-      {equipButton}
+    <Box position='relative' top='110px' left='45px' boxSize='100px'>
+      <Box position='relative'>
+        {slotImage}
+        <Box position='absolute' top='50%' left='50%' transform='translate(-50%, -50%)'>
+          {petImage}
+        </Box>
+      </Box>
+      <Box>{equipButton}</Box>
     </Box>
   );
 }
 
 function InventoryArea(): JSX.Element {
   // Array of pets
-  const imageSources = [unequippedSlot, unequippedSlot, unequippedSlot];
+  const pets = [
+    { petID: 1, type: 'dog', playerID: 1, speed: 1.5, equipped: false },
+    { petID: 1, type: 'dog', playerID: 1, speed: 1.5, equipped: true },
+    { petID: 1, type: 'dog', playerID: 1, speed: 1.5, equipped: false },
+    { petID: 1, type: 'dog', playerID: 1, speed: 1.5, equipped: true },
+    { petID: 1, type: 'dog', playerID: 1, speed: 1.5, equipped: false },
+    { petID: 1, type: 'dog', playerID: 1, speed: 1.5, equipped: true },
+  ];
 
   return (
     <Box position='relative'>
-      {/* Background Image */}
-      <Image src={inventoryBackground.src} position='absolute' top='0' left='0' zIndex='-1' />
+      {/* Inventory Background */}
+      <Image src={inventoryBackground.src} position='absolute' />
 
-      {/* Grid of Images */}
-      <Grid templateColumns='repeat(3, 1fr)' gap={4}>
-        {/* {imageSources.map((im, index) => (
-          <Image src={im.src} key={index} position='relative' top='100px'></Image>
-        ))} */}
-        <PetInventorySlot petID={0} type={'dog'} playerID={0} speed={0} equipped={true} />
+      {/* Grid of Pets */}
+      <Grid templateColumns='repeat(3, 1fr)' gap={4} gridAutoFlow='row dense' gridRowGap={10}>
+        {pets.map((pet, index) => (
+          <PetInventorySlot key={index} {...pet} />
+        ))}
       </Grid>
+
+      {/* Coin Count Image */}
+      <Box position='absolute' right='50' top='0' boxSize='100px'>
+        <Image src={coin_count.src} />
+      </Box>
+
+      {/* back button */}
+      <Box position='absolute' left='0' top='400' boxSize='50px'>
+        <Image src={back_btn.src} />
+      </Box>
+
+      {/* forward button */}
+      <Box position='absolute' right='0' top='400' boxSize='50px'>
+        <Image src={forward_btn.src} />
+      </Box>
     </Box>
   );
 }
@@ -105,13 +128,5 @@ export default function InventoryAreaWrapper(): JSX.Element {
       </Modal>
     );
   }
-  // using the player ID, fetch the list of pets they have already bought (from MongoDB)
-  // rendering:
-  // inventory background
-  // render each pet in each slot for this player
-  // align equip button (if this pet is equiped then use unequip button)
-  // display currency at the top
-  // previous/forward buttons
-
   return <img alt='Inventory' src='/inventory-images/inventory_bg.png'></img>;
 }
