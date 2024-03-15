@@ -2,10 +2,12 @@ import {
   Box,
   Button,
   chakra,
+  color,
   ComponentWithAs,
   Container,
   ContainerProps,
   Grid,
+  IconButton,
   Image,
   Modal,
   ModalBody,
@@ -13,47 +15,109 @@ import {
   ModalContent,
   ModalHeader,
   ModalOverlay,
+  Stack,
+  Text,
 } from '@chakra-ui/react';
 import React, { useCallback } from 'react';
 import { useInteractable } from '../../../../classes/TownController';
 import useTownController from '../../../../hooks/useTownController';
 import PetShop from './PetShop';
 import shopBackground from './petshop-images/shop_bg.png';
-import slot from './petshop-images/pet_slot_bg.png';
 import closeButton from './petshop-images/x_btn.png';
+import coinCount from './petshop-images/coin_count.png';
+import forwardButton from './petshop-images/forward_btn.png';
+import backButton from './petshop-images/back_btn.png';
+import slotBackground from './petshop-images/pet_slot_bg.png';
+import slotBackgroundDisabled from './petshop-images/pet_slot_bg_disabled.png';
+import { PetCatalog } from './types/petCatalog';
+import { Pet } from './types/pet';
+import dog from './../../../../../public/logo512.png';
+import adoptButton from './petshop-images/adopt_btn.png';
 
-let bgColour = 'red';
-function myClick(): void {
-  if (bgColour == 'red') {
-    bgColour = 'yellow';
-  } else {
-    bgColour = 'red';
+const PETS = [
+  { petID: 1, type: 'chicken', playerID: 1, speed: 1.5, equipped: false },
+  { petID: 1, type: 'cat', playerID: 1, speed: 1.5, equipped: true },
+  { petID: 1, type: 'dog', playerID: 1, speed: 1.5, equipped: false },
+  { petID: 1, type: 'dog', playerID: 1, speed: 1.5, equipped: true },
+  { petID: 1, type: 'dog', playerID: 1, speed: 1.5, equipped: false },
+  { petID: 1, type: 'dog', playerID: 1, speed: 1.5, equipped: true },
+];
+
+const petsOfPlayer: Record<number, Pet[]> = { 1: PETS.slice(0, 2), 2: [], 3: PETS.slice(3, 5) };
+
+function PetShopSlot(petCatalog: PetCatalog): JSX.Element {
+  let background = <Image src={slotBackground.src} />;
+  let adopt = <IconButton icon={<Image src={adoptButton.src} />} aria-label={'adopt-button'} />;
+  // if the player has not bought the pet, make the
+  const pets = petsOfPlayer[1];
+  console.log('pets =', pets);
+  console.log('pet catalog =', petCatalog);
+  if (pets.map(pet => pet.type).includes(petCatalog.type)) {
+    background = <Image src={slotBackgroundDisabled.src} />;
+    adopt = <></>;
   }
-  console.log('clicked!!!');
+  const petImage = <Image src={dog.src} />;
+  return (
+    <Box position='relative' top='110px' left='45px' boxSize='100px'>
+      <Box position='relative'>
+        {background}
+        <Box position='absolute' top='50%' left='50%' transform='translate(-50%, -50%)'>
+          {petImage}
+        </Box>
+      </Box>
+      <Box>{adopt}</Box>
+    </Box>
+  );
 }
-
-// function PetShopArea(): JSX.Element {
-//   console.log(shopBackground);
-//   const petShopGrid = <Image src={shopBackground.src} boxSize='lg'></Image>;
-//   // return <PetShopContainer></PetShopContainer>;
-//   return petShopGrid;
-// }
 
 function PetShopArea(): JSX.Element {
   // Array of pets
-  const imageSources = [slot, slot, slot];
+  const petsCatalog: PetCatalog[] = [
+    { type: 'dog', speed: 1.5, counter: 0, price: 10 },
+    { type: 'chicken', speed: 1.75, counter: 0, price: 12 },
+    { type: 'dragon', speed: 1, counter: 0, price: 7 },
+    { type: 'chicken', speed: 2.5, counter: 0, price: 5 },
+    { type: 'dog', speed: 0.5, counter: 0, price: 9 },
+    { type: 'dog', speed: 0.25, counter: 0, price: 3 },
+  ];
+
+  const currency = 10;
+  const coinCountImage = (
+    <Box position='absolute' right='50' top='0' boxSize='100px'>
+      <Stack>
+        <Image src={coinCount.src} />
+        <Text position='relative' top='25%' left='50%' transform='translate(-20%,-200%)'>
+          {currency}
+        </Text>
+      </Stack>
+    </Box>
+  );
 
   return (
     <Box position='relative'>
-      {/* Background Image */}
-      <Image src={shopBackground.src} position='absolute' top='0' left='0' zIndex='-1' />
+      {/* Inventory Background */}
+      <Image src={shopBackground.src} position='absolute' />
 
-      {/* Grid of Images */}
-      <Grid templateColumns='repeat(3, 1fr)' gap={4}>
-        {imageSources.map((im, index) => (
-          <Image src={im.src} key={index} position='relative' top='100px'></Image>
+      {/* Grid of Pets */}
+      <Grid templateColumns='repeat(3, 1fr)' gap={4} gridAutoFlow='row dense' gridRowGap={10}>
+        {petsCatalog.map((pet, index) => (
+          // <PetShopSlot pet={PETS[0]} petCatalog={pet} key={index} />
+          <PetShopSlot key={index} {...pet}></PetShopSlot>
         ))}
       </Grid>
+
+      {/* Coin Count Image */}
+      {coinCountImage}
+
+      {/* back button */}
+      <Box position='absolute' left='0' top='400' boxSize='50px'>
+        <IconButton icon={<Image src={backButton.src} />} aria-label={''} />;
+      </Box>
+
+      {/* forward button */}
+      <Box position='absolute' right='0' top='400' boxSize='50px'>
+        <IconButton icon={<Image src={forwardButton.src} />} aria-label={''} />;
+      </Box>
     </Box>
   );
 }
@@ -72,24 +136,20 @@ export default function PetShopAreaWrapper(): JSX.Element {
       townController.interactEnd(petShopArea);
     }
   }, [townController, petShopArea]);
-  const open = false;
+  const open = true;
   if (open) {
     return (
       <Modal isOpen={true} onClose={closeModal} closeOnOverlayClick={false} size='xl'>
         <ModalOverlay />
         <ModalContent bgColor='transparent'>
-          {/* <ModalHeader>Pet Shop</ModalHeader> */}
           <ModalCloseButton
             bgImage={closeButton.src}
             objectFit='fill'
             bgSize='contain'
             onClick={closeModal}
+            zIndex='modal'
           />
-          {/* <Image src={closeButton.src} onClick={closeModal} /> */}
           <PetShopArea />
-          {/* <ModalBody>
-            <Image src={shop_bg} boxSize='lg' onClick={() => console.log('clicked!')}></Image>
-          </ModalBody> */}
         </ModalContent>
       </Modal>
     );
