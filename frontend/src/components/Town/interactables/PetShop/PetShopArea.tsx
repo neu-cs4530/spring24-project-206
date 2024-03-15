@@ -50,19 +50,36 @@ function PetShopSlot(petCatalog: PetCatalog): JSX.Element {
   let adopt = <IconButton icon={<Image src={adoptButton.src} />} aria-label={'adopt-button'} />;
   // if the player has not bought the pet, make the
   const pets = petsOfPlayer[1];
-  console.log('pets =', pets);
-  console.log('pet catalog =', petCatalog);
   if (pets.map(pet => pet.type).includes(petCatalog.type)) {
     background = <Image src={slotBackgroundDisabled.src} />;
     adopt = <></>;
   }
   const petImage = <Image src={dog.src} />;
+  const slot = (
+    <Box>
+      {petImage}
+      <Text
+        pos='absolute'
+        top='0'
+        left='initial'
+        fontFamily='monospace'
+        fontWeight='bold'
+        backgroundColor='whiteAlpha.600'>
+        Price: {petCatalog.price} Speed: {petCatalog.speed} Popularity:{petCatalog.counter}
+      </Text>
+    </Box>
+  );
   return (
     <Box position='relative' top='110px' left='45px' boxSize='100px'>
       <Box position='relative'>
         {background}
-        <Box position='absolute' top='50%' left='50%' transform='translate(-50%, -50%)'>
-          {petImage}
+        <Box
+          bgSize='contain'
+          position='absolute'
+          top='50%'
+          left='50%'
+          transform='translate(-50%, -50%)'>
+          {slot}
         </Box>
       </Box>
       <Box>{adopt}</Box>
@@ -84,12 +101,10 @@ function PetShopArea(): JSX.Element {
   const currency = 10;
   const coinCountImage = (
     <Box position='absolute' right='50' top='0' boxSize='100px'>
-      <Stack>
-        <Image src={coinCount.src} />
-        <Text position='relative' top='25%' left='50%' transform='translate(-20%,-200%)'>
-          {currency}
-        </Text>
-      </Stack>
+      <Image src={coinCount.src} />
+      <Text position='relative' top='-35%' left='35%' fontFamily='monospace' fontWeight='bold'>
+        {currency}
+      </Text>
     </Box>
   );
 

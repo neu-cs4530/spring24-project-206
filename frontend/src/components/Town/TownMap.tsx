@@ -87,7 +87,7 @@ export default function TownMap(): JSX.Element {
     <div id='app-container'>
       <NewConversationModal />
       <GameAreaWrapper />
-      <InventoryAreaWrapper />
+      <PetShopAreaWrapper />
       <aside className={clsx(classes.chatWindowContainer, { [classes.hide]: !isChatWindowOpen })}>
         <ChatWindow />
       </aside>
