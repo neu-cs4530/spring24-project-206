@@ -24,6 +24,7 @@ import unequippedButton from './inventory-images/unequip_btn.png';
 import coin_count from './inventory-images/coin_count.png';
 import forward_btn from './inventory-images/forward_btn.png';
 import back_btn from './inventory-images/back_btn.png';
+import { GameResult, InteractableID } from '../../../../types/CoveyTownSocket';
 
 function PetInventorySlot({ type, equipped }: Pet): JSX.Element {
   let petImage = <Image src={emptyPet.src} />;
@@ -53,7 +54,7 @@ function PetInventorySlot({ type, equipped }: Pet): JSX.Element {
   );
 }
 
-function InventoryArea(): JSX.Element {
+function InventoryArea({ interactableID }: { interactableID: InteractableID }): JSX.Element {
   // Array of pets
   const pets = [
     { petID: 1, type: 'dog', playerID: 1, speed: 1.5, equipped: false },
@@ -63,6 +64,16 @@ function InventoryArea(): JSX.Element {
     { petID: 1, type: 'dog', playerID: 1, speed: 1.5, equipped: false },
     { petID: 1, type: 'dog', playerID: 1, speed: 1.5, equipped: true },
   ];
+
+  const currency = 10;
+  const coinCountImage = (
+    <Box position='absolute' right='50' top='0' boxSize='100px'>
+      <Image src={coin_count.src} />
+      {/* <Text position='relative' top='-35%' left='35%' fontFamily='monospace' fontWeight='bold'>
+        {currency}
+      </Text> */}
+    </Box>
+  );
 
   return (
     <Box position='relative'>
@@ -77,9 +88,7 @@ function InventoryArea(): JSX.Element {
       </Grid>
 
       {/* Coin Count Image */}
-      <Box position='absolute' right='50' top='0' boxSize='100px'>
-        <Image src={coin_count.src} />
-      </Box>
+      {coinCountImage}
 
       {/* back button */}
       <Box position='absolute' left='0' top='400' boxSize='50px'>
@@ -100,16 +109,17 @@ function InventoryArea(): JSX.Element {
  */
 export default function InventoryAreaWrapper(): JSX.Element {
   // fetch the player ID
-  const townController = useTownController();
   const inventoryArea = useInteractable<Inventory>('inventory');
-  const currentID = townController.ourPlayer.id;
+  const townController = useTownController();
   const closeModal = useCallback(() => {
     if (inventoryArea) {
       townController.interactEnd(inventoryArea);
+      // i think we need to create a pet controller and add it to classes/interactable and then create a new method getPetAreaController
+      // const controller = townController.getGameAreaController(inventoryArea);
+      // controller.leaveGame();
     }
   }, [townController, inventoryArea]);
-  const open = true;
-  if (open) {
+  if (inventoryArea) {
     return (
       <Modal isOpen={true} onClose={closeModal} closeOnOverlayClick={false} size='xl'>
         <ModalOverlay />
@@ -120,13 +130,10 @@ export default function InventoryAreaWrapper(): JSX.Element {
             bgSize='contain'
             onClick={closeModal}
           />
-          <InventoryArea />
-          {/* <ModalBody>
-            <Image src={shop_bg} boxSize='lg' onClick={() => console.log('clicked!')}></Image>
-          </ModalBody> */}
+          <InventoryArea interactableID={inventoryArea.id} />
         </ModalContent>
       </Modal>
     );
   }
-  return <img alt='Inventory' src='/inventory-images/inventory_bg.png'></img>;
+  return <></>;
 }
