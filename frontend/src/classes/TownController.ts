@@ -40,9 +40,11 @@ import InteractableAreaController, {
   BaseInteractableEventMap,
   GenericInteractableAreaController,
 } from './interactable/InteractableAreaController';
+import PetShopController from './interactable/PetShopController';
 import TicTacToeAreaController from './interactable/TicTacToeAreaController';
 import ViewingAreaController from './interactable/ViewingAreaController';
 import PlayerController from './PlayerController';
+import PetShop from '../components/Town/interactables/PetShop/PetShop';
 
 const CALCULATE_NEARBY_PLAYERS_DELAY_MS = 300;
 const SOCKET_COMMAND_TIMEOUT_MS = 5000;
@@ -691,6 +693,17 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
       return existingController as GameAreaController<GameType, EventsType>;
     } else {
       throw new Error('Game area controller not created');
+    }
+  }
+
+  public getPetShopAreaController(petShopArea: PetShop): PetShopController {
+    const existingController = this._interactableControllers.find(
+      eachExistingArea => eachExistingArea.id === petShopArea.name,
+    );
+    if (existingController instanceof PetShopController) {
+      return existingController as PetShopController;
+    } else {
+      throw new Error('Pet shop area controller not created');
     }
   }
 

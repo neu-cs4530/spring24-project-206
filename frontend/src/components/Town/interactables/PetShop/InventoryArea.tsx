@@ -115,7 +115,7 @@ export default function InventoryAreaWrapper(): JSX.Element {
     if (inventoryArea) {
       townController.interactEnd(inventoryArea);
       // i think we need to create a pet controller and add it to classes/interactable and then create a new method getPetAreaController
-      // const controller = townController.getGameAreaController(inventoryArea);
+      // const controller = townController.getPetShopAreaController(inventoryArea);
       // controller.leaveGame();
     }
   }, [townController, inventoryArea]);

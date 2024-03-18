@@ -17,9 +17,10 @@ import {
   ModalOverlay,
   Stack,
   Text,
+  toast,
 } from '@chakra-ui/react';
 import React, { useCallback } from 'react';
-import { useInteractable } from '../../../../classes/TownController';
+import { useInteractable, useInteractableAreaController } from '../../../../classes/TownController';
 import useTownController from '../../../../hooks/useTownController';
 import PetShop from './PetShop';
 import shopBackground from './petshop-images/shop_bg.png';
@@ -33,6 +34,8 @@ import { PetCatalog } from './types/petCatalog';
 import { Pet } from './types/pet';
 import dog from './../../../../../public/logo512.png';
 import adoptButton from './petshop-images/adopt_btn.png';
+import { InteractableID } from '../../../../types/CoveyTownSocket';
+import PetShopController from '../../../../classes/interactable/PetShopController';
 
 const PETS = [
   { petID: 1, type: 'chicken', playerID: 1, speed: 1.5, equipped: false },
@@ -45,9 +48,29 @@ const PETS = [
 
 const petsOfPlayer: Record<number, Pet[]> = { 1: PETS.slice(0, 2), 2: [], 3: PETS.slice(3, 5) };
 
-function PetShopSlot(petCatalog: PetCatalog): JSX.Element {
+function PetShopSlot(petCatalog: PetCatalog, controller: PetShopController): JSX.Element {
   let background = <Image src={slotBackground.src} />;
-  let adopt = <IconButton icon={<Image src={adoptButton.src} />} aria-label={'adopt-button'} />;
+  let adopt = (
+    <IconButton
+      icon={
+        <Image
+          src={adoptButton.src}
+          onClick={async () => {
+            try {
+              await controller.adopt(petCatalog.type);
+            } catch (e) {
+              // toast({
+              //   title: 'Error adopting',
+              //   description: (e as Error).toString(),
+              //   status: 'error',
+              // });
+            }
+          }}
+        />
+      }
+      aria-label={'adopt-button'}
+    />
+  );
   // if the player has not bought the pet, make the
   const pets = petsOfPlayer[1];
   if (pets.map(pet => pet.type).includes(petCatalog.type)) {
@@ -88,7 +111,9 @@ function PetShopSlot(petCatalog: PetCatalog): JSX.Element {
   );
 }
 
-function PetShopArea(): JSX.Element {
+function PetShopArea({ interactableID }: { interactableID: InteractableID }): JSX.Element {
+  const controller = useInteractableAreaController<PetShopController>(interactableID);
+  const townController = useTownController();
   // Array of pets
   const petsCatalog: PetCatalog[] = [
     { type: 'dog', speed: 1.5, counter: 0, price: 10 },
@@ -143,17 +168,18 @@ function PetShopArea(): JSX.Element {
  * @param PlayerID the player ID of the current player
  */
 export default function PetShopAreaWrapper(): JSX.Element {
-  // fetch the player ID
+  const petArea = useInteractable<PetShop>('petShop');
   const townController = useTownController();
-  const petShopArea = useInteractable<PetShop>('petShop');
-  const currentID = townController.ourPlayer.id;
   const closeModal = useCallback(() => {
-    if (petShopArea) {
-      townController.interactEnd(petShopArea);
+    if (petArea) {
+      townController.interactEnd(petArea);
+      // i think we need to create a pet controller and add it to classes/interactable and then create a new method getPetAreaController
+      // const controller = townController.getPetShopAreaController(petArea);
+      // controller.leaveGame();
     }
-  }, [townController, petShopArea]);
+  }, [townController, petArea]);
   const open = true;
-  if (open) {
+  if (petArea) {
     return (
       <Modal isOpen={true} onClose={closeModal} closeOnOverlayClick={false} size='xl'>
         <ModalOverlay />
@@ -165,7 +191,7 @@ export default function PetShopAreaWrapper(): JSX.Element {
             onClick={closeModal}
             zIndex='modal'
           />
-          <PetShopArea />
+          <PetShopArea interactableID={petArea.id} />
         </ModalContent>
       </Modal>
     );
