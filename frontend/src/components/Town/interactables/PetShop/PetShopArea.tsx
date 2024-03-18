@@ -65,7 +65,7 @@ function PetShopSlot(petCatalog: PetCatalog): JSX.Element {
         fontFamily='monospace'
         fontWeight='bold'
         backgroundColor='whiteAlpha.600'>
-        Price: {petCatalog.price} Speed: {petCatalog.speed} Popularity:{petCatalog.counter}
+        Price: {petCatalog.price} Popularity:{petCatalog.counter}
       </Text>
     </Box>
   );
@@ -75,6 +75,7 @@ function PetShopSlot(petCatalog: PetCatalog): JSX.Element {
         {background}
         <Box
           bgSize='contain'
+          boxSize='85'
           position='absolute'
           top='50%'
           left='50%'
