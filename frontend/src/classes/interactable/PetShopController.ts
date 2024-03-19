@@ -3,7 +3,7 @@ import InteractableAreaController, {
   PET_SHOP_AREA_TYPE,
 } from './InteractableAreaController';
 import { PetShopArea as PetShopAreaModel } from '../../types/CoveyTownSocket';
-import { Pet } from '../../components/Town/interactables/PetShop/types/pet';
+import { Pet } from '../../../../townService/src/lib/Pet';
 import TownController from '../TownController';
 
 export type PetShopAreaEvents = BaseInteractableEventMap & {
@@ -27,7 +27,7 @@ export default class PetShopController extends InteractableAreaController<
   async adopt(type: string) {
     // this._pets?.push()
     await this._townController.sendInteractableCommand(this.id, {
-      type: 'Adopt',
+      type: 'AdoptPet',
       petType: type,
       playerID: this._townController.ourPlayer.id,
     });

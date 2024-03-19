@@ -242,7 +242,7 @@ export interface GameMoveCommand<MoveType> {
   move: MoveType;
 }
 export interface AdoptCommand {
-  type: 'Adopt';
+  type: 'AdoptPet';
   petType: string;
   playerID: PlayerID;
 }

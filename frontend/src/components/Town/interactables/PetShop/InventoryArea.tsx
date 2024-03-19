@@ -16,7 +16,7 @@ import closeButton from './petshop-images/x_btn.png';
 import inventoryBackground from './inventory-images/inventory_bg.png';
 import unequippedSlot from './inventory-images/inventory_slot_bg.png';
 import equippedSlot from './inventory-images/inventory_slot_bg_equipped.png';
-import { Pet } from './types/pet';
+import { Pet } from '../../../../../../townService/src/lib/Pet';
 import emptyPet from './inventory-images/inventory_slot_bg_empty.png';
 import dog from './inventory-images/pet.png';
 import equippedButton from './inventory-images/equip_btn.png';
