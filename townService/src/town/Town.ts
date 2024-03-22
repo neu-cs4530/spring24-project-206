@@ -20,7 +20,9 @@ import {
 } from '../types/CoveyTownSocket';
 import { logError } from '../Utils';
 import ConversationArea from './ConversationArea';
+// eslint-disable-next-line import/no-cycle
 import GameAreaFactory from './games/GameAreaFactory';
+import TicTacToeGameArea from './games/TicTacToeGameArea';
 import InteractableArea from './InteractableArea';
 import ViewingArea from './ViewingArea';
 
@@ -94,6 +96,32 @@ export default class Town {
   private _connectedSockets: Set<CoveyTownSocket> = new Set();
 
   private _chatMessages: ChatMessage[] = [];
+
+  // Define a map to store player IDs with their currency
+  private _playerCurrencyMap: Map<string, number> = new Map<string, number>();
+
+  // Getter for player currency map
+  public get playerCurrencyMap(): Map<string, number> {
+    return this._playerCurrencyMap;
+  }
+
+  /**
+   * Set currency for a player
+   * @param playerID ID of the player
+   * @param currency Currency value to set
+   */
+  public setPlayerCurrency(playerID: string, currency: number): void {
+    this._playerCurrencyMap.set(playerID, currency);
+  }
+
+  /**
+   * Get currency for a player
+   * @param playerID ID of the player
+   * @returns Currency value for the player
+   */
+  public getPlayerCurrency(playerID: string): number | undefined {
+    return this._playerCurrencyMap.get(playerID);
+  }
 
   constructor(
     friendlyName: string,
@@ -174,6 +202,7 @@ export default class Town {
 
     // Set up a listener to process commands to interactables.
     // Dispatches commands to the appropriate interactable and sends the response back to the client
+    // MAKE COMMENTS
     socket.on('interactableCommand', (command: InteractableCommand & InteractableCommandBase) => {
       const interactable = this._interactables.find(
         eachInteractable => eachInteractable.id === command.interactableID,
@@ -181,6 +210,34 @@ export default class Town {
       if (interactable) {
         try {
           const payload = interactable.handleCommand(command, newPlayer);
+          const interactableModel = interactable.toModel();
+          if (interactableModel.type === 'TicTacToeArea') {
+            console.log('Type is TicTacToe');
+            const ticTacToeGameArea = interactable as TicTacToeGameArea;
+            if (
+              ticTacToeGameArea.game?.state.status === 'OVER' &&
+              ticTacToeGameArea.game.state.winner
+            ) {
+              console.log('Winner Found');
+              const winnerID = ticTacToeGameArea.game.state.winner;
+              const winnerCurrency = this.getPlayerCurrency(winnerID);
+              if (winnerCurrency === undefined) {
+                // Add default currency amount for the winner
+                this.setPlayerCurrency(winnerID, 1); // Adjust the currency amount as needed
+                console.log('Player Currency +1');
+                socket.emit('currencyChanged', {
+                  currency: this.playerCurrencyMap,
+                });
+              } else {
+                // Increment currency for the winner
+                this.setPlayerCurrency(winnerID, winnerCurrency + 1); // Adjust the currency amount as needed
+                console.log('Player Currency curr +1');
+                socket.emit('currencyChanged', {
+                  currency: this.playerCurrencyMap,
+                });
+              }
+            }
+          }
           socket.emit('commandResponse', {
             commandID: command.commandID,
             interactableID: command.interactableID,

@@ -15,6 +15,12 @@ export type TownJoinResponse = {
   isPubliclyListed: boolean;
   /** Current state of interactables in this town */
   interactables: TypedInteractable[];
+  /** Currency of the player */
+  currency: Map<string, number>;
+};
+
+export type CurrencyChangeResponse = {
+  currency: Map<string, number>;
 };
 
 export type InteractableType =
@@ -40,10 +46,6 @@ export interface Player {
   id: PlayerID;
   userName: string;
   location: PlayerLocation;
-}
-export interface CurrencyPlayer {
-  id: PlayerID;
-  currency: number;
 }
 
 export type XY = { x: number; y: number };
@@ -284,6 +286,7 @@ export interface ServerToClientEvents {
   chatMessage: (message: ChatMessage) => void;
   interactableUpdate: (interactable: Interactable) => void;
   commandResponse: (response: InteractableCommandResponse) => void;
+  currencyChanged: (currency: CurrencyChangeResponse) => void;
 }
 
 export interface ClientToServerEvents {

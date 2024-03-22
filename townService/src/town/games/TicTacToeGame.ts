@@ -1,4 +1,3 @@
-import PlayerCurrencyManager from '../../lib/CurrencyPlayerManager';
 import InvalidParametersError, {
   GAME_FULL_MESSAGE,
   GAME_NOT_IN_PROGRESS_MESSAGE,
@@ -16,14 +15,11 @@ import Game from './Game';
  * @see https://en.wikipedia.org/wiki/Tic-tac-toe
  */
 export default class TicTacToeGame extends Game<TicTacToeGameState, TicTacToeMove> {
-  private _playerCurrencyManager: PlayerCurrencyManager; // Declare an instance variable
-
   public constructor() {
     super({
       moves: [],
       status: 'WAITING_TO_START',
     });
-    this._playerCurrencyManager = new PlayerCurrencyManager();
   }
 
   private get _board() {
@@ -50,9 +46,6 @@ export default class TicTacToeGame extends Game<TicTacToeGameState, TicTacToeMov
           status: 'OVER',
           winner: board[i][0] === 'X' ? this.state.x : this.state.o,
         };
-        if (this.state.winner) {
-          this._incrementWinnerCurrency(this.state.winner);
-        }
         return;
       }
       if (board[0][i] !== '' && board[0][i] === board[1][i] && board[0][i] === board[2][i]) {
@@ -61,9 +54,6 @@ export default class TicTacToeGame extends Game<TicTacToeGameState, TicTacToeMov
           status: 'OVER',
           winner: board[0][i] === 'X' ? this.state.x : this.state.o,
         };
-        if (this.state.winner) {
-          this._incrementWinnerCurrency(this.state.winner);
-        }
         return;
       }
     }
@@ -74,9 +64,6 @@ export default class TicTacToeGame extends Game<TicTacToeGameState, TicTacToeMov
         status: 'OVER',
         winner: board[0][0] === 'X' ? this.state.x : this.state.o,
       };
-      if (this.state.winner) {
-        this._incrementWinnerCurrency(this.state.winner);
-      }
       return;
     }
     // Check for 3 in the other diagonal
@@ -86,9 +73,6 @@ export default class TicTacToeGame extends Game<TicTacToeGameState, TicTacToeMov
         status: 'OVER',
         winner: board[0][2] === 'X' ? this.state.x : this.state.o,
       };
-      if (this.state.winner) {
-        this._incrementWinnerCurrency(this.state.winner);
-      }
       return;
     }
     // Check for no more moves
@@ -236,26 +220,5 @@ export default class TicTacToeGame extends Game<TicTacToeGameState, TicTacToeMov
         winner: this.state.x,
       };
     }
-  }
-
-  // In your TicTacToeGame class, when a player wins the game, create a CurrencyPlayer for the winning player
-  private _incrementWinnerCurrency(winnerID: string): void {
-    const winningPlayer = this._getPlayerByID(winnerID); // Assuming you have a method to get the player by ID
-    if (winningPlayer) {
-      PlayerCurrencyManager.createCurrencyPlayerForPlayer(winningPlayer, 0); // Assuming initial currency is 0
-      PlayerCurrencyManager.incrementPlayerCurrency(winningPlayer);
-    }
-  }
-
-  private _getPlayerByID(playerID: string): Player | undefined {
-    // Implement logic to retrieve a player by their ID
-    // This could involve searching through an array or map of players
-    // For example, if your players are stored in an array:
-    return this._players.find(player => player.id === playerID);
-  }
-
-  public _handleWinningPlayer(player: Player) {
-    // Increment currency for the winning player
-    PlayerCurrencyManager.incrementPlayerCurrency(player);
   }
 }

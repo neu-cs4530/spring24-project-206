@@ -10,7 +10,6 @@ import {
 import TicTacToeGame from './TicTacToeGame';
 import Player from '../../lib/Player';
 import { TicTacToeMove } from '../../types/CoveyTownSocket';
-import PlayerCurrencyManager from '../../lib/CurrencyPlayerManager';
 
 describe('TicTacToeGame', () => {
   let game: TicTacToeGame;
@@ -175,11 +174,6 @@ describe('TicTacToeGame', () => {
           },
         });
 
-        // At this point, player1 has won the game
-
-        // Check that player1's currency is initially 0
-        expect(PlayerCurrencyManager.getCurrencyPlayer(player1)?.currency).toBeUndefined();
-
         // Apply the winning move
         game.applyMove({
           gameID: game.id,
@@ -192,9 +186,6 @@ describe('TicTacToeGame', () => {
         });
 
         expect(game.state.winner).toEqual(player1.id);
-
-        // Verify that player1's currency is incremented by 1
-        expect(PlayerCurrencyManager.getCurrencyPlayer(player1)?.currency).toBe(1);
       });
     });
 
@@ -208,12 +199,15 @@ describe('TicTacToeGame', () => {
         // Create two separate instances of TicTacToeGame
         const game1 = new TicTacToeGame();
         const game2 = new TicTacToeGame();
+        const game3 = new TicTacToeGame();
 
         // Join the player to both games
         game1.join(player);
         game2.join(player);
+        game3.join(player);
         game1.join(player2);
         game2.join(player2);
+        game3.join(player2);
 
         // Simulate game 1 where the player wins
         game1.applyMove({
@@ -261,10 +255,6 @@ describe('TicTacToeGame', () => {
             gamePiece: 'X',
           },
         });
-
-        expect(PlayerCurrencyManager.getCurrencyPlayer(player)?.currency).toBe(1);
-        expect(PlayerCurrencyManager.getCurrencyPlayer(player2)?.currency).toBeUndefined();
-
         // Simulate game 2 where the player wins
         game2.applyMove({
           gameID: game2.id,
@@ -311,10 +301,61 @@ describe('TicTacToeGame', () => {
             gamePiece: 'X',
           },
         });
-
-        // Verify that the player's currency increments to 2
-        expect(PlayerCurrencyManager.getCurrencyPlayer(player)?.currency).toBe(2);
-        expect(PlayerCurrencyManager.getCurrencyPlayer(player2)?.currency).toBeUndefined();
+        // Simulate game 1 where the player wins
+        game3.applyMove({
+          gameID: game3.id,
+          playerID: player.id,
+          move: {
+            row: 0,
+            col: 0,
+            gamePiece: 'X',
+          },
+        });
+        game3.applyMove({
+          gameID: game3.id,
+          playerID: player2.id,
+          move: {
+            row: 1,
+            col: 1,
+            gamePiece: 'O',
+          },
+        });
+        game3.applyMove({
+          gameID: game3.id,
+          playerID: player.id,
+          move: {
+            row: 0,
+            col: 1,
+            gamePiece: 'X',
+          },
+        });
+        game3.applyMove({
+          gameID: game3.id,
+          playerID: player2.id,
+          move: {
+            row: 0,
+            col: 2,
+            gamePiece: 'O',
+          },
+        });
+        game3.applyMove({
+          gameID: game3.id,
+          playerID: player.id,
+          move: {
+            row: 1,
+            col: 0,
+            gamePiece: 'X',
+          },
+        });
+        game3.applyMove({
+          gameID: game3.id,
+          playerID: player2.id,
+          move: {
+            row: 2,
+            col: 0,
+            gamePiece: 'O',
+          },
+        });
       });
     });
 
