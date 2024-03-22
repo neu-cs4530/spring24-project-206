@@ -7,6 +7,7 @@ import {
   ModalCloseButton,
   ModalContent,
   ModalOverlay,
+  Text,
 } from '@chakra-ui/react';
 import React, { useCallback } from 'react';
 import { useInteractable } from '../../../../classes/TownController';
@@ -69,9 +70,9 @@ function InventoryArea({ interactableID }: { interactableID: InteractableID }): 
   const coinCountImage = (
     <Box position='absolute' right='50' top='0' boxSize='100px'>
       <Image src={coin_count.src} />
-      {/* <Text position='relative' top='-35%' left='35%' fontFamily='monospace' fontWeight='bold'>
+      <Text position='relative' top='-35%' left='35%' fontFamily='monospace' fontWeight='bold'>
         {currency}
-      </Text> */}
+      </Text>
     </Box>
   );
 
@@ -114,9 +115,6 @@ export default function InventoryAreaWrapper(): JSX.Element {
   const closeModal = useCallback(() => {
     if (inventoryArea) {
       townController.interactEnd(inventoryArea);
-      // i think we need to create a pet controller and add it to classes/interactable and then create a new method getPetAreaController
-      // const controller = townController.getPetShopAreaController(inventoryArea);
-      // controller.leaveGame();
     }
   }, [townController, inventoryArea]);
   if (inventoryArea) {
@@ -129,6 +127,7 @@ export default function InventoryAreaWrapper(): JSX.Element {
             objectFit='fill'
             bgSize='contain'
             onClick={closeModal}
+            zIndex='modal'
           />
           <InventoryArea interactableID={inventoryArea.id} />
         </ModalContent>

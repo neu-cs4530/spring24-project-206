@@ -23,9 +23,9 @@ function interactableTypeForObjectType(type: string): any {
     return ViewingArea;
   } else if (type === 'GameArea') {
     return GameArea;
-  } else if (type == 'PetShop') {
+  } else if (type == 'PetShopArea') {
     return PetShop;
-  } else if (type == 'Inventory') {
+  } else if (type == 'InventoryArea') {
     return Inventory;
   } else {
     throw new Error(`Unknown object type: ${type}`);

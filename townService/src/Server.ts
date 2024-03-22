@@ -16,7 +16,7 @@ import TownsStore from './lib/TownsStore';
 import { ClientToServerEvents, ServerToClientEvents } from './types/CoveyTownSocket';
 import { TownsController } from './town/TownsController';
 import { logError } from './Utils';
-import PetsController from './pets/pets-controller';
+import petsController from './pets/pets-controller';
 
 // Create the server instances
 const app = Express();
@@ -92,7 +92,7 @@ const sessionOptions = {
 
 app.use(session(sessionOptions));
 
-PetsController(app);
+petsController(app);
 
 // Start the configured server, defaulting to port 8081 if $PORT is not set
 server.listen(process.env.PORT || 8081, () => {

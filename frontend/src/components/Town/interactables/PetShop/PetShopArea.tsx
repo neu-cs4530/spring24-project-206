@@ -1,26 +1,16 @@
 import {
   Box,
-  Button,
-  chakra,
-  color,
-  ComponentWithAs,
-  Container,
-  ContainerProps,
   Grid,
   IconButton,
   Image,
   Modal,
-  ModalBody,
   ModalCloseButton,
   ModalContent,
-  ModalHeader,
   ModalOverlay,
-  Stack,
   Text,
-  toast,
 } from '@chakra-ui/react';
 import React, { useCallback } from 'react';
-import { useInteractable, useInteractableAreaController } from '../../../../classes/TownController';
+import { useInteractable } from '../../../../classes/TownController';
 import useTownController from '../../../../hooks/useTownController';
 import PetShop from './PetShop';
 import shopBackground from './petshop-images/shop_bg.png';
@@ -112,8 +102,8 @@ function PetShopSlot(petCatalog: PetCatalog, controller: PetShopController): JSX
 }
 
 function PetShopArea({ interactableID }: { interactableID: InteractableID }): JSX.Element {
-  const controller = useInteractableAreaController<PetShopController>(interactableID);
-  const townController = useTownController();
+  // const controller = useInteractableAreaController<PetShopController>(interactableID);
+  // const townController = useTownController();
   // Array of pets
   const petsCatalog: PetCatalog[] = [
     { type: 'dog', speed: 1.5, counter: 0, price: 10 },
@@ -173,12 +163,8 @@ export default function PetShopAreaWrapper(): JSX.Element {
   const closeModal = useCallback(() => {
     if (petArea) {
       townController.interactEnd(petArea);
-      // i think we need to create a pet controller and add it to classes/interactable and then create a new method getPetAreaController
-      // const controller = townController.getPetShopAreaController(petArea);
-      // controller.leaveGame();
     }
   }, [townController, petArea]);
-  const open = true;
   if (petArea) {
     return (
       <Modal isOpen={true} onClose={closeModal} closeOnOverlayClick={false} size='xl'>

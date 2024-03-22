@@ -6,7 +6,6 @@ const findAllPets = async (req, res) => {
     const pets = await petsDao.findAllPets();
     res.json(pets);
   } catch (error) {
-    console.error('Error fetching towns:', error);
     res.status(500).json({ error: 'Internal Server Error' });
   }
 };
@@ -14,13 +13,12 @@ const findAllPets = async (req, res) => {
 /*
 Search by petID
 */
-const findPetById = async (req, res) => {
+const findPetByType = async (req, res) => {
   try {
-    const { id } = req.params;
-    const pet = await petsDao.findPetById(id);
+    const { type } = req.params;
+    const pet = await petsDao.findPetByType(type);
     res.json(pet);
   } catch (error) {
-    console.error('Error fetching towns:', error);
     res.status(500).json({ error: 'Internal Server Error' });
   }
 };
@@ -28,10 +26,9 @@ const findPetById = async (req, res) => {
 /*
 Body Format for createPet
 {
-    petID: {type: Number, required: true}, 
-    playerID: {type: Number, required: true},
-    speed: {type: Number, required: true},
-    equipped: {type: Boolean, required: true}
+    type: { type: String, required: true },
+    playerID: { type: Number, required: true },
+    equipped: { type: Boolean, default: false },
 }
 
 */
@@ -40,31 +37,27 @@ const createPet = async (req, res) => {
     const pet = await petsDao.createPet(req.body);
     res.json(pet);
   } catch (error) {
-    console.error('Error fetching towns:', error);
     res.status(500).json({ error: 'Internal Server Error' });
   }
 };
 
-const updatePet = async (req, res) => {
+const updatePetEquippedStatus = async (req, res) => {
   try {
-    const { petID } = req.body;
-    const { playerID } = req.body;
-    const { speed } = req.body;
-    const { equipped } = req.body;
-    const pet = await petsModel.updateOne({ petID }, { $set: { playerID, speed, equipped } });
+    const { type, equipped } = req.body;
+    const pet = await petsModel.updateOne({ type }, { $set: { equipped } });
 
     res.json(pet);
   } catch (error) {
-    console.error('Error fetching towns:', error);
     res.status(500).json({ error: 'Internal Server Error' });
   }
 };
+const API_BASE_PATH = '/api/pets';
 
-const PetsController = app => {
-  app.get('/api/pets', findAllPets);
-  app.get('/api/pets/:id', findPetById);
-  app.post('/api/pets', createPet);
-  // TODO: do we need to update pet?
+const petsController = app => {
+  app.get(API_BASE_PATH, findAllPets);
+  app.get(`${API_BASE_PATH}:type`, findPetByType);
+  app.post(API_BASE_PATH, createPet);
+  app.put(`${API_BASE_PATH}:type`, updatePetEquippedStatus);
 };
 
-export default PetsController;
+export default petsController;
