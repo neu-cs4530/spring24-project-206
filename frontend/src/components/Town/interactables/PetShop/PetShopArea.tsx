@@ -28,12 +28,12 @@ import adoptButton from './petshop-images/adopt_btn.png';
 import PetShopController from '../../../../classes/interactable/PetShopController';
 
 const PETS = [
-  { petID: 1, type: 'chicken', playerID: 1, speed: 1.5, equipped: false },
-  { petID: 1, type: 'cat', playerID: 1, speed: 1.5, equipped: true },
-  { petID: 1, type: 'dog', playerID: 1, speed: 1.5, equipped: false },
-  { petID: 1, type: 'dog', playerID: 1, speed: 1.5, equipped: true },
-  { petID: 1, type: 'dog', playerID: 1, speed: 1.5, equipped: false },
-  { petID: 1, type: 'dog', playerID: 1, speed: 1.5, equipped: true },
+  { type: 'chicken', playerID: '1', equipped: false },
+  { type: 'cat', playerID: '1', equipped: true },
+  { type: 'dog', playerID: '1', equipped: false },
+  { type: 'dog', playerID: '1', equipped: true },
+  { type: 'dog', playerID: '1', equipped: false },
+  { type: 'dog', playerID: '1', equipped: true },
 ];
 
 const petsOfPlayer: Record<number, Pet[]> = { 1: PETS.slice(0, 2), 2: [], 3: PETS.slice(3, 5) };

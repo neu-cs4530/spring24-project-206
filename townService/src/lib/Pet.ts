@@ -1,5 +1,7 @@
+import { PlayerID } from '../types/CoveyTownSocket';
+
 export interface Pet {
   type: string;
-  playerID: number;
+  playerID: PlayerID;
   equipped: boolean;
 }

@@ -58,12 +58,12 @@ function PetInventorySlot({ type, equipped }: Pet): JSX.Element {
 function InventoryArea({ interactableID }: { interactableID: InteractableID }): JSX.Element {
   // Array of pets
   const pets = [
-    { petID: 1, type: 'dog', playerID: 1, speed: 1.5, equipped: false },
-    { petID: 1, type: 'dog', playerID: 1, speed: 1.5, equipped: true },
-    { petID: 1, type: 'dog', playerID: 1, speed: 1.5, equipped: false },
-    { petID: 1, type: 'dog', playerID: 1, speed: 1.5, equipped: true },
-    { petID: 1, type: 'dog', playerID: 1, speed: 1.5, equipped: false },
-    { petID: 1, type: 'dog', playerID: 1, speed: 1.5, equipped: true },
+    { type: 'chicken', playerID: '1', equipped: false },
+    { type: 'cat', playerID: '1', equipped: true },
+    { type: 'dog', playerID: '1', equipped: false },
+    { type: 'dog', playerID: '1', equipped: true },
+    { type: 'dog', playerID: '1', equipped: false },
+    { type: 'dog', playerID: '1', equipped: true },
   ];
 
   const currency = 10;
