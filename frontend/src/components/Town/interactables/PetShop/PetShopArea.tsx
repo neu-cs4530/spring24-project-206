@@ -8,9 +8,10 @@ import {
   ModalContent,
   ModalOverlay,
   Text,
+  useToast,
 } from '@chakra-ui/react';
 import React, { useCallback } from 'react';
-import { useInteractable } from '../../../../classes/TownController';
+import { useInteractable, useInteractableAreaController } from '../../../../classes/TownController';
 import useTownController from '../../../../hooks/useTownController';
 import PetShop from './PetShop';
 import shopBackground from './petshop-images/shop_bg.png';
@@ -24,7 +25,6 @@ import { PetCatalog } from '../../../../../../townService/src/lib/PetCatalog';
 import { Pet } from '../../../../../../townService/src/lib/Pet';
 import dog from './../../../../../public/logo512.png';
 import adoptButton from './petshop-images/adopt_btn.png';
-import { InteractableID } from '../../../../types/CoveyTownSocket';
 import PetShopController from '../../../../classes/interactable/PetShopController';
 
 const PETS = [
@@ -38,9 +38,15 @@ const PETS = [
 
 const petsOfPlayer: Record<number, Pet[]> = { 1: PETS.slice(0, 2), 2: [], 3: PETS.slice(3, 5) };
 
-function PetShopSlot(petCatalog: PetCatalog, controller: PetShopController): JSX.Element {
+interface PetShopProps {
+  petCatalog: PetCatalog;
+  controller: PetShopController;
+}
+
+function PetShopSlot({ petCatalog, controller }: PetShopProps): JSX.Element {
+  const toast = useToast();
   let background = <Image src={slotBackground.src} />;
-  let adopt = (
+  let adoptElement = (
     <IconButton
       icon={
         <Image
@@ -49,11 +55,11 @@ function PetShopSlot(petCatalog: PetCatalog, controller: PetShopController): JSX
             try {
               await controller.adopt(petCatalog.type);
             } catch (e) {
-              // toast({
-              //   title: 'Error adopting',
-              //   description: (e as Error).toString(),
-              //   status: 'error',
-              // });
+              toast({
+                title: 'Error adopting',
+                description: (e as Error).toString(),
+                status: 'error',
+              });
             }
           }}
         />
@@ -65,7 +71,7 @@ function PetShopSlot(petCatalog: PetCatalog, controller: PetShopController): JSX
   const pets = petsOfPlayer[1];
   if (pets.map(pet => pet.type).includes(petCatalog.type)) {
     background = <Image src={slotBackgroundDisabled.src} />;
-    adopt = <></>;
+    adoptElement = <></>;
   }
   const petImage = <Image src={dog.src} />;
   const slot = (
@@ -96,14 +102,14 @@ function PetShopSlot(petCatalog: PetCatalog, controller: PetShopController): JSX
           {slot}
         </Box>
       </Box>
-      <Box>{adopt}</Box>
+      <Box>{adoptElement}</Box>
     </Box>
   );
 }
 
-function PetShopArea({ interactableID }: { interactableID: InteractableID }): JSX.Element {
-  // const controller = useInteractableAreaController<PetShopController>(interactableID);
-  // const townController = useTownController();
+function PetShopArea(): JSX.Element {
+  const townController = useTownController();
+  const controller = townController.petShopArea;
   // Array of pets
   const petsCatalog: PetCatalog[] = [
     { type: 'dog', speed: 1.5, counter: 0, price: 10 },
@@ -132,8 +138,7 @@ function PetShopArea({ interactableID }: { interactableID: InteractableID }): JS
       {/* Grid of Pets */}
       <Grid templateColumns='repeat(3, 1fr)' gap={4} gridAutoFlow='row dense' gridRowGap={10}>
         {petsCatalog.map((pet, index) => (
-          // <PetShopSlot pet={PETS[0]} petCatalog={pet} key={index} />
-          <PetShopSlot key={index} {...pet}></PetShopSlot>
+          <PetShopSlot key={index} petCatalog={pet} controller={controller} />
         ))}
       </Grid>
 
@@ -177,7 +182,7 @@ export default function PetShopAreaWrapper(): JSX.Element {
             onClick={closeModal}
             zIndex='modal'
           />
-          <PetShopArea interactableID={petArea.id} />
+          <PetShopArea />
         </ModalContent>
       </Modal>
     );

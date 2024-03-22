@@ -341,6 +341,13 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
     return ret as GameAreaController<GameState, GameEventTypes>[];
   }
 
+  public get petShopArea(): PetShopController {
+    const ret = this._interactableControllers.find(
+      eachInteractable => eachInteractable instanceof PetShopController,
+    );
+    return ret as PetShopController;
+  }
+
   /**
    * Begin interacting with an interactable object. Emits an event to all listeners.
    * @param interactedObj

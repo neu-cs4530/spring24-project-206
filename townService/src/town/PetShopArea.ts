@@ -1,5 +1,4 @@
 import { ITiledMapObject } from '@jonbell/tiled-map-type-guard';
-import { nanoid } from 'nanoid';
 import Player from '../lib/Player';
 import { Pet } from '../lib/Pet';
 import {
