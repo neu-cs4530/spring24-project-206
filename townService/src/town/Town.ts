@@ -225,6 +225,7 @@ export default class Town {
                 // Add default currency amount for the winner
                 this.setPlayerCurrency(winnerID, 1); // Adjust the currency amount as needed
                 console.log('Player Currency +1');
+                console.log('Map:', this.playerCurrencyMap);
                 socket.emit('currencyChanged', {
                   currency: this.playerCurrencyMap,
                 });
@@ -232,6 +233,7 @@ export default class Town {
                 // Increment currency for the winner
                 this.setPlayerCurrency(winnerID, winnerCurrency + 1); // Adjust the currency amount as needed
                 console.log('Player Currency curr +1');
+                console.log('Map:', this.playerCurrencyMap);
                 socket.emit('currencyChanged', {
                   currency: this.playerCurrencyMap,
                 });

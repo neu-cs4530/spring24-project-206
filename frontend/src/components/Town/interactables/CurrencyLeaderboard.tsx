@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Table, Tbody, Td, Thead, Tr, Spinner } from '@chakra-ui/react';
+import { Table, Tbody, Td, Thead, Tr } from '@chakra-ui/react';
 
 interface PlayerCurrency {
   player: string;
@@ -11,13 +11,11 @@ interface CurrencyLeaderboardProps {
 }
 
 const CurrencyLeaderboard: React.FC<CurrencyLeaderboardProps> = ({ playerCurrencyMap }) => {
-  const [players, setPlayers] = useState<PlayerCurrency[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [playerCurrency, setPlayerCurrency] = useState<PlayerCurrency[]>([]);
 
   useEffect(() => {
     const fetchLeaderboard = () => {
       if (playerCurrencyMap.size === 0) {
-        setIsLoading(false);
         return;
       }
 
@@ -28,8 +26,7 @@ const CurrencyLeaderboard: React.FC<CurrencyLeaderboardProps> = ({ playerCurrenc
         }),
       );
       playersArray.sort((a, b) => b.currency - a.currency);
-      setPlayers(playersArray.slice(0, 5));
-      setIsLoading(false);
+      setPlayerCurrency(playersArray.slice(0, 5));
     };
 
     fetchLeaderboard();
@@ -45,15 +42,11 @@ const CurrencyLeaderboard: React.FC<CurrencyLeaderboardProps> = ({ playerCurrenc
         }),
       );
       updatedPlayersArray.sort((a, b) => b.currency - a.currency);
-      setPlayers(updatedPlayersArray.slice(0, 5));
+      setPlayerCurrency(updatedPlayersArray.slice(0, 5));
     };
 
     updateLeaderboard();
   }, [playerCurrencyMap]);
-
-  if (isLoading) {
-    return <Spinner size='xl' />;
-  }
 
   return (
     <Table>
@@ -64,7 +57,7 @@ const CurrencyLeaderboard: React.FC<CurrencyLeaderboardProps> = ({ playerCurrenc
         </Tr>
       </Thead>
       <Tbody>
-        {players.map(({ player, currency }) => (
+        {playerCurrency.map(({ player, currency }) => (
           <Tr key={player}>
             <Td>{player}</Td>
             <Td>{currency}</Td>

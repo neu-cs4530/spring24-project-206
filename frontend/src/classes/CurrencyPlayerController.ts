@@ -1,4 +1,7 @@
 import { EventEmitter } from 'events';
+
+/**
+import { EventEmitter } from 'events';
 import TypedEmitter from 'typed-emitter';
 
 export type CurrencyPlayerEvents = {
@@ -41,3 +44,4 @@ export default class CurrencyPlayerController extends (EventEmitter as new () =>
     return new CurrencyPlayerController(modelPlayer.id, modelPlayer.currency);
   }
 }
+*/

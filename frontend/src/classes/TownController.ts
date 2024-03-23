@@ -1,6 +1,6 @@
 import assert from 'assert';
 import { EventEmitter } from 'events';
-import _ from 'lodash';
+import _, { map } from 'lodash';
 import { nanoid } from 'nanoid';
 import { useEffect, useState } from 'react';
 import { io } from 'socket.io-client';
@@ -112,7 +112,7 @@ export type TownEvents = {
    */
   interact: <T extends Interactable>(typeName: T['name'], obj: T) => void;
 
-  currencyChange: (currency: CurrencyMap) => void;
+  currencyChanged: (currency: CurrencyMap) => void;
 };
 
 /**
@@ -223,7 +223,7 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
   private _updateCurrencyMap(playerID: PlayerID, newCurrency: number): void {
     this._currency.set(playerID, newCurrency);
     // Emit currency change event with a copy of the currency map
-    this.emit('currencyChange', new Map(this._currency));
+    this.emit('currencyChanged', this._currency);
   }
 
   private _incrementWinnerCurrency(winnerID: PlayerID): void {
@@ -521,12 +521,49 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
       }
     });
     */
+
+    /**
     this._socket.on('currencyChanged', ({ currency }) => {
       console.log('Currency event received in frontend');
+      // console.log(currency);
       // Update local currency map
-      this._currency = new Map(currency);
+      for (const [playerID, newCurrency] of currency) {
+        this._updateCurrencyMap(playerID, newCurrency);
+        console.log(playerID, newCurrency);
+      }
+      console.log(currency);
       // Emit currency change event with a copy of the currency map
-      this.emit('currencyChange', new Map(this._currency));
+      // this.emit('currencyChange', new Map(this._currency));
+    });
+    */
+
+    this._socket.on('currencyChanged', ({ currency }) => {
+      console.log('Currency event received in frontend');
+      console.log(currency);
+      // Check if currency is empty
+      if (currency.size === 0) {
+        console.log('Currency data is empty');
+        return;
+      }
+      /**
+      for (const [playerID, newCurrency] of currency) {
+        this._updateCurrencyMap(playerID, newCurrency);
+        console.log(playerID, newCurrency);
+      }
+      */
+      currency.forEach((value, key) => {
+        this._updateCurrencyMap(key, value);
+        console.log(key, value);
+      });
+      /**
+      // Update local currency map
+      Object.entries(currency).forEach(([playerID, newCurrency]) => {
+        this._updateCurrencyMap(playerID, newCurrency);
+        console.log(playerID, newCurrency);
+      });
+      */
+      // Emit currency change event with a copy of the currency map
+      // this.emit('currencyChanged', new Map(this._currency));
     });
   }
 
@@ -673,7 +710,7 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
         // Update the local currency map
         this._currency = initialData.currency;
         // Emit the currencyChange event with the updated currency map
-        this.emit('currencyChange', this._currency);
+        this.emit('currencyChanged', this._currency);
 
         this._providerVideoToken = initialData.providerVideoToken;
         this._friendlyNameInternal = initialData.friendlyName;
@@ -915,20 +952,26 @@ export function useActiveInteractableAreas(): GenericInteractableAreaController[
 
 // Custom hook to manage currency leaderboard
 // Added Code
-export const useCurrencyLeaderboard = (townController: TownController): CurrencyMap => {
+export const useCurrencyMap = (townController: TownController): CurrencyMap => {
   const [playerCurrencyMap, setPlayerCurrencyMap] = useState<CurrencyMap>(new Map());
 
   useEffect(() => {
-    const updateLeaderboard = (currency: CurrencyMap) => {
-      setPlayerCurrencyMap(new Map(currency));
+    const updateCurrency = (currency: CurrencyMap) => {
+      setPlayerCurrencyMap(currency); // Use the other way
+      /**
+      Object.entries(currency).forEach(([playerID, newCurrency]) => {
+        this._updateCurrencyMap(playerID, newCurrency);
+        console.log(playerID, newCurrency);
+      })
+      */
     };
 
     // Subscribe to currency change events
-    townController.addListener('currencyChange', updateLeaderboard);
+    townController.addListener('currencyChanged', updateCurrency);
 
     // Unsubscribe on component unmount
     return () => {
-      townController.removeListener('currencyChange', updateLeaderboard);
+      townController.removeListener('currencyChanged', updateCurrency);
     };
   }, [townController]);
 

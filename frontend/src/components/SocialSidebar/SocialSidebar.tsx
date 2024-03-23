@@ -1,6 +1,6 @@
 import { Heading, StackDivider, VStack } from '@chakra-ui/react';
 import React, { useEffect, useState } from 'react';
-import TownController from '../../classes/TownController';
+import TownController, { useCurrencyMap } from '../../classes/TownController';
 import CurrencyLeaderboard from '../Town/interactables/CurrencyLeaderboard';
 import InteractableAreasList from './InteractableAreasList';
 import PlayersList from './PlayersList';
@@ -14,6 +14,8 @@ interface SocialSidebarProps {
 }
 
 const SocialSidebar: React.FC<SocialSidebarProps> = ({ townController }) => {
+  // const playerCurrencyMap = useCurrencyMap(townController);
+
   const [playerCurrencyMap, setPlayerCurrencyMap] = useState<Map<string, number>>(new Map());
 
   useEffect(() => {
@@ -22,10 +24,10 @@ const SocialSidebar: React.FC<SocialSidebarProps> = ({ townController }) => {
     };
 
     if (townController) {
-      townController.addListener('currencyChange', updateCurrency);
+      townController.addListener('currencyChanged', updateCurrency);
 
       return () => {
-        townController.removeListener('currencyChange', updateCurrency);
+        townController.removeListener('currencyChanged', updateCurrency);
       };
     }
   }, [townController]);
