@@ -11,7 +11,11 @@ import {
   useToast,
 } from '@chakra-ui/react';
 import React, { useCallback } from 'react';
-import { useInteractable, useInteractableAreaController } from '../../../../classes/TownController';
+import {
+  useInteractable,
+  useInteractableAreaController,
+  usePetShopController,
+} from '../../../../classes/TownController';
 import useTownController from '../../../../hooks/useTownController';
 import PetShop from './PetShop';
 import shopBackground from './petshop-images/shop_bg.png';
@@ -26,6 +30,7 @@ import { Pet } from '../../../../../../townService/src/lib/Pet';
 import dog from './../../../../../public/logo512.png';
 import adoptButton from './petshop-images/adopt_btn.png';
 import PetShopController from '../../../../classes/interactable/PetShopController';
+import { InteractableID } from '../../../../types/CoveyTownSocket';
 
 const PETS = [
   { type: 'chicken', playerID: '1', equipped: false },
@@ -53,6 +58,7 @@ function PetShopSlot({ petCatalog, controller }: PetShopProps): JSX.Element {
           src={adoptButton.src}
           onClick={async () => {
             try {
+              // console.log(petCatalog.type);
               await controller.adopt(petCatalog.type);
             } catch (e) {
               toast({
@@ -107,9 +113,10 @@ function PetShopSlot({ petCatalog, controller }: PetShopProps): JSX.Element {
   );
 }
 
-function PetShopArea(): JSX.Element {
-  const townController = useTownController();
-  const controller = townController.petShopArea;
+function PetShopArea({ interactableID }: { interactableID: InteractableID }): JSX.Element {
+  const controller = usePetShopController(interactableID);
+  // const controller = useInteractableAreaController<PetShopController>(interactableID);
+  console.log(controller);
   // Array of pets
   const petsCatalog: PetCatalog[] = [
     { type: 'dog', speed: 1.5, counter: 0, price: 10 },
@@ -134,22 +141,18 @@ function PetShopArea(): JSX.Element {
     <Box position='relative'>
       {/* Inventory Background */}
       <Image src={shopBackground.src} position='absolute' />
-
       {/* Grid of Pets */}
       <Grid templateColumns='repeat(3, 1fr)' gap={4} gridAutoFlow='row dense' gridRowGap={10}>
         {petsCatalog.map((pet, index) => (
           <PetShopSlot key={index} petCatalog={pet} controller={controller} />
         ))}
       </Grid>
-
       {/* Coin Count Image */}
       {coinCountImage}
-
       {/* back button */}
       <Box position='absolute' left='0' top='400' boxSize='50px'>
         <IconButton icon={<Image src={backButton.src} />} aria-label={''} />;
       </Box>
-
       {/* forward button */}
       <Box position='absolute' right='0' top='400' boxSize='50px'>
         <IconButton icon={<Image src={forwardButton.src} />} aria-label={''} />;
@@ -164,6 +167,7 @@ function PetShopArea(): JSX.Element {
  */
 export default function PetShopAreaWrapper(): JSX.Element {
   const petArea = useInteractable<PetShop>('petShop');
+
   const townController = useTownController();
   const closeModal = useCallback(() => {
     if (petArea) {
@@ -182,7 +186,7 @@ export default function PetShopAreaWrapper(): JSX.Element {
             onClick={closeModal}
             zIndex='modal'
           />
-          <PetShopArea />
+          <PetShopArea interactableID={petArea.name} />
         </ModalContent>
       </Modal>
     );

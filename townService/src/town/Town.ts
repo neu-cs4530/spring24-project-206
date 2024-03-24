@@ -22,6 +22,7 @@ import { logError } from '../Utils';
 import ConversationArea from './ConversationArea';
 import GameAreaFactory from './games/GameAreaFactory';
 import InteractableArea from './InteractableArea';
+import PetShopArea from './PetShopArea';
 import ViewingArea from './ViewingArea';
 
 /**
@@ -422,10 +423,17 @@ export default class Town {
       .filter(eachObject => eachObject.type === 'GameArea')
       .map(eachGameAreaObj => GameAreaFactory(eachGameAreaObj, this._broadcastEmitter));
 
+    const petAreas = objectLayer.objects
+      .filter(eachObject => eachObject.type === 'PetShopArea')
+      .map(eachInteractableObj =>
+        PetShopArea.fromMapObject(eachInteractableObj, this._broadcastEmitter),
+      );
+
     this._interactables = this._interactables
       .concat(viewingAreas)
       .concat(conversationAreas)
-      .concat(gameAreas);
+      .concat(gameAreas)
+      .concat(petAreas);
     this._validateInteractables();
   }
 

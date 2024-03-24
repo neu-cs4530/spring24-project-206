@@ -90,7 +90,7 @@ const sessionOptions = {
   store,
 };
 
-app.use(session(sessionOptions));
+// app.use(session(sessionOptions));
 
 petsController(app);
 

@@ -22,6 +22,7 @@ import {
   InteractableCommandBase,
   InteractableCommandResponse,
   InteractableID,
+  PetShopArea,
   PlayerID,
   PlayerLocation,
   TownSettingsUpdate,
@@ -30,6 +31,7 @@ import {
 import {
   isConnectFourArea,
   isConversationArea,
+  isPetShopArea,
   isTicTacToeArea,
   isViewingArea,
 } from '../types/TypeUtils';
@@ -40,7 +42,7 @@ import InteractableAreaController, {
   BaseInteractableEventMap,
   GenericInteractableAreaController,
 } from './interactable/InteractableAreaController';
-import PetShopController from './interactable/PetShopController';
+import PetShopController, { PetShopAreaEvents } from './interactable/PetShopController';
 import TicTacToeAreaController from './interactable/TicTacToeAreaController';
 import ViewingAreaController from './interactable/ViewingAreaController';
 import PlayerController from './PlayerController';
@@ -341,11 +343,12 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
     return ret as GameAreaController<GameState, GameEventTypes>[];
   }
 
-  public get petShopArea(): PetShopController {
-    const ret = this._interactableControllers.find(
+  public get petShopArea(): PetShopController[] {
+    console.log(this._interactableControllers);
+    const ret = this._interactableControllers.filter(
       eachInteractable => eachInteractable instanceof PetShopController,
     );
-    return ret as PetShopController;
+    return ret as PetShopController[];
   }
 
   /**
@@ -640,6 +643,10 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
             this._interactableControllers.push(
               new ConnectFourAreaController(eachInteractable.id, eachInteractable, this),
             );
+          } else if (isPetShopArea(eachInteractable)) {
+            this._interactableControllers.push(
+              new PetShopController(eachInteractable.id, this, []),
+            );
           }
         });
         this._userID = initialData.userID;
@@ -800,6 +807,18 @@ export function useInteractableAreaController<T>(interactableAreaID: string): T 
     throw new Error(`Requested interactable area ${interactableAreaID} does not exist`);
   }
   return interactableAreaController as unknown as T;
+}
+
+export function usePetShopController(interactableAreaID: string): PetShopController {
+  const townController = useTownController();
+
+  const interactableAreaController = townController.petShopArea.find(
+    eachArea => eachArea.id == interactableAreaID,
+  );
+  if (!interactableAreaController) {
+    throw new Error(`Requested interactable area ${interactableAreaID} does not exist`);
+  }
+  return interactableAreaController as PetShopController;
 }
 
 /**

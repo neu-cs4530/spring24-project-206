@@ -220,5 +220,7 @@ export class TownsController extends Controller {
       isPubliclyListed: town.isPubliclyListed,
       interactables: town.interactables.map(eachInteractable => eachInteractable.toModel()),
     });
+
+    console.log(town.interactables);
   }
 }

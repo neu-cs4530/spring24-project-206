@@ -24,8 +24,10 @@ export default class PetShopController extends InteractableAreaController<
     this._townController = townController;
   }
 
-  async adopt(type: string) {
+  public async adopt(type: string) {
+    console.log(type);
     this._pets?.push({ type: type, playerID: this._townController.ourPlayer.id, equipped: true });
+    console.log(this._pets);
     await this._townController.sendInteractableCommand(this.id, {
       type: 'AdoptPet',
       petType: type,
