@@ -344,10 +344,13 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
   }
 
   public get petShopArea(): PetShopController[] {
+    console.log('All controllers');
     console.log(this._interactableControllers);
     const ret = this._interactableControllers.filter(
       eachInteractable => eachInteractable instanceof PetShopController,
     );
+    console.log('Pet Shop Controllers');
+    console.log(ret);
     return ret as PetShopController[];
   }
 
@@ -521,23 +524,31 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
     interactableID: InteractableID,
     command: CommandType,
   ): Promise<InteractableCommandResponse<CommandType>['payload']> {
+    console.log('send interactable');
     const commandMessage: InteractableCommand & InteractableCommandBase = {
       ...command,
       commandID: nanoid(),
       interactableID: interactableID,
     };
+    console.log('return promise');
     return new Promise((resolve, reject) => {
       const watchdog = setTimeout(() => {
+        console.log('command timed out');
         reject('Command timed out');
       }, SOCKET_COMMAND_TIMEOUT_MS);
 
       const ackListener = (response: InteractableCommandResponse<CommandType>) => {
+        console.log(`response command = ${response.commandID}`);
+        console.log(`message command = ${commandMessage.commandID}`);
         if (response.commandID === commandMessage.commandID) {
+          console.log('IDs match, clearing the timeout');
           clearTimeout(watchdog);
           this._socket.off('commandResponse', ackListener);
           if (response.error) {
+            console.log(`response error: ${response.error}`);
             reject(response.error);
           } else {
+            console.log(`response payload: ${response.payload}`);
             resolve(response.payload);
           }
         }

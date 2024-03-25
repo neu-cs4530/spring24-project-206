@@ -55,9 +55,9 @@ const API_BASE_PATH = '/api/pets';
 
 const petsController = app => {
   app.get(API_BASE_PATH, findAllPets);
-  app.get(`${API_BASE_PATH}:type`, findPetByType);
+  app.get(`${API_BASE_PATH}/:type`, findPetByType);
   app.post(API_BASE_PATH, createPet);
-  app.put(`${API_BASE_PATH}:type`, updatePetEquippedStatus);
+  app.put(`${API_BASE_PATH}/:type`, updatePetEquippedStatus);
 };
 
 export default petsController;

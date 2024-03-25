@@ -221,6 +221,7 @@ export class TownsController extends Controller {
       interactables: town.interactables.map(eachInteractable => eachInteractable.toModel()),
     });
 
-    console.log(town.interactables);
+    // console.log('All interactables');
+    // console.log(town.interactables);
   }
 }

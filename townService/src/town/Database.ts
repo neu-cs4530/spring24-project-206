@@ -2,7 +2,7 @@ import axios from 'axios';
 import { PlayerID } from '../types/CoveyTownSocket';
 
 const addPet = async (data: { type: string; playerID: PlayerID; equipped: boolean }) => {
-  const response = await axios.post(`${process.env.NEXT_PUBLIC_TOWNS_SERVICE_URL}/api/pets`, data);
+  const response = await axios.post(`http://localhost:8081/api/pets`, data); // FIXME: change url
   const pet = response.data;
   return pet;
 };

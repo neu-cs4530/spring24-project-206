@@ -115,7 +115,7 @@ function PetShopSlot({ petCatalog, controller }: PetShopProps): JSX.Element {
 
 function PetShopArea({ interactableID }: { interactableID: InteractableID }): JSX.Element {
   const controller = usePetShopController(interactableID);
-  // const controller = useInteractableAreaController<PetShopController>(interactableID);
+  console.log('Controller from React hook');
   console.log(controller);
   // Array of pets
   const petsCatalog: PetCatalog[] = [
@@ -203,5 +203,5 @@ export default function PetShopAreaWrapper(): JSX.Element {
   // forward button (not on last page)
   // previous button (not on first page) **COULD ALSO THINK OF ROTATING THE PAGE NUMBERS**
 
-  return <img alt='Pet shop' src='/petshop-images/shop_bg.png'></img>;
+  return <></>;
 }
