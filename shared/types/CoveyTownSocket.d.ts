@@ -15,8 +15,6 @@ export type TownJoinResponse = {
   isPubliclyListed: boolean;
   /** Current state of interactables in this town */
   interactables: TypedInteractable[];
-  /** Currency of the player */
-  currency: Map<string, number>;
 };
 
 export type CurrencyChangeResponse = {

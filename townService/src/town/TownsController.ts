@@ -219,7 +219,6 @@ export class TownsController extends Controller {
       friendlyName: town.friendlyName,
       isPubliclyListed: town.isPubliclyListed,
       interactables: town.interactables.map(eachInteractable => eachInteractable.toModel()),
-      currency: town.playerCurrencyMap,
     });
   }
 }

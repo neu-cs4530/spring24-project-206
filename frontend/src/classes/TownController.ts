@@ -635,11 +635,8 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
     return new Promise<void>((resolve, reject) => {
       this._socket.connect();
       this._socket.on('initialize', initialData => {
-        // Update the local currency map
-        this._currency = initialData.currency;
         // Emit the currencyChange event with the updated currency map
         this.emit('currencyChanged', this._currency);
-
         this._providerVideoToken = initialData.providerVideoToken;
         this._friendlyNameInternal = initialData.friendlyName;
         this._townIsPubliclyListedInternal = initialData.isPubliclyListed;
