@@ -17,6 +17,7 @@ import { ClientToServerEvents, ServerToClientEvents } from './types/CoveyTownSoc
 import { TownsController } from './town/TownsController';
 import { logError } from './Utils';
 import petsController from './pets/pets-controller';
+import petsCatalogController from './pet-shop/pet-shop-controller';
 
 // Create the server instances
 const app = Express();
@@ -93,6 +94,7 @@ const sessionOptions = {
 // app.use(session(sessionOptions));
 
 petsController(app);
+petsCatalogController(app);
 
 // Start the configured server, defaulting to port 8081 if $PORT is not set
 server.listen(process.env.PORT || 8081, () => {

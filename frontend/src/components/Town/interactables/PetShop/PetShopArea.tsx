@@ -30,7 +30,11 @@ import { Pet } from '../../../../../../townService/src/lib/Pet';
 import dog from './../../../../../public/logo512.png';
 import adoptButton from './petshop-images/adopt_btn.png';
 import PetShopController from '../../../../classes/interactable/PetShopController';
-import { InteractableID } from '../../../../types/CoveyTownSocket';
+import { InteractableID, PlayerID } from '../../../../types/CoveyTownSocket';
+import {
+  findPetsByPlayer,
+  findPetsInCatalog,
+} from '../../../../../../townService/src/town/Database';
 
 const PETS = [
   { type: 'chicken', playerID: '1', equipped: false },
@@ -46,9 +50,10 @@ const petsOfPlayer: Record<number, Pet[]> = { 1: PETS.slice(0, 2), 2: [], 3: PET
 interface PetShopProps {
   petCatalog: PetCatalog;
   controller: PetShopController;
+  playersPets: Pet[];
 }
 
-function PetShopSlot({ petCatalog, controller }: PetShopProps): JSX.Element {
+function PetShopSlot({ petCatalog, controller, playersPets }: PetShopProps): JSX.Element {
   const toast = useToast();
   let background = <Image src={slotBackground.src} />;
   let adoptElement = (
@@ -74,8 +79,7 @@ function PetShopSlot({ petCatalog, controller }: PetShopProps): JSX.Element {
     />
   );
   // if the player has not bought the pet, make the
-  const pets = petsOfPlayer[1];
-  if (pets.map(pet => pet.type).includes(petCatalog.type)) {
+  if (playersPets.map(pet => pet.type).includes(petCatalog.type)) {
     background = <Image src={slotBackgroundDisabled.src} />;
     adoptElement = <></>;
   }
@@ -113,19 +117,29 @@ function PetShopSlot({ petCatalog, controller }: PetShopProps): JSX.Element {
   );
 }
 
-function PetShopArea({ interactableID }: { interactableID: InteractableID }): JSX.Element {
+function PetShopArea({
+  interactableID,
+  playerID,
+}: {
+  interactableID: InteractableID;
+  playerID: PlayerID;
+}): JSX.Element {
   const controller = usePetShopController(interactableID);
   console.log('Controller from React hook');
   console.log(controller);
-  // Array of pets
-  const petsCatalog: PetCatalog[] = [
-    { type: 'dog', speed: 1.5, counter: 0, price: 10 },
-    { type: 'chicken', speed: 1.75, counter: 0, price: 12 },
-    { type: 'dragon', speed: 1, counter: 0, price: 7 },
-    { type: 'chicken', speed: 2.5, counter: 0, price: 5 },
-    { type: 'dog', speed: 0.5, counter: 0, price: 9 },
-    { type: 'dog', speed: 0.25, counter: 0, price: 3 },
-  ];
+  // Array of pets in the shop
+  const petsCatalogPromise = findPetsInCatalog();
+  let petsCatalog: PetCatalog[] = [];
+  petsCatalogPromise.then(res => {
+    petsCatalog = res;
+  });
+
+  // Array of pets in the inventory
+  const petsPromise = findPetsByPlayer(playerID);
+  let pets: Pet[] = [];
+  petsPromise.then(res => {
+    pets = res;
+  });
 
   const currency = 10;
   const coinCountImage = (
@@ -144,7 +158,7 @@ function PetShopArea({ interactableID }: { interactableID: InteractableID }): JS
       {/* Grid of Pets */}
       <Grid templateColumns='repeat(3, 1fr)' gap={4} gridAutoFlow='row dense' gridRowGap={10}>
         {petsCatalog.map((pet, index) => (
-          <PetShopSlot key={index} petCatalog={pet} controller={controller} />
+          <PetShopSlot key={index} petCatalog={pet} controller={controller} playersPets={pets} />
         ))}
       </Grid>
       {/* Coin Count Image */}
@@ -163,7 +177,6 @@ function PetShopArea({ interactableID }: { interactableID: InteractableID }): JS
 
 /**
  * Using the player ID, renders the pet options that the player can buy
- * @param PlayerID the player ID of the current player
  */
 export default function PetShopAreaWrapper(): JSX.Element {
   const petArea = useInteractable<PetShop>('petShop');
@@ -186,7 +199,7 @@ export default function PetShopAreaWrapper(): JSX.Element {
             onClick={closeModal}
             zIndex='modal'
           />
-          <PetShopArea interactableID={petArea.name} />
+          <PetShopArea interactableID={petArea.name} playerID={townController.ourPlayer.id} />
         </ModalContent>
       </Modal>
     );

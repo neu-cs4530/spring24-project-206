@@ -9,7 +9,7 @@ import {
   TownEmitter,
 } from '../types/CoveyTownSocket';
 import InteractableArea from './InteractableArea';
-import addPet from './Database';
+import { addPet } from './Database';
 
 export default class PetShopArea extends InteractableArea {
   public pets?: Pet[];
