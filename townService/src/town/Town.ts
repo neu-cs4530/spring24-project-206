@@ -235,7 +235,6 @@ export default class Town {
                 console.log('Player Currency:', this.getPlayerCurrency(winnerID));
 
                 socket.emit('currencyChanged', {
-                  // currency: this.playerCurrencyMap,
                   currencyPlayerList: Array.from(this.playerCurrencyMap.keys()),
                   currencyList: Array.from(this.playerCurrencyMap.values()),
                 });

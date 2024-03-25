@@ -220,12 +220,6 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
   // CurrencyMap type definition
   public _currency: CurrencyMap = new Map();
 
-  private _updateCurrencyMap(playerID: PlayerID, newCurrency: number): void {
-    this._currency.set(playerID, newCurrency);
-    // Emit currency change event with a copy of the currency map
-    this.emit('currencyChanged', this._currency);
-  }
-
   // Getter for currency map
   public getCurrency(): CurrencyMap {
     return this._currency;
@@ -883,28 +877,6 @@ export function useActiveInteractableAreas(): GenericInteractableAreaController[
   }, [townController]);
   return interactableAreas;
 }
-
-// Custom hook to manage currency leaderboard
-// Added Code
-export const useCurrencyMap = (townController: TownController): CurrencyMap => {
-  const [playerCurrencyMap, setPlayerCurrencyMap] = useState<CurrencyMap>(new Map());
-
-  useEffect(() => {
-    if (townController) {
-      const updateCurrency = (currency: CurrencyMap) => {
-        setPlayerCurrencyMap(new Map(currency));
-      };
-
-      townController.addListener('currencyChanged', updateCurrency);
-
-      return () => {
-        townController.removeListener('currencyChanged', updateCurrency);
-      };
-    }
-  }, [townController]);
-
-  return playerCurrencyMap;
-};
 
 /**
  * A react hook to retrieve the active interactable areas. This hook will re-render any components

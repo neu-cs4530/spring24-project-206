@@ -1,5 +1,6 @@
 // CurrencyLeaderboard.tsx
 
+import { Heading } from '@chakra-ui/react';
 import React, { useEffect, useState } from 'react';
 import useTownController from '../../../hooks/useTownController';
 
@@ -40,7 +41,9 @@ const CurrencyLeaderboard: React.FC = () => {
 
   return (
     <div>
-      <h2>Currency Leaderboard</h2>
+      <Heading fontSize='xl' as='h1'>
+        Currency Leaderboard
+      </Heading>
       <ul>
         {Array.from(leaderboard.entries()).map(([playerID, currency]) => (
           <li key={playerID}>

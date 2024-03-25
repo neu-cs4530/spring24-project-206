@@ -23,7 +23,6 @@ const SocialSidebar: React.FC<SocialSidebarProps> = () => {
       borderRadius='4px'>
       {/* Render CurrencyLeaderboard component */}
       <CurrencyLeaderboard />
-
       <Heading fontSize='xl' as='h1'>
         Players In This Town
       </Heading>
