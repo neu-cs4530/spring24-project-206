@@ -100,6 +100,8 @@ export default class Town {
   // Define a map to store player IDs with their currency
   private _playerCurrencyMap: Map<string, number> = new Map<string, number>();
 
+  private _gameCurrencyAwardedMap: Map<string, boolean> = new Map<string, boolean>();
+
   // Getter for player currency map
   public get playerCurrencyMap(): Map<string, number> {
     return this._playerCurrencyMap;
@@ -218,25 +220,28 @@ export default class Town {
               ticTacToeGameArea.game?.state.status === 'OVER' &&
               ticTacToeGameArea.game.state.winner
             ) {
-              console.log('Winner Found');
-              const winnerID = ticTacToeGameArea.game.state.winner;
-              const winnerCurrency = this.getPlayerCurrency(winnerID);
-              if (winnerCurrency === undefined) {
-                // Add default currency amount for the winner
-                this.setPlayerCurrency(winnerID, 1); // Adjust the currency amount as needed
-                console.log('Player Currency +1');
-                console.log('Map:', this.playerCurrencyMap);
+              const gameID = ticTacToeGameArea.game.id;
+              if (!this._gameCurrencyAwardedMap.has(gameID)) {
+                const winnerID = ticTacToeGameArea.game.state.winner;
+                const winnerCurrency = this.getPlayerCurrency(winnerID);
+                if (winnerCurrency === undefined) {
+                  // Add default currency amount for the winner
+                  this.setPlayerCurrency(winnerID, 1); // Adjust the currency amount as needed
+                } else {
+                  // Increment currency for the winner
+                  this.setPlayerCurrency(winnerID, winnerCurrency + 1); // Adjust the currency amount as needed
+                }
+                this._gameCurrencyAwardedMap.set(gameID, true);
+                console.log('Player Currency:', this.getPlayerCurrency(winnerID));
+
                 socket.emit('currencyChanged', {
-                  currency: this.playerCurrencyMap,
+                  // currency: this.playerCurrencyMap,
+                  currencyPlayerList: Array.from(this.playerCurrencyMap.keys()),
+                  currencyList: Array.from(this.playerCurrencyMap.values()),
                 });
-              } else {
-                // Increment currency for the winner
-                this.setPlayerCurrency(winnerID, winnerCurrency + 1); // Adjust the currency amount as needed
-                console.log('Player Currency curr +1');
-                console.log('Map:', this.playerCurrencyMap);
-                socket.emit('currencyChanged', {
-                  currency: this.playerCurrencyMap,
-                });
+                console.log('Players:', Array.from(this.playerCurrencyMap.keys()));
+                console.log('Currencies:', Array.from(this.playerCurrencyMap.values()));
+                console.log(this.playerCurrencyMap);
               }
             }
           }

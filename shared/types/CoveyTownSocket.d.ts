@@ -20,7 +20,11 @@ export type TownJoinResponse = {
 };
 
 export type CurrencyChangeResponse = {
-  currency: Map<string, number>;
+  // currency: Map<string, number>;
+
+  currencyPlayerList: string[];
+
+  currencyList: number[];
 };
 
 export type InteractableType =

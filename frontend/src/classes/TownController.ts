@@ -1,6 +1,6 @@
 import assert from 'assert';
 import { EventEmitter } from 'events';
-import _, { map } from 'lodash';
+import _ from 'lodash';
 import { nanoid } from 'nanoid';
 import { useEffect, useState } from 'react';
 import { io } from 'socket.io-client';
@@ -218,17 +218,12 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
   // Map of PalyerId and currency value, make a react hook here,
 
   // CurrencyMap type definition
-  private _currency: CurrencyMap = new Map();
+  public _currency: CurrencyMap = new Map();
 
   private _updateCurrencyMap(playerID: PlayerID, newCurrency: number): void {
     this._currency.set(playerID, newCurrency);
     // Emit currency change event with a copy of the currency map
     this.emit('currencyChanged', this._currency);
-  }
-
-  private _incrementWinnerCurrency(winnerID: PlayerID): void {
-    const currentCurrency = this._currency.get(winnerID) || 0;
-    this._updateCurrencyMap(winnerID, currentCurrency + 1);
   }
 
   // Getter for currency map
@@ -488,82 +483,21 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
       }
     });
 
-    /**
-    this._socket.on('currencyChanged', ({ currency }) => {
-      // Update UI to reflect the new player currency
-      // For example, find the element representing the player's currency and update its text
-      const playerCurrencyElement = document.getElementById('currency');
-      console.log('element received');
-      if (playerCurrencyElement) {
-        // Get the currency for the current player
-        const currentPlayer = this.ourPlayer; // Get the current player
-        const currentPlayerCurrency = currency.get(currentPlayer.id);
-        playerCurrencyElement.innerText = `Currency: ${currentPlayerCurrency}`;
-      }
-    });
-    */
-
-    /**
-    this._socket.on('currencyChanged', ({ currency }) => {
-      // Update UI to reflect the new player currency
-      // For example, find the element representing the player's currency and update its text
-      const playerCurrencyElement = document.getElementById('currency');
-      console.log('element received');
-      if (playerCurrencyElement) {
-        // Update local currency map
-        this._currency = new Map(currency);
-        // Get the currency for the current player
-        const currentPlayer = this.ourPlayer; // Get the current player
-        const currentPlayerCurrency = currency.get(currentPlayer.id);
-        playerCurrencyElement.innerText = `Currency: ${currentPlayerCurrency}`;
-        // Emit currency change event with a copy of the currency map
-        this.emit('currencyChange', new Map(this._currency));
-      }
-    });
-    */
-
-    /**
-    this._socket.on('currencyChanged', ({ currency }) => {
+    this._socket.on('currencyChanged', ({ currencyPlayerList, currencyList }) => {
       console.log('Currency event received in frontend');
-      // console.log(currency);
-      // Update local currency map
-      for (const [playerID, newCurrency] of currency) {
-        this._updateCurrencyMap(playerID, newCurrency);
-        console.log(playerID, newCurrency);
-      }
-      console.log(currency);
-      // Emit currency change event with a copy of the currency map
-      // this.emit('currencyChange', new Map(this._currency));
-    });
-    */
+      console.log(currencyPlayerList);
+      console.log(currencyList);
 
-    this._socket.on('currencyChanged', ({ currency }) => {
-      console.log('Currency event received in frontend');
-      console.log(currency);
-      // Check if currency is empty
-      if (currency.size === 0) {
-        console.log('Currency data is empty');
-        return;
-      }
-      /**
-      for (const [playerID, newCurrency] of currency) {
-        this._updateCurrencyMap(playerID, newCurrency);
-        console.log(playerID, newCurrency);
-      }
-      */
-      currency.forEach((value, key) => {
-        this._updateCurrencyMap(key, value);
-        console.log(key, value);
+      const currencyMap = new Map();
+      currencyPlayerList.forEach((playerID, index) => {
+        currencyMap.set(playerID, currencyList[index]);
       });
-      /**
-      // Update local currency map
-      Object.entries(currency).forEach(([playerID, newCurrency]) => {
-        this._updateCurrencyMap(playerID, newCurrency);
-        console.log(playerID, newCurrency);
-      });
-      */
+
+      this._currency = currencyMap;
+      console.log(this._currency);
+
       // Emit currency change event with a copy of the currency map
-      // this.emit('currencyChanged', new Map(this._currency));
+      this.emit('currencyChanged', this._currency);
     });
   }
 
@@ -956,23 +890,17 @@ export const useCurrencyMap = (townController: TownController): CurrencyMap => {
   const [playerCurrencyMap, setPlayerCurrencyMap] = useState<CurrencyMap>(new Map());
 
   useEffect(() => {
-    const updateCurrency = (currency: CurrencyMap) => {
-      setPlayerCurrencyMap(currency); // Use the other way
-      /**
-      Object.entries(currency).forEach(([playerID, newCurrency]) => {
-        this._updateCurrencyMap(playerID, newCurrency);
-        console.log(playerID, newCurrency);
-      })
-      */
-    };
+    if (townController) {
+      const updateCurrency = (currency: CurrencyMap) => {
+        setPlayerCurrencyMap(new Map(currency));
+      };
 
-    // Subscribe to currency change events
-    townController.addListener('currencyChanged', updateCurrency);
+      townController.addListener('currencyChanged', updateCurrency);
 
-    // Unsubscribe on component unmount
-    return () => {
-      townController.removeListener('currencyChanged', updateCurrency);
-    };
+      return () => {
+        townController.removeListener('currencyChanged', updateCurrency);
+      };
+    }
   }, [townController]);
 
   return playerCurrencyMap;

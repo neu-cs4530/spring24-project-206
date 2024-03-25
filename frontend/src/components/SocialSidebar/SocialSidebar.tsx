@@ -1,37 +1,15 @@
+import React from 'react';
 import { Heading, StackDivider, VStack } from '@chakra-ui/react';
-import React, { useEffect, useState } from 'react';
-import TownController, { useCurrencyMap } from '../../classes/TownController';
-import CurrencyLeaderboard from '../Town/interactables/CurrencyLeaderboard';
 import InteractableAreasList from './InteractableAreasList';
 import PlayersList from './PlayersList';
-
-interface SocialSidebarProps {
-  townController: TownController; // Make the prop optional
-}
+import TownController from '../../classes/TownController';
+import CurrencyLeaderboard from '../Town/interactables/CurrencyLeaderboard';
 
 interface SocialSidebarProps {
   townController: TownController;
 }
 
-const SocialSidebar: React.FC<SocialSidebarProps> = ({ townController }) => {
-  // const playerCurrencyMap = useCurrencyMap(townController);
-
-  const [playerCurrencyMap, setPlayerCurrencyMap] = useState<Map<string, number>>(new Map());
-
-  useEffect(() => {
-    const updateCurrency = (currency: Map<string, number>) => {
-      setPlayerCurrencyMap(new Map(currency));
-    };
-
-    if (townController) {
-      townController.addListener('currencyChanged', updateCurrency);
-
-      return () => {
-        townController.removeListener('currencyChanged', updateCurrency);
-      };
-    }
-  }, [townController]);
-
+const SocialSidebar: React.FC<SocialSidebarProps> = () => {
   return (
     <VStack
       align='left'
@@ -43,8 +21,9 @@ const SocialSidebar: React.FC<SocialSidebarProps> = ({ townController }) => {
       height='100%'
       divider={<StackDivider borderColor='gray.200' />}
       borderRadius='4px'>
-      {/* Pass playerCurrencyMap as prop to CurrencyLeaderboard component */}
-      <CurrencyLeaderboard playerCurrencyMap={playerCurrencyMap} />
+      {/* Render CurrencyLeaderboard component */}
+      <CurrencyLeaderboard />
+
       <Heading fontSize='xl' as='h1'>
         Players In This Town
       </Heading>
