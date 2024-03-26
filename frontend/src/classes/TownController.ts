@@ -235,12 +235,12 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
   public _allTimeCurrency: CurrencyMap = new Map();
 
   /**
-   * A currency map for current players
+   * A currency map for the current players
    */
   public _currentCurrency: CurrencyMap = new Map();
 
   /**
-   * Getter for all time currency map
+   * Getter for the all time currency map
    */
   public getAllTimeCurrency(): CurrencyMap {
     return this._allTimeCurrency;

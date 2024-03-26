@@ -205,7 +205,7 @@ export default class Town {
     );
     const currencyCountList = Array.from(this.playerCurrencyMap.values());
 
-    // Emit the current leaderboard data to connected sockets
+    // Emit the current leaderboard data to all connected sockets
     this._connectedSockets.forEach(socket => {
       socket.emit('currentCurrencyChanged', {
         currencyPlayerIDs: currencyPlayerIDList,
