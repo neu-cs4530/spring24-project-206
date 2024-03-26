@@ -40,7 +40,7 @@
     "src",
     "generated",
     "pages"
-  ],
+, "../townService/src/lib/types", "../townService/src/lib/Pet.ts", "../townService/src/lib/PetCatalog.ts"  ],
   "references": [
     {
       "path": "../shared/"

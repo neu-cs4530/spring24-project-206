@@ -1,6 +1,9 @@
+// this coding pattern was inspired by a previous semester's group project 409
+import 'dotenv/config';
 import Express from 'express';
 import * as http from 'http';
 import CORS from 'cors';
+import mongoose from 'mongoose';
 import { AddressInfo } from 'net';
 import swaggerUi from 'swagger-ui-express';
 import { ValidateError } from 'tsoa';
@@ -11,6 +14,8 @@ import TownsStore from './lib/TownsStore';
 import { ClientToServerEvents, ServerToClientEvents } from './types/CoveyTownSocket';
 import { TownsController } from './town/TownsController';
 import { logError } from './Utils';
+import petsController from './pets/pets-controller';
+import petsCatalogController from './pet-shop/pet-shop-controller';
 
 // Create the server instances
 const app = Express();
@@ -65,6 +70,18 @@ app.use(
     return next();
   },
 );
+
+// connect to mongo
+const CONNECTION_STRING =
+  'mongodb+srv://ananya:cWxO4lhcRGjkMx9S@personal-pet-collection.hbmnsu4.mongodb.net/pet-collection?retryWrites=true&w=majority&appName=personal-pet-collection';
+console.log('Trying to connect to MongoDB...');
+mongoose
+  .connect(CONNECTION_STRING)
+  .then(() => console.log('Successfully connected to MongoDB'))
+  .catch(err => console.log('Failed to connect to MongoDB:', err));
+
+petsController(app);
+petsCatalogController(app);
 
 // Start the configured server, defaulting to port 8081 if $PORT is not set
 server.listen(process.env.PORT || 8081, () => {
