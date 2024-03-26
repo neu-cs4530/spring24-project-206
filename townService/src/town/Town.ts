@@ -560,13 +560,13 @@ export default class Town {
     const gameAreas = objectLayer.objects
       .filter(eachObject => eachObject.type === 'GameArea')
       .map(eachGameAreaObj => GameAreaFactory(eachGameAreaObj, this._broadcastEmitter));
-    
+
     const petAreas = objectLayer.objects
       .filter(eachObject => eachObject.type === 'PetShopArea')
       .map(eachInteractableObj =>
         PetShopArea.fromMapObject(eachInteractableObj, this._broadcastEmitter),
       );
-    
+
     this._interactables = this._interactables
       .concat(viewingAreas)
       .concat(conversationAreas)
