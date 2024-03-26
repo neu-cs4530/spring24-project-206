@@ -30,6 +30,7 @@ import {
 import {
   isConnectFourArea,
   isConversationArea,
+  isPetShopArea,
   isTicTacToeArea,
   isViewingArea,
 } from '../types/TypeUtils';
@@ -40,9 +41,11 @@ import InteractableAreaController, {
   BaseInteractableEventMap,
   GenericInteractableAreaController,
 } from './interactable/InteractableAreaController';
+import PetShopController from './interactable/PetShopController';
 import TicTacToeAreaController from './interactable/TicTacToeAreaController';
 import ViewingAreaController from './interactable/ViewingAreaController';
 import PlayerController from './PlayerController';
+import PetShop from '../components/Town/interactables/PetShop/PetShop';
 
 const CALCULATE_NEARBY_PLAYERS_DELAY_MS = 300;
 const SOCKET_COMMAND_TIMEOUT_MS = 5000;
@@ -379,6 +382,13 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
     return ret as GameAreaController<GameState, GameEventTypes>[];
   }
 
+  public get petShopArea(): PetShopController[] {
+    const ret = this._interactableControllers.filter(
+      eachInteractable => eachInteractable instanceof PetShopController,
+    );
+    return ret as PetShopController[];
+  }
+
   /**
    * Begin interacting with an interactable object. Emits an event to all listeners.
    * @param interactedObj
@@ -509,6 +519,7 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
      * currencyPlayerUsernames is the list of player usernames
      */
     this._socket.on('allTimeCurrencyChanged', ({ currencyCounts, currencyPlayerUsernames }) => {
+
       const currencyMap = new Map();
       currencyPlayerUsernames.forEach((playerID, index) => {
         currencyMap.set(playerID, currencyCounts[index]);
@@ -704,6 +715,10 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
             this._interactableControllers.push(
               new ConnectFourAreaController(eachInteractable.id, eachInteractable, this),
             );
+          } else if (isPetShopArea(eachInteractable)) {
+            this._interactableControllers.push(
+              new PetShopController(eachInteractable.id, this, []),
+            );
           }
         });
         this._userID = initialData.userID;
@@ -764,6 +779,17 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
       return existingController as GameAreaController<GameType, EventsType>;
     } else {
       throw new Error('Game area controller not created');
+    }
+  }
+
+  public getPetShopAreaController(petShopArea: PetShop): PetShopController {
+    const existingController = this._interactableControllers.find(
+      eachExistingArea => eachExistingArea.id === petShopArea.name,
+    );
+    if (existingController instanceof PetShopController) {
+      return existingController as PetShopController;
+    } else {
+      throw new Error('Pet shop area controller not created');
     }
   }
 
@@ -853,6 +879,18 @@ export function useInteractableAreaController<T>(interactableAreaID: string): T 
     throw new Error(`Requested interactable area ${interactableAreaID} does not exist`);
   }
   return interactableAreaController as unknown as T;
+}
+
+export function usePetShopController(interactableAreaID: string): PetShopController {
+  const townController = useTownController();
+
+  const interactableAreaController = townController.petShopArea.find(
+    eachArea => eachArea.id == interactableAreaID,
+  );
+  if (!interactableAreaController) {
+    throw new Error(`Requested interactable area ${interactableAreaID} does not exist`);
+  }
+  return interactableAreaController as PetShopController;
 }
 
 /**

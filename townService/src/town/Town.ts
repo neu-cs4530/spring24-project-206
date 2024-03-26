@@ -26,6 +26,7 @@ import ConversationArea from './ConversationArea';
 import GameAreaFactory from './games/GameAreaFactory';
 import TicTacToeGameArea from './games/TicTacToeGameArea';
 import InteractableArea from './InteractableArea';
+import PetShopArea from './PetShopArea';
 import ViewingArea from './ViewingArea';
 
 /**
@@ -111,6 +112,7 @@ export default class Town {
   /**
    * Getter for the player currency map
    */
+
   public get playerCurrencyMap(): CurrencyMap {
     return this._playerCurrencyMap;
   }
@@ -313,10 +315,10 @@ export default class Town {
                 // If winner's currency is undefined, set it to a default amount (1 in this case)
                 if (winnerCurrency === undefined) {
                   // Add default currency amount for the winner
-                  this.setPlayerCurrency(winnerID, 1); // Adjust the currency amount as needed
+                  this.setPlayerCurrency(winnerID, 1);
                 } else {
                   // Increment currency for the winner
-                  this.setPlayerCurrency(winnerID, winnerCurrency + 1); // Adjust the currency amount as needed
+                  this.setPlayerCurrency(winnerID, winnerCurrency + 1);
                 }
                 // Mark that currency has been awarded for this game
                 this._gameCurrencyAwardedMap.set(gameID, true);
@@ -558,10 +560,18 @@ export default class Town {
     const gameAreas = objectLayer.objects
       .filter(eachObject => eachObject.type === 'GameArea')
       .map(eachGameAreaObj => GameAreaFactory(eachGameAreaObj, this._broadcastEmitter));
+    
+    const petAreas = objectLayer.objects
+      .filter(eachObject => eachObject.type === 'PetShopArea')
+      .map(eachInteractableObj =>
+        PetShopArea.fromMapObject(eachInteractableObj, this._broadcastEmitter),
+      );
+    
     this._interactables = this._interactables
       .concat(viewingAreas)
       .concat(conversationAreas)
-      .concat(gameAreas);
+      .concat(gameAreas)
+      .concat(petAreas);
     this._validateInteractables();
   }
 

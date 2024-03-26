@@ -12,6 +12,7 @@ const CurrencyLeaderboard: React.FC = () => {
   const [allTimeLeaderboard, setAllTimeLeaderboard] = useState<CurrencyMap>(new Map());
   const [currentLeaderboard, setCurrentLeaderboard] = useState<CurrencyMap>(new Map());
 
+
   // Effect hook to run once on component mount and on changes to town controller
   useEffect(() => {
     // Function to update the all-time leaderboard

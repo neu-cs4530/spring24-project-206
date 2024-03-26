@@ -7,6 +7,8 @@ import { Callback } from '../VideoCall/VideoFrontend/types';
 import Interactable from './Interactable';
 import ConversationArea from './interactables/ConversationArea';
 import GameArea from './interactables/GameArea';
+import Inventory from './interactables/PetShop/Inventory';
+import PetShop from './interactables/PetShop/PetShop';
 import Transporter from './interactables/Transporter';
 import ViewingArea from './interactables/ViewingArea';
 
@@ -21,6 +23,10 @@ function interactableTypeForObjectType(type: string): any {
     return ViewingArea;
   } else if (type === 'GameArea') {
     return GameArea;
+  } else if (type == 'PetShopArea') {
+    return PetShop;
+  } else if (type == 'InventoryArea') {
+    return Inventory;
   } else {
     throw new Error(`Unknown object type: ${type}`);
   }
