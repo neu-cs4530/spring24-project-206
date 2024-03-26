@@ -25,7 +25,6 @@ import unequippedButton from './inventory-images/unequip_btn.png';
 import coin_count from './inventory-images/coin_count.png';
 import forward_btn from './inventory-images/forward_btn.png';
 import back_btn from './inventory-images/back_btn.png';
-import { GameResult, InteractableID } from '../../../../types/CoveyTownSocket';
 
 function PetInventorySlot({ type, equipped }: Pet): JSX.Element {
   let petImage = <Image src={emptyPet.src} />;
@@ -55,7 +54,7 @@ function PetInventorySlot({ type, equipped }: Pet): JSX.Element {
   );
 }
 
-function InventoryArea({ interactableID }: { interactableID: InteractableID }): JSX.Element {
+function InventoryArea(): JSX.Element {
   // Array of pets
   const pets = [
     { type: 'chicken', playerID: '1', equipped: false },
@@ -129,7 +128,7 @@ export default function InventoryAreaWrapper(): JSX.Element {
             onClick={closeModal}
             zIndex='modal'
           />
-          <InventoryArea interactableID={inventoryArea.id} />
+          <InventoryArea />
         </ModalContent>
       </Modal>
     );

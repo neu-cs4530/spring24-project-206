@@ -5,8 +5,6 @@ import InteractableAreaController, {
 import { PetShopArea as PetShopAreaModel } from '../../types/CoveyTownSocket';
 import { Pet } from '../../../../townService/src/lib/Pet';
 import TownController from '../TownController';
-import { findPetsInCatalog } from '../../../../townService/src/town/Database';
-import { PetCatalog } from '../../../../townService/src/lib/PetCatalog';
 
 export type PetShopAreaEvents = BaseInteractableEventMap & {
   petChange: (newPets: Pet[] | undefined) => void;
@@ -27,10 +25,7 @@ export default class PetShopController extends InteractableAreaController<
   }
 
   public async adopt(type: string) {
-    console.log(`Adopting pet of ${type}`);
     this._pets?.push({ type: type, playerID: this._townController.ourPlayer.id, equipped: true });
-    console.log('Big list of pets');
-    console.log(this._pets);
     await this._townController.sendInteractableCommand(this.id, {
       type: 'AdoptPet',
       petType: type,

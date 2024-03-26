@@ -11,11 +11,7 @@ import {
   useToast,
 } from '@chakra-ui/react';
 import React, { useCallback, useEffect, useState } from 'react';
-import {
-  useInteractable,
-  useInteractableAreaController,
-  usePetShopController,
-} from '../../../../classes/TownController';
+import { useInteractable, usePetShopController } from '../../../../classes/TownController';
 import useTownController from '../../../../hooks/useTownController';
 import PetShop from './PetShop';
 import shopBackground from './petshop-images/shop_bg.png';
@@ -36,17 +32,6 @@ import {
   findPetsInCatalog,
 } from '../../../../../../townService/src/town/Database';
 
-const PETS = [
-  { type: 'chicken', playerID: '1', equipped: false },
-  { type: 'cat', playerID: '1', equipped: true },
-  { type: 'dog', playerID: '1', equipped: false },
-  { type: 'dog', playerID: '1', equipped: true },
-  { type: 'dog', playerID: '1', equipped: false },
-  { type: 'dog', playerID: '1', equipped: true },
-];
-
-const petsOfPlayer: Record<number, Pet[]> = { 1: PETS.slice(0, 2), 2: [], 3: PETS.slice(3, 5) };
-
 interface PetShopProps {
   petCatalog: PetCatalog;
   controller: PetShopController;
@@ -63,7 +48,6 @@ function PetShopSlot({ petCatalog, controller, playersPets }: PetShopProps): JSX
           src={adoptButton.src}
           onClick={async () => {
             try {
-              // console.log(petCatalog.type);
               await controller.adopt(petCatalog.type);
             } catch (e) {
               toast({
@@ -125,16 +109,6 @@ function PetShopArea({
   playerID: PlayerID;
 }) {
   const controller = usePetShopController(interactableID);
-  console.log('Controller from React hook');
-  console.log(controller);
-  // Array of pets in the shop
-  // const petsCatalogPromise = findPetsInCatalog();
-  // console.log('catalog promise' + petsCatalogPromise);
-  // let petsCatalog: PetCatalog[] = [];
-  // petsCatalogPromise.then((res: PetCatalog[]) => {
-  //   petsCatalog = res;
-  // });
-  // console.log('catalog' + petsCatalog);
 
   const [petsCatalog, setPlayerCatalog] = useState<PetCatalog[]>([]);
   useEffect(() => {
@@ -150,14 +124,6 @@ function PetShopArea({
     getTheCatalog();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  // Array of pets in the inventory
-  // const petsPromise = findPetsByPlayer(playerID);
-  // let pets: Pet[] = [];
-  // petsPromise.then(res => {
-  //   pets = res;
-  // });
-  // console.log('players pets' + petsPromise);
 
   const [pets, setPets] = useState<Pet[]>([]);
   useEffect(() => {
@@ -237,17 +203,5 @@ export default function PetShopAreaWrapper(): JSX.Element {
       </Modal>
     );
   }
-  // using the player ID, fetch the list of pets they have already bought (from MongoDB)
-  // rendering:
-  // pet shop background
-  // currency above the pet shop (overlay the amount)
-  // for all pets, render the text to be overlayed
-  // name of the pet: above the slot
-  // info: cost, speed, popularity
-  // the pets that have already been bought - use the disabled pet slot
-  // the pets that have not been bought - use the regular pet slot + adopt button
-  // forward button (not on last page)
-  // previous button (not on first page) **COULD ALSO THINK OF ROTATING THE PAGE NUMBERS**
-
   return <></>;
 }

@@ -1,11 +1,9 @@
 // this coding pattern was inspired by a previous semester's group project 409
 import 'dotenv/config';
 import Express from 'express';
-import session from 'express-session';
 import * as http from 'http';
 import CORS from 'cors';
 import mongoose from 'mongoose';
-import connectMongo from 'connect-mongo';
 import { AddressInfo } from 'net';
 import swaggerUi from 'swagger-ui-express';
 import { ValidateError } from 'tsoa';
@@ -81,17 +79,6 @@ mongoose
   .connect(CONNECTION_STRING)
   .then(() => console.log('Successfully connected to MongoDB'))
   .catch(err => console.log('Failed to connect to MongoDB:', err));
-
-const store = connectMongo.create({ mongoUrl: CONNECTION_STRING });
-
-const sessionOptions = {
-  secret: 'any string',
-  resave: false,
-  saveUninitialized: false,
-  store,
-};
-
-// app.use(session(sessionOptions));
 
 petsController(app);
 petsCatalogController(app);

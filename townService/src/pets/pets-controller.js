@@ -1,5 +1,4 @@
 import * as petsDao from './pets-dao';
-import petsModel from './pets-model';
 
 const findAllPets = async (req, res) => {
   try {
