@@ -79,6 +79,9 @@ export default class Town {
   /** The list of players currently in the town * */
   private _players: Player[] = [];
 
+  /** The list of all players that have been in the town * */
+  private _allPlayers: Player[] = [];
+
   /** The videoClient that this CoveyTown will use to provision video resources * */
   private _videoClient: IVideoClient = TwilioVideo.getInstance();
 
@@ -100,13 +103,16 @@ export default class Town {
 
   private _chatMessages: ChatMessage[] = [];
 
-  // A map to store player IDs with their currency
+  /** A map to store player IDs with their currency * */
   private _playerCurrencyMap: CurrencyMap = new Map<string, number>();
 
-  // A map to check if a game has been awarded currency
+  /** A map to check if a tic tac toe game has already rewarded a player with currency * */
   private _gameCurrencyAwardedMap: Map<string, boolean> = new Map<string, boolean>();
 
-  // Getter for player currency map
+  /**
+   * Getter for the player currency map
+   */
+
   public get playerCurrencyMap(): CurrencyMap {
     return this._playerCurrencyMap;
   }
@@ -118,6 +124,10 @@ export default class Town {
    */
   public setPlayerCurrency(playerID: PlayerID, currency: number): void {
     this._playerCurrencyMap.set(playerID, currency);
+    // Emit event to all connected sockets with updated all time leaderboard
+    this._emitAllTimeLeaderboard();
+    // Emit event to all connected sockets with updated current player leaderboard
+    this._emitCurrentLeaderboard();
   }
 
   /**
@@ -127,6 +137,26 @@ export default class Town {
    */
   public getPlayerCurrency(playerID: PlayerID): number | undefined {
     return this._playerCurrencyMap.get(playerID);
+  }
+
+  /**
+   * Gets usernames for all players that have ever been in the town
+   * @param playerID the player ID
+   * @returns the player username
+   */
+  private _getUsernameForAllPlayers(playerID: PlayerID): string {
+    const player = this._allPlayers.find(eachPlayer => eachPlayer.id === playerID);
+    return player ? player.userName : 'Unknown';
+  }
+
+  /**
+   * Gets usernames for players currently in the town
+   * @param playerID the player ID
+   * @returns the player username
+   */
+  private _getUsernameForCurrentPlayers(playerID: PlayerID): string {
+    const player = this._players.find(eachPlayer => eachPlayer.id === playerID);
+    return player ? player.userName : '';
   }
 
   constructor(
@@ -144,6 +174,50 @@ export default class Town {
   }
 
   /**
+   * This method emits the all-time leaderboard data to the frontend when called.
+   * It sends information about player IDs, their corresponding currency counts, and usernames.
+   */
+  private _emitAllTimeLeaderboard(): void {
+    // Extract player IDs, usernames, and currency counts from playerCurrencyMap
+    const currencyPlayerIDList = Array.from(this.playerCurrencyMap.keys());
+    const currencyUsernameList = currencyPlayerIDList.map(playerID =>
+      this._getUsernameForAllPlayers(playerID),
+    );
+    const currencyCountList = Array.from(this.playerCurrencyMap.values());
+
+    // Emit the all-time leaderboard data to connected sockets
+    this._connectedSockets.forEach(socket => {
+      socket.emit('allTimeCurrencyChanged', {
+        currencyPlayerIDs: currencyPlayerIDList,
+        currencyCounts: currencyCountList,
+        currencyPlayerUsernames: currencyUsernameList,
+      });
+    });
+  }
+
+  /**
+   * This method emits the current leaderboard data to the frontend when called.
+   * It sends information about player IDs, their corresponding currency counts, and usernames.
+   */
+  private _emitCurrentLeaderboard(): void {
+    // Extract player IDs, usernames, and currency counts from playerCurrencyMap
+    const currencyPlayerIDList = Array.from(this.playerCurrencyMap.keys());
+    const currencyUsernameList = currencyPlayerIDList.map(playerID =>
+      this._getUsernameForCurrentPlayers(playerID),
+    );
+    const currencyCountList = Array.from(this.playerCurrencyMap.values());
+
+    // Emit the current leaderboard data to all connected sockets
+    this._connectedSockets.forEach(socket => {
+      socket.emit('currentCurrencyChanged', {
+        currencyPlayerIDs: currencyPlayerIDList,
+        currencyCounts: currencyCountList,
+        currencyPlayerUsernames: currencyUsernameList,
+      });
+    });
+  }
+
+  /**
    * Adds a player to this Covey Town, provisioning the necessary credentials for the
    * player, and returning them
    *
@@ -152,9 +226,11 @@ export default class Town {
   async addPlayer(userName: string, socket: CoveyTownSocket): Promise<Player> {
     const newPlayer = new Player(userName, socket.to(this._townID));
     this._players.push(newPlayer);
-
+    this._allPlayers.push(newPlayer);
     this._connectedSockets.add(socket);
-
+    // Creates the leaderboards for a player who just joined
+    this._emitAllTimeLeaderboard();
+    this._emitCurrentLeaderboard();
     // Create a video token for this user to join this town
     newPlayer.videoToken = await this._videoClient.getTokenForTown(this._townID, newPlayer.id);
 
@@ -166,6 +242,10 @@ export default class Town {
     // player's session is disconnected
     socket.on('disconnect', () => {
       this._removePlayer(newPlayer);
+      // Needs to update the current leaderboard and remove the player who left from the current
+      // leaderboard and all-time leaderboard
+      this._emitAllTimeLeaderboard();
+      this._emitCurrentLeaderboard();
       this._connectedSockets.delete(socket);
     });
 
@@ -221,15 +301,14 @@ export default class Town {
           const interactableModel = interactable.toModel();
           // If the interactable type is 'TicTacToeArea'
           if (interactableModel.type === 'TicTacToeArea') {
+            // Narrows down the interactable object to TicTacToeGameArea type
             const ticTacToeGameArea = interactable as TicTacToeGameArea;
             // If the TicTacToe game is over and there's a winner
-            if (
-              ticTacToeGameArea.game?.state.status === 'OVER' &&
-              ticTacToeGameArea.game.state.winner
-            ) {
-              // Ensure currency for this game hasn't been awarded yet
+            if (ticTacToeGameArea.game?.state.winner) {
               const gameID = ticTacToeGameArea.game.id;
+              // Ensure currency for this game hasn't been awarded yet
               if (!this._gameCurrencyAwardedMap.has(gameID)) {
+                // Gets the winning player's ID
                 const winnerID = ticTacToeGameArea.game.state.winner;
                 // Get the current currency amount for the winner
                 const winnerCurrency = this.getPlayerCurrency(winnerID);
@@ -243,12 +322,6 @@ export default class Town {
                 }
                 // Mark that currency has been awarded for this game
                 this._gameCurrencyAwardedMap.set(gameID, true);
-
-                // Emits the player IDs and currencies to the frontend
-                socket.emit('currencyChanged', {
-                  currencyPlayerList: Array.from(this.playerCurrencyMap.keys()),
-                  currencyList: Array.from(this.playerCurrencyMap.values()),
-                });
               }
             }
           }
@@ -315,7 +388,6 @@ export default class Town {
     const prevInteractable = this._interactables.find(
       conv => conv.id === player.location.interactableID,
     );
-
     if (!prevInteractable?.contains(location)) {
       if (prevInteractable) {
         // Remove from old area
@@ -331,9 +403,7 @@ export default class Town {
     } else {
       location.interactableID = prevInteractable.id;
     }
-
     player.location = location;
-
     this._broadcastEmitter.emit('playerMoved', player.toPlayerModel());
   }
 
@@ -482,13 +552,11 @@ export default class Town {
       .map(eachViewingAreaObject =>
         ViewingArea.fromMapObject(eachViewingAreaObject, this._broadcastEmitter),
       );
-
     const conversationAreas = objectLayer.objects
       .filter(eachObject => eachObject.type === 'ConversationArea')
       .map(eachConvAreaObj =>
         ConversationArea.fromMapObject(eachConvAreaObj, this._broadcastEmitter),
       );
-
     const gameAreas = objectLayer.objects
       .filter(eachObject => eachObject.type === 'GameArea')
       .map(eachGameAreaObj => GameAreaFactory(eachGameAreaObj, this._broadcastEmitter));

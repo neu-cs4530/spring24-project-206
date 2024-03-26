@@ -66,15 +66,18 @@ export type TownEvents = {
    * @param providerVideoToken a secret token that can be used to connect to the video service
    */
   connect: (providerVideoToken: string) => void;
+
   /**
    * An event that indicates that the TownController has been disconnected from the townService
    */
   disconnect: () => void;
+
   /**
    * An event that indicates that the town settings have been updated. This event is dispatched
    * before updating the properties of this TownController; clients may find the new settings in the parameter
    */
   townSettingsUpdated: (newTownSettings: TownSettingsUpdate) => void;
+
   /**
    * An event that indicates that the set of players in the town has changed. This event is dispatched
    * before updating the proeprties of this TownController; clients will find the new players in the parameter
@@ -97,15 +100,18 @@ export type TownEvents = {
    * An event that indicates that a new chat message has been received, which is the parameter passed to the listener
    */
   chatMessage: (message: ChatMessage) => void;
+
   /**
    * An event that indicates that the 2D game is now paused. Pausing the game should, if nothing else,
    * release all key listeners, so that text entry is possible
    */
   pause: () => void;
+
   /**
    * An event that indicates that the 2D game should now be unpaused (resumed).
    */
   unPause: () => void;
+
   /**
    * An event that indicates that the player is now interacting with a different interactable
    * @param typeName the type of interactable
@@ -114,10 +120,16 @@ export type TownEvents = {
   interact: <T extends Interactable>(typeName: T['name'], obj: T) => void;
 
   /**
-   * An event that indicated a change in the currency of a player
-   * @param currency the currency map
+   * Event handler for the 'allTimeCurrencyChanged' event.
+   * @param currency a CurrencyMap object representing all time currency changes
    */
-  currencyChanged: (currency: CurrencyMap) => void;
+  allTimeCurrencyChanged: (currency: CurrencyMap) => void;
+
+  /**
+   * Event handler for the 'currentCurrencyChanged' event.
+   * @param currency a CurrencyMap object representing current currency changes.
+   */
+  currentCurrencyChanged: (currency: CurrencyMap) => void;
 };
 
 /**
@@ -220,12 +232,28 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
    */
   private _interactableEmitter = new EventEmitter();
 
-  // CurrencyMap type definition
-  public _currency: CurrencyMap = new Map();
+  /**
+   * A currency map for all time players
+   */
+  public _allTimeCurrency: CurrencyMap = new Map();
 
-  // Getter for currency map
-  public getCurrency(): CurrencyMap {
-    return this._currency;
+  /**
+   * A currency map for the current players
+   */
+  public _currentCurrency: CurrencyMap = new Map();
+
+  /**
+   * Getter for the all time currency map
+   */
+  public getAllTimeCurrency(): CurrencyMap {
+    return this._allTimeCurrency;
+  }
+
+  /**
+   * Getter for current currency map
+   */
+  public getCurrentCurrency(): CurrencyMap {
+    return this._currentCurrency;
   }
 
   public constructor({ userName, townID, loginController }: ConnectionProperties) {
@@ -233,14 +261,12 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
     this._townID = townID;
     this._userName = userName;
     this._loginController = loginController;
-
     /*
         The event emitter will show a warning if more than this number of listeners are registered, as it
         may indicate a leak (listeners that should de-register not de-registering). The default is 10; we expect
         more than 10 listeners because each conversation area might be its own listener, and there are more than 10
         */
     this.setMaxListeners(30);
-
     const url = process.env.NEXT_PUBLIC_TOWNS_SERVICE_URL;
     assert(url);
     this._socket = io(url, { auth: { userName, townID } });
@@ -401,7 +427,6 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
     this._socket.on('chatMessage', message => {
       this.emit('chatMessage', message);
     });
-
     /**
      * On changes to town settings, update the local state and emit a townSettingsUpdated event to
      * the controller's event listeners
@@ -460,7 +485,6 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
         this.emit('playerMoved', playerToUpdate);
       }
     });
-
     /**
      * When an interactable's state changes, push that update into the relevant controller
      *
@@ -488,21 +512,40 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
     });
 
     /**
-     * Upon a change in the currency, it pushes the update to the frontend for all time players
+     * Upon a change in the currency from the backend, it pushes the update to the frontend here
+     * for all time players
      *
-     * CurrencyPlayerList is the list of playerIDs
-     * CurrencyList is the list of currencies
+     * currencyCounts is the list of currencies
+     * currencyPlayerUsernames is the list of player usernames
      */
-    this._socket.on('currencyChanged', ({ currencyPlayerList, currencyList }) => {
+    this._socket.on('allTimeCurrencyChanged', ({ currencyCounts, currencyPlayerUsernames }) => {
       const currencyMap = new Map();
-      currencyPlayerList.forEach((playerID, index) => {
-        currencyMap.set(playerID, currencyList[index]);
+      currencyPlayerUsernames.forEach((playerID, index) => {
+        currencyMap.set(playerID, currencyCounts[index]);
       });
+      this._allTimeCurrency = currencyMap;
+      // Emit currency change event with the all time currency map
+      this.emit('allTimeCurrencyChanged', this._allTimeCurrency);
+    });
 
-      this._currency = currencyMap;
-
-      // Emit currency change event with a copy of the currency map
-      this.emit('currencyChanged', this._currency);
+    /**
+     * Upon a change in the currency from the backend, it pushes the update to the frontend here
+     * for current players
+     *
+     * currencyCounts is the list of currencies
+     * currencyPlayerUsernames is the list of player usernames
+     */
+    this._socket.on('currentCurrencyChanged', ({ currencyCounts, currencyPlayerUsernames }) => {
+      const currencyMap = new Map();
+      currencyPlayerUsernames.forEach((playerID, index) => {
+        const currency = currencyCounts[index];
+        if (playerID !== '' && playerID !== undefined) {
+          currencyMap.set(playerID, currency);
+        }
+      });
+      this._currentCurrency = currencyMap;
+      // Emit currency change event with the current currency map
+      this.emit('currentCurrencyChanged', this._currentCurrency);
     });
   }
 
@@ -560,7 +603,6 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
       const watchdog = setTimeout(() => {
         reject('Command timed out');
       }, SOCKET_COMMAND_TIMEOUT_MS);
-
       const ackListener = (response: InteractableCommandResponse<CommandType>) => {
         if (response.commandID === commandMessage.commandID) {
           clearTimeout(watchdog);
@@ -653,7 +695,6 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
         this._players = initialData.currentPlayers.map(eachPlayerModel =>
           PlayerController.fromPlayerModel(eachPlayerModel),
         );
-
         this._interactableControllers = [];
         initialData.interactables.forEach(eachInteractable => {
           if (isConversationArea(eachInteractable)) {
@@ -1066,6 +1107,7 @@ export function useInteractable<T extends Interactable>(
   }, [interactableType, townController, setInteractable]);
   return interactable;
 }
+
 /**
  * A react hook to retrieve the players that should be included in the video call
  *
