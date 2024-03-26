@@ -38,10 +38,6 @@ export default class PetShopController extends InteractableAreaController<
     });
   }
 
-  public async getPetCatalog(): Promise<PetCatalog[]> {
-    await findPetsInCatalog();
-  }
-
   set pets(newPets: Pet[] | undefined) {
     if (this._pets !== newPets) {
       this.emit('petCatalogChange', newPets);
