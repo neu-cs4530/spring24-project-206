@@ -1,13 +1,12 @@
 import axios from 'axios';
-import { PlayerID } from '../types/CoveyTownSocket';
 
-export const addPet = async (data: { type: string; playerID: PlayerID; equipped: boolean }) => {
+export const addPet = async data => {
   const response = await axios.post(`http://localhost:8081/api/pets`, data); // FIXME: change url
   const pet = response.data;
   return pet;
 };
 
-export const findPetsByPlayer = async (playerID: PlayerID) => {
+export const findPetsByPlayer = async playerID => {
   const response = await axios.get(`http://localhost:8081/api/pets/player/${playerID}`); // FIXME: change url
   const pets = response.data;
   return pets;

@@ -5,6 +5,7 @@ import InteractableAreaController, {
 import { PetShopArea as PetShopAreaModel } from '../../types/CoveyTownSocket';
 import { Pet } from '../../../../townService/src/lib/Pet';
 import TownController from '../TownController';
+import { findPetsInCatalog } from '../../../../townService/src/town/Database';
 
 export type PetShopAreaEvents = BaseInteractableEventMap & {
   petChange: (newPets: Pet[] | undefined) => void;
@@ -34,6 +35,10 @@ export default class PetShopController extends InteractableAreaController<
       petType: type,
       playerID: this._townController.ourPlayer.id,
     });
+  }
+
+  public async getPetCatalog() {
+    await findPetsInCatalog();
   }
 
   set pets(newPets: Pet[] | undefined) {

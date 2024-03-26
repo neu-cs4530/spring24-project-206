@@ -10,7 +10,7 @@ import {
   Text,
   useToast,
 } from '@chakra-ui/react';
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   useInteractable,
   useInteractableAreaController,
@@ -123,23 +123,56 @@ function PetShopArea({
 }: {
   interactableID: InteractableID;
   playerID: PlayerID;
-}): JSX.Element {
+}) {
   const controller = usePetShopController(interactableID);
   console.log('Controller from React hook');
   console.log(controller);
   // Array of pets in the shop
-  const petsCatalogPromise = findPetsInCatalog();
-  let petsCatalog: PetCatalog[] = [];
-  petsCatalogPromise.then(res => {
-    petsCatalog = res;
-  });
+  // const petsCatalogPromise = findPetsInCatalog();
+  // console.log('catalog promise' + petsCatalogPromise);
+  // let petsCatalog: PetCatalog[] = [];
+  // petsCatalogPromise.then((res: PetCatalog[]) => {
+  //   petsCatalog = res;
+  // });
+  // console.log('catalog' + petsCatalog);
+
+  const [petsCatalog, setPlayerCatalog] = useState<PetCatalog[]>([]);
+  useEffect(() => {
+    const getTheCatalog = async () => {
+      try {
+        const catalog = await findPetsInCatalog();
+        setPlayerCatalog(catalog);
+      } catch (error) {
+        console.error('Error fetching data: ', error);
+      }
+    };
+    // Immediately invoke the async function
+    getTheCatalog();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Array of pets in the inventory
-  const petsPromise = findPetsByPlayer(playerID);
-  let pets: Pet[] = [];
-  petsPromise.then(res => {
-    pets = res;
-  });
+  // const petsPromise = findPetsByPlayer(playerID);
+  // let pets: Pet[] = [];
+  // petsPromise.then(res => {
+  //   pets = res;
+  // });
+  // console.log('players pets' + petsPromise);
+
+  const [pets, setPets] = useState<Pet[]>([]);
+  useEffect(() => {
+    const getThePets = async () => {
+      try {
+        const playerpets = await findPetsByPlayer(playerID);
+        setPets(playerpets);
+      } catch (error) {
+        console.error('Error fetching data: ', error);
+      }
+    };
+    // Immediately invoke the async function
+    getThePets();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const currency = 10;
   const coinCountImage = (
