@@ -10,9 +10,11 @@ import {
   ChatMessage,
   ConversationArea as ConversationAreaModel,
   CoveyTownSocket,
+  CurrencyMap,
   Interactable,
   InteractableCommand,
   InteractableCommandBase,
+  PlayerID,
   PlayerLocation,
   ServerToClientEvents,
   SocketData,
@@ -97,13 +99,14 @@ export default class Town {
 
   private _chatMessages: ChatMessage[] = [];
 
-  // Define a map to store player IDs with their currency
-  private _playerCurrencyMap: Map<string, number> = new Map<string, number>();
+  // A map to store player IDs with their currency
+  private _playerCurrencyMap: CurrencyMap = new Map<string, number>();
 
+  // A map to check if a game has been awarded currency
   private _gameCurrencyAwardedMap: Map<string, boolean> = new Map<string, boolean>();
 
   // Getter for player currency map
-  public get playerCurrencyMap(): Map<string, number> {
+  public get playerCurrencyMap(): CurrencyMap {
     return this._playerCurrencyMap;
   }
 
@@ -112,7 +115,7 @@ export default class Town {
    * @param playerID ID of the player
    * @param currency Currency value to set
    */
-  public setPlayerCurrency(playerID: string, currency: number): void {
+  public setPlayerCurrency(playerID: PlayerID, currency: number): void {
     this._playerCurrencyMap.set(playerID, currency);
   }
 
@@ -121,7 +124,7 @@ export default class Town {
    * @param playerID ID of the player
    * @returns Currency value for the player
    */
-  public getPlayerCurrency(playerID: string): number | undefined {
+  public getPlayerCurrency(playerID: PlayerID): number | undefined {
     return this._playerCurrencyMap.get(playerID);
   }
 
@@ -204,43 +207,47 @@ export default class Town {
 
     // Set up a listener to process commands to interactables.
     // Dispatches commands to the appropriate interactable and sends the response back to the client
-    // MAKE COMMENTS
     socket.on('interactableCommand', (command: InteractableCommand & InteractableCommandBase) => {
+      // Finds the interactable object associated with the received command
       const interactable = this._interactables.find(
         eachInteractable => eachInteractable.id === command.interactableID,
       );
+      // If the interactable object is found
       if (interactable) {
         try {
           const payload = interactable.handleCommand(command, newPlayer);
+          // Convert the interactable object to a model and check its type
           const interactableModel = interactable.toModel();
+          // If the interactable type is 'TicTacToeArea'
           if (interactableModel.type === 'TicTacToeArea') {
-            console.log('Type is TicTacToe');
             const ticTacToeGameArea = interactable as TicTacToeGameArea;
+            // If the TicTacToe game is over and there's a winner
             if (
               ticTacToeGameArea.game?.state.status === 'OVER' &&
               ticTacToeGameArea.game.state.winner
             ) {
+              // Ensure currency for this game hasn't been awarded yet
               const gameID = ticTacToeGameArea.game.id;
               if (!this._gameCurrencyAwardedMap.has(gameID)) {
                 const winnerID = ticTacToeGameArea.game.state.winner;
+                // Get the current currency amount for the winner
                 const winnerCurrency = this.getPlayerCurrency(winnerID);
+                // If winner's currency is undefined, set it to a default amount (1 in this case)
                 if (winnerCurrency === undefined) {
                   // Add default currency amount for the winner
-                  this.setPlayerCurrency(winnerID, 1); // Adjust the currency amount as needed
+                  this.setPlayerCurrency(winnerID, 1);
                 } else {
                   // Increment currency for the winner
-                  this.setPlayerCurrency(winnerID, winnerCurrency + 1); // Adjust the currency amount as needed
+                  this.setPlayerCurrency(winnerID, winnerCurrency + 1);
                 }
+                // Mark that currency has been awarded for this game
                 this._gameCurrencyAwardedMap.set(gameID, true);
-                console.log('Player Currency:', this.getPlayerCurrency(winnerID));
 
+                // Emits the player IDs and currencies to the frontend
                 socket.emit('currencyChanged', {
                   currencyPlayerList: Array.from(this.playerCurrencyMap.keys()),
                   currencyList: Array.from(this.playerCurrencyMap.values()),
                 });
-                console.log('Players:', Array.from(this.playerCurrencyMap.keys()));
-                console.log('Currencies:', Array.from(this.playerCurrencyMap.values()));
-                console.log(this.playerCurrencyMap);
               }
             }
           }

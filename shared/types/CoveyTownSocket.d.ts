@@ -18,12 +18,15 @@ export type TownJoinResponse = {
 };
 
 export type CurrencyChangeResponse = {
-  // currency: Map<string, number>;
-
+  // List of player IDs
   currencyPlayerList: string[];
 
+  // List of player currencies
   currencyList: number[];
 };
+
+// Define the map to store player IDs and their currency
+type CurrencyMap = Map<PlayerID, number>;
 
 export type InteractableType =
   | "ConversationArea"

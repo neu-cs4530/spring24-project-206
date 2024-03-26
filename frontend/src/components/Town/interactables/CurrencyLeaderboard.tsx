@@ -1,16 +1,16 @@
-// CurrencyLeaderboard.tsx
-
 import { Heading } from '@chakra-ui/react';
 import React, { useEffect, useState } from 'react';
 import useTownController from '../../../hooks/useTownController';
+import { CurrencyMap } from '../../../types/CoveyTownSocket';
 
 const CurrencyLeaderboard: React.FC = () => {
   const townController = useTownController();
-  const [leaderboard, setLeaderboard] = useState<Map<string, number>>(new Map());
+  const [leaderboard, setLeaderboard] = useState<CurrencyMap>(new Map());
 
   useEffect(() => {
-    const updateLeaderboard = (currencyMap: Map<string, number>) => {
-      if (!currencyMap) return; // Handle the case where currencyMap is undefined
+    const updateLeaderboard = (currencyMap: CurrencyMap) => {
+      // Handle the case where currencyMap is undefined
+      if (!currencyMap) return;
 
       // Sort players by currency
       const sortedPlayers = Array.from(currencyMap).sort((a, b) => b[1] - a[1]);
@@ -24,7 +24,7 @@ const CurrencyLeaderboard: React.FC = () => {
     };
 
     // Subscribe to currency change event
-    const currencyChangeListener = (currencyMap: Map<string, number>) => {
+    const currencyChangeListener = (currencyMap: CurrencyMap) => {
       updateLeaderboard(currencyMap);
     };
 

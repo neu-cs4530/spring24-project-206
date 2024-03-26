@@ -15,6 +15,7 @@ import useTownController from '../hooks/useTownController';
 import {
   ChatMessage,
   CoveyTownSocket,
+  CurrencyMap,
   GameState,
   Interactable as InteractableAreaModel,
   InteractableCommand,
@@ -51,9 +52,6 @@ export type ConnectionProperties = {
   townID: string;
   loginController: LoginController;
 };
-
-// Define the map to store player IDs and their currency
-type CurrencyMap = Map<PlayerID, number>;
 
 /**
  * The TownController emits these events. Components may subscribe to these events
@@ -112,6 +110,10 @@ export type TownEvents = {
    */
   interact: <T extends Interactable>(typeName: T['name'], obj: T) => void;
 
+  /**
+   * An event that indicated a change in the currency of a player
+   * @param currency the currency map
+   */
   currencyChanged: (currency: CurrencyMap) => void;
 };
 
@@ -214,8 +216,6 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
    * An event emitter that broadcasts interactable-specific events
    */
   private _interactableEmitter = new EventEmitter();
-
-  // Map of PalyerId and currency value, make a react hook here,
 
   // CurrencyMap type definition
   public _currency: CurrencyMap = new Map();
@@ -477,18 +477,19 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
       }
     });
 
+    /**
+     * Upon a change in the currency, it pushes the update to the frontend for all time players
+     *
+     * CurrencyPlayerList is the list of playerIDs
+     * CurrencyList is the list of currencies
+     */
     this._socket.on('currencyChanged', ({ currencyPlayerList, currencyList }) => {
-      console.log('Currency event received in frontend');
-      console.log(currencyPlayerList);
-      console.log(currencyList);
-
       const currencyMap = new Map();
       currencyPlayerList.forEach((playerID, index) => {
         currencyMap.set(playerID, currencyList[index]);
       });
 
       this._currency = currencyMap;
-      console.log(this._currency);
 
       // Emit currency change event with a copy of the currency map
       this.emit('currencyChanged', this._currency);
@@ -635,8 +636,6 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
     return new Promise<void>((resolve, reject) => {
       this._socket.connect();
       this._socket.on('initialize', initialData => {
-        // Emit the currencyChange event with the updated currency map
-        this.emit('currencyChanged', this._currency);
         this._providerVideoToken = initialData.providerVideoToken;
         this._friendlyNameInternal = initialData.friendlyName;
         this._townIsPubliclyListedInternal = initialData.isPubliclyListed;

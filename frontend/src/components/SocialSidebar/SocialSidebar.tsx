@@ -9,6 +9,10 @@ interface SocialSidebarProps {
   townController: TownController;
 }
 
+/**
+ * This creates a social sidebar. Added the currency leaderboard here
+ * @returns a sidebar
+ */
 const SocialSidebar: React.FC<SocialSidebarProps> = () => {
   return (
     <VStack
