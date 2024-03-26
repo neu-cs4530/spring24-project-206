@@ -22,6 +22,7 @@
     "homepage": "https://github.com/neu-se/covey.town#readme",
     "devDependencies": {
         "@types/jest": "^26.0.15",
+        "@types/node": "^20.11.26",
         "@typescript-eslint/eslint-plugin": "^4.8.1",
         "@typescript-eslint/parser": "^4.8.1",
         "eslint": "^7.13.0",
@@ -52,7 +53,6 @@
     },
     "files": [
         "frontend/src/classes/interactable/ConnectFourAreaController.ts",
-        "frontend/src/classes/interactable/ConnectFourAreaController.ts",
         "frontend/src/classes/interactable/InteractableAreaController.ts",
         "frontend/src/components/Town/interactables/ConnectFour/ConnectFourArea.tsx",
         "frontend/src/components/Town/interactables/ConnectFour/ConnectFourBoard.tsx",
@@ -60,5 +60,3 @@
         "frontend/src/components/SocialSidebar/InteractableAreasList.tsx"
     ]
 }
-
-

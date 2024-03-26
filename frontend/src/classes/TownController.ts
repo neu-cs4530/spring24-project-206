@@ -1,5 +1,5 @@
 import assert from 'assert';
-import EventEmitter from 'events';
+import { EventEmitter } from 'events';
 import _ from 'lodash';
 import { nanoid } from 'nanoid';
 import { useEffect, useState } from 'react';
@@ -15,6 +15,7 @@ import useTownController from '../hooks/useTownController';
 import {
   ChatMessage,
   CoveyTownSocket,
+  CurrencyMap,
   GameState,
   Interactable as InteractableAreaModel,
   InteractableCommand,
@@ -111,6 +112,12 @@ export type TownEvents = {
    * @param obj the interactable that is being interacted with
    */
   interact: <T extends Interactable>(typeName: T['name'], obj: T) => void;
+
+  /**
+   * An event that indicated a change in the currency of a player
+   * @param currency the currency map
+   */
+  currencyChanged: (currency: CurrencyMap) => void;
 };
 
 /**
@@ -212,6 +219,14 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
    * An event emitter that broadcasts interactable-specific events
    */
   private _interactableEmitter = new EventEmitter();
+
+  // CurrencyMap type definition
+  public _currency: CurrencyMap = new Map();
+
+  // Getter for currency map
+  public getCurrency(): CurrencyMap {
+    return this._currency;
+  }
 
   public constructor({ userName, townID, loginController }: ConnectionProperties) {
     super();
@@ -470,6 +485,24 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
         console.error('Error updating interactable', interactable);
         console.trace(err);
       }
+    });
+
+    /**
+     * Upon a change in the currency, it pushes the update to the frontend for all time players
+     *
+     * CurrencyPlayerList is the list of playerIDs
+     * CurrencyList is the list of currencies
+     */
+    this._socket.on('currencyChanged', ({ currencyPlayerList, currencyList }) => {
+      const currencyMap = new Map();
+      currencyPlayerList.forEach((playerID, index) => {
+        currencyMap.set(playerID, currencyList[index]);
+      });
+
+      this._currency = currencyMap;
+
+      // Emit currency change event with a copy of the currency map
+      this.emit('currencyChanged', this._currency);
     });
   }
 
