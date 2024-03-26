@@ -519,7 +519,6 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
      * currencyPlayerUsernames is the list of player usernames
      */
     this._socket.on('allTimeCurrencyChanged', ({ currencyCounts, currencyPlayerUsernames }) => {
-
       const currencyMap = new Map();
       currencyPlayerUsernames.forEach((playerID, index) => {
         currencyMap.set(playerID, currencyCounts[index]);
