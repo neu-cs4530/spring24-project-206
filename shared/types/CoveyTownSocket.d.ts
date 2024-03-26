@@ -18,11 +18,12 @@ export type TownJoinResponse = {
 };
 
 export type CurrencyChangeResponse = {
-  // currency: Map<string, number>;
-
-  currencyPlayerList: string[];
-
-  currencyList: number[];
+  // A list of the player IDs
+  currencyPlayerIDs: string[];
+  // A list of player currencies
+  currencyCounts: number[];
+  // A list of player usernames
+  currencyPlayerUsernames: string[];
 };
 
 export type InteractableType =
@@ -278,6 +279,9 @@ export type InteractableCommandResponse<MessageType> = {
   payload?: InteractableCommandResponseMap[MessageType];
 };
 
+// Defines a currency map which consists of a player ID connected to their currency
+type CurrencyMap = Map<PlayerID, number>;
+
 export interface ServerToClientEvents {
   playerMoved: (movedPlayer: Player) => void;
   playerDisconnect: (disconnectedPlayer: Player) => void;
@@ -288,7 +292,8 @@ export interface ServerToClientEvents {
   chatMessage: (message: ChatMessage) => void;
   interactableUpdate: (interactable: Interactable) => void;
   commandResponse: (response: InteractableCommandResponse) => void;
-  currencyChanged: (currency: CurrencyChangeResponse) => void;
+  allTimeCurrencyChanged: (currency: CurrencyChangeResponse) => void;
+  currentCurrencyChanged: (currency: CurrencyChangeResponse) => void;
 }
 
 export interface ClientToServerEvents {

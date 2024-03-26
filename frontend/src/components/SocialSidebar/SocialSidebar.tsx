@@ -8,7 +8,11 @@ import CurrencyLeaderboard from '../Town/interactables/CurrencyLeaderboard';
 interface SocialSidebarProps {
   townController: TownController;
 }
-
+/**
+ * This creates a social sidebar. Added the currency leaderboard in here which will display both the
+ * all-time and current leaderboards
+ * @returns a sidebar
+ */
 const SocialSidebar: React.FC<SocialSidebarProps> = () => {
   return (
     <VStack
