@@ -1,6 +1,8 @@
 import { ITiledMap, ITiledMapObjectLayer } from '@jonbell/tiled-map-type-guard';
 import { nanoid } from 'nanoid';
 import { BroadcastOperator } from 'socket.io';
+import { getOnePlayerCurrency } from '../leaderboard/leaderboard-dao';
+import leaderboardModel from '../leaderboard/leaderboard-model';
 import InvalidParametersError from '../lib/InvalidParametersError';
 import IVideoClient from '../lib/IVideoClient';
 import Player from '../lib/Player';
@@ -114,6 +116,7 @@ export default class Town {
    */
 
   public get playerCurrencyMap(): CurrencyMap {
+    // TODO: get all players from the database, normalise to a map structure
     return this._playerCurrencyMap;
   }
 
@@ -123,6 +126,7 @@ export default class Town {
    * @param currency Currency value to set
    */
   public setPlayerCurrency(playerID: PlayerID, currency: number): void {
+    // TODO: update the player's currency
     this._playerCurrencyMap.set(playerID, currency);
     // Emit event to all connected sockets with updated all time leaderboard
     this._emitAllTimeLeaderboard();
@@ -136,6 +140,7 @@ export default class Town {
    * @returns Currency value for the player
    */
   public getPlayerCurrency(playerID: PlayerID): number | undefined {
+    // TODO: change this to receive from database
     return this._playerCurrencyMap.get(playerID);
   }
 
@@ -315,10 +320,10 @@ export default class Town {
                 // If winner's currency is undefined, set it to a default amount (1 in this case)
                 if (winnerCurrency === undefined) {
                   // Add default currency amount for the winner
-                  this.setPlayerCurrency(winnerID, 1);
+                  this.setPlayerCurrency(winnerID, 1); // TODO:
                 } else {
                   // Increment currency for the winner
-                  this.setPlayerCurrency(winnerID, winnerCurrency + 1);
+                  this.setPlayerCurrency(winnerID, winnerCurrency + 1); // TODO:
                 }
                 // Mark that currency has been awarded for this game
                 this._gameCurrencyAwardedMap.set(gameID, true);

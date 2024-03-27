@@ -49,6 +49,8 @@ export default class PetShopArea extends InteractableArea {
     player: Player,
   ): InteractableCommandReturnType<CommandType> {
     if (command.type === 'AdoptPet') {
+      // TODO: check whether they have sufficient currency
+      // TODO: deduct currency
       addPet({
         type: command.petType,
         playerID: player.id,
