@@ -1,4 +1,4 @@
-import petsCatalogModel from './pets-catalog-model.js';
+import petsCatalogModel from './pets-catalog-model';
 
 // get all pets
 export const findAllPets = () => petsCatalogModel.find();
