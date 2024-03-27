@@ -28,7 +28,7 @@ const incrementCounter = async (req, res) => {
     const pet = await petsCatalogDao.updateCounterForPet(type);
     res.json(pet);
   } catch (error) {
-    res.status(500).json({ error: 'Internal Server Error' });
+    res.status(500).json({ error: "Error incrementing the pet's popularity" });
   }
 };
 
