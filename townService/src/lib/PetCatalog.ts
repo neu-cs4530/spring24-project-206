@@ -3,4 +3,5 @@ export interface PetCatalog {
   speed: number;
   price: number;
   counter: number;
+  img_id: number;
 }

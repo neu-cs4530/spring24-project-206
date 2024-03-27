@@ -23,7 +23,18 @@ import slotBackground from './petshop-images/pet_slot_bg.png';
 import slotBackgroundDisabled from './petshop-images/pet_slot_bg_disabled.png';
 import { PetCatalog } from '../../../../../../townService/src/lib/PetCatalog';
 import { Pet } from '../../../../../../townService/src/lib/Pet';
-import dog from './../../../../../public/logo512.png';
+import one from './pet-images/1.png';
+import two from './pet-images/2.png';
+import three from './pet-images/3.png';
+import four from './pet-images/4.png';
+import five from './pet-images/5.png';
+import six from './pet-images/6.png';
+import seven from './pet-images/7.png';
+import eight from './pet-images/8.png';
+import nine from './pet-images/9.png';
+import ten from './pet-images/10.png';
+import eleven from './pet-images/11.png';
+import twelve from './pet-images/12.png';
 import adoptButton from './petshop-images/adopt_btn.png';
 import PetShopController from '../../../../classes/interactable/PetShopController';
 import { InteractableID, PlayerID } from '../../../../types/CoveyTownSocket';
@@ -67,23 +78,56 @@ function PetShopSlot({ petCatalog, controller, playersPets }: PetShopProps): JSX
     background = <Image src={slotBackgroundDisabled.src} />;
     adoptElement = <></>;
   }
-  const petImage = <Image src={dog.src} />;
+
+  const petImages = [one, two, three, four, five, six, seven, eight, nine, ten, eleven, twelve];
+
+  // Construct the image source based on petCatalog.type
+  const petImageSrc = petImages[petCatalog.img_id - 1]?.src || '';
+  const petImage = (
+    <Image
+      src={petImageSrc}
+      alt={petCatalog.img_id.toString()}
+      width='49%' // Adjust the width as desired
+      height='49%' // Adjust the height as desired
+      objectFit='cover'
+      position='absolute'
+      bottom='0'
+      left='25%'
+    />
+  );
+  // const petImage = <Image src={dog2.src} />;
   const slot = (
     <Box>
-      {petImage}
       <Text
         pos='absolute'
-        top='0'
+        top='0px'
         left='initial'
+        width='100%'
         fontFamily='monospace'
         fontWeight='bold'
-        backgroundColor='whiteAlpha.600'>
-        Price: {petCatalog.price} Popularity:{petCatalog.counter}
+        backgroundColor='whiteAlpha.600'
+        fontSize='10px'
+        textAlign='center'>
+        Price: {petCatalog.price} <br /> Popularity: {petCatalog.counter} <br /> Speed:{' '}
+        {petCatalog.speed}
+      </Text>
+      <Text
+        pos='absolute'
+        top='-20px'
+        left='0'
+        width='100%' // Ensure the text spans the entire width of the box
+        textAlign='center' // Center the text horizontally
+        fontFamily='monospace'
+        fontWeight='bold'
+        fontSize='9px'
+        color='black' // Adjust color as needed
+        zIndex='1'>
+        {petCatalog.type}
       </Text>
     </Box>
   );
   return (
-    <Box position='relative' top='110px' left='45px' boxSize='100px'>
+    <Box position='relative' top='115px' left='45px' boxSize='100px' width='55%'>
       <Box position='relative'>
         {background}
         <Box
@@ -94,6 +138,7 @@ function PetShopSlot({ petCatalog, controller, playersPets }: PetShopProps): JSX
           left='50%'
           transform='translate(-50%, -50%)'>
           {slot}
+          {petImage}
         </Box>
       </Box>
       <Box>{adoptElement}</Box>
@@ -140,6 +185,14 @@ function PetShopArea({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const [currentPage, setCurrentPage] = useState(1);
+  const petsPerPage = 6; // Number of pets to display per page
+
+  // Calculate the index range for the current page
+  const indexOfLastPet = currentPage * petsPerPage;
+  const indexOfFirstPet = indexOfLastPet - petsPerPage;
+  const currentPets = petsCatalog.slice(indexOfFirstPet, indexOfLastPet);
+
   const currency = 10;
   const coinCountImage = (
     <Box position='absolute' right='50' top='0' boxSize='100px'>
@@ -150,25 +203,50 @@ function PetShopArea({
     </Box>
   );
 
+  const nextPage = () => {
+    setCurrentPage(currentPage + 1);
+  };
+
+  const prevPage = () => {
+    setCurrentPage(currentPage - 1);
+  };
+
   return (
     <Box position='relative'>
       {/* Inventory Background */}
       <Image src={shopBackground.src} position='absolute' />
       {/* Grid of Pets */}
-      <Grid templateColumns='repeat(3, 1fr)' gap={4} gridAutoFlow='row dense' gridRowGap={10}>
-        {petsCatalog.map((pet, index) => (
+      <Grid
+        templateColumns='repeat(3, 1fr)'
+        gridAutoFlow='row dense'
+        gridRowGap={62}
+        gridColumnGap={0}
+        justifyContent='center'>
+        {currentPets.map((pet, index) => (
           <PetShopSlot key={index} petCatalog={pet} controller={controller} playersPets={pets} />
         ))}
       </Grid>
       {/* Coin Count Image */}
       {coinCountImage}
       {/* back button */}
-      <Box position='absolute' left='0' top='400' boxSize='50px'>
-        <IconButton icon={<Image src={backButton.src} />} aria-label={''} />;
+      <Box position='absolute' left='0' top='410' boxSize='42px'>
+        <IconButton
+          icon={<Image src={backButton.src} />}
+          aria-label={''}
+          onClick={prevPage}
+          disabled={currentPage === 1}
+        />
+        ;
       </Box>
       {/* forward button */}
-      <Box position='absolute' right='0' top='400' boxSize='50px'>
-        <IconButton icon={<Image src={forwardButton.src} />} aria-label={''} />;
+      <Box position='absolute' right='0' top='410' boxSize='42px'>
+        <IconButton
+          icon={<Image src={forwardButton.src} />}
+          aria-label={''}
+          onClick={nextPage}
+          disabled={indexOfLastPet >= petsCatalog.length}
+        />
+        ;
       </Box>
     </Box>
   );

@@ -1,5 +1,5 @@
-import { Pet } from '../lib/Pet.js';
-import petsModel from './pets-model.js';
+import { Pet } from '../lib/Pet';
+import petsModel from './pets-model';
 
 export const findAllPets = () => petsModel.find();
 

@@ -1,5 +1,8 @@
 import * as petsCatalogDao from './pets-catalog-dao';
 
+/**
+ * Find all pets
+ */
 const findAllPets = async (req, res) => {
   try {
     const pets = await petsCatalogDao.findAllPets();
@@ -22,7 +25,10 @@ const findPetByType = async (req, res) => {
   }
 };
 
-const incrementCounter = async (req, res) => {
+/**
+ * increment pet popularity
+ */
+export const incrementCounter = async (req, res) => {
   try {
     const { type } = req.params;
     const pet = await petsCatalogDao.updateCounterForPet(type);

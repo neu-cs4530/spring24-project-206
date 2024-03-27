@@ -26,7 +26,13 @@ export type CurrencyChangeResponse = {
   currencyPlayerUsernames: string[];
 };
 
-export type InteractableType = 'ConversationArea' | 'ViewingArea' | 'TicTacToeArea' | 'ConnectFourArea' | 'PetShopArea' | 'InventoryArea';
+export type InteractableType =
+  | "ConversationArea"
+  | "ViewingArea"
+  | "TicTacToeArea"
+  | "ConnectFourArea"
+  | "PetShopArea"
+  | "InventoryArea";
 
 // Define the map to store player IDs and their currency
 type CurrencyMap = Map<PlayerID, number>;
@@ -284,13 +290,21 @@ export interface EquipCommand {
   playerID: PlayerID;
 }
 
-export type InteractableCommandReturnType<CommandType extends InteractableCommand> =
-  CommandType extends JoinGameCommand ? { gameID: string}:
-  CommandType extends ViewingAreaUpdateCommand ? undefined :
-  CommandType extends GameMoveCommand<TicTacToeMove> ? undefined :
-  CommandType extends LeaveGameCommand ? undefined :
-  CommandType extends AdoptCommand ? undefined :
-  never;
+export type InteractableCommandReturnType<
+  CommandType extends InteractableCommand
+> = CommandType extends JoinGameCommand
+  ? { gameID: string }
+  : CommandType extends ViewingAreaUpdateCommand
+  ? undefined
+  : CommandType extends GameMoveCommand<TicTacToeMove>
+  ? undefined
+  : CommandType extends LeaveGameCommand
+  ? undefined
+  : CommandType extends AdoptCommand
+  ? undefined
+  : CommandType extends EquipCommand
+  ? undefined
+  : never;
 
 export type InteractableCommandResponse<MessageType> = {
   commandID: CommandID;
