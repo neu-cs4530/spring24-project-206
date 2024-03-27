@@ -73,11 +73,15 @@ export type ChatMessage = {
 
 export interface ConversationArea extends Interactable {
   topic?: string;
-};
+}
 
 export interface PetShopArea extends Interactable {
   pets?: Pet[];
-};
+}
+
+export interface InventoryArea extends Interactable {
+  pets?: Pet[];
+}
 
 export interface BoundingBox {
   x: number;
@@ -238,9 +242,17 @@ interface InteractableCommandBase {
   type: string;
 }
 
-export type InteractableCommand =  ViewingAreaUpdateCommand | JoinGameCommand | GameMoveCommand<TicTacToeMove> | GameMoveCommand<ConnectFourMove> | StartGameCommand | LeaveGameCommand | AdoptCommand;
-export interface ViewingAreaUpdateCommand  {
-  type: 'ViewingAreaUpdate';
+export type InteractableCommand =
+  | ViewingAreaUpdateCommand
+  | JoinGameCommand
+  | GameMoveCommand<TicTacToeMove>
+  | GameMoveCommand<ConnectFourMove>
+  | StartGameCommand
+  | LeaveGameCommand
+  | AdoptCommand
+  | EquipCommand;
+export interface ViewingAreaUpdateCommand {
+  type: "ViewingAreaUpdate";
   update: ViewingArea;
 }
 export interface JoinGameCommand {
@@ -261,12 +273,18 @@ export interface GameMoveCommand<MoveType> {
 }
 
 export interface AdoptCommand {
-  type: 'AdoptPet';
+  type: "AdoptPet";
   petType: string;
   playerID: PlayerID;
 }
 
-export type InteractableCommandReturnType<CommandType extends InteractableCommand> = 
+export interface EquipCommand {
+  type: "EquipPet";
+  petType: string;
+  playerID: PlayerID;
+}
+
+export type InteractableCommandReturnType<CommandType extends InteractableCommand> =
   CommandType extends JoinGameCommand ? { gameID: string}:
   CommandType extends ViewingAreaUpdateCommand ? undefined :
   CommandType extends GameMoveCommand<TicTacToeMove> ? undefined :
@@ -280,9 +298,6 @@ export type InteractableCommandResponse<MessageType> = {
   error?: string;
   payload?: InteractableCommandResponseMap[MessageType];
 };
-
-// Defines a currency map which consists of a player ID connected to their currency
-type CurrencyMap = Map<PlayerID, number>;
 
 export interface ServerToClientEvents {
   playerMoved: (movedPlayer: Player) => void;

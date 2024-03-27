@@ -30,6 +30,7 @@ function PetInventorySlot({ type, equipped }: Pet): JSX.Element {
   let petImage = <Image src={emptyPet.src} />;
   let slotImage = <></>;
   let equipButton = <></>;
+  // ADD onclick
   if (equipped) {
     equipButton = <IconButton icon={<Image src={unequippedButton.src} />} aria-label={''} />;
     slotImage = <Image src={equippedSlot.src} />;
