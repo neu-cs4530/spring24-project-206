@@ -23,7 +23,18 @@ import slotBackground from './petshop-images/pet_slot_bg.png';
 import slotBackgroundDisabled from './petshop-images/pet_slot_bg_disabled.png';
 import { PetCatalog } from '../../../../../../townService/src/lib/PetCatalog';
 import { Pet } from '../../../../../../townService/src/lib/Pet';
-import dog from './../../../../../public/logo512.png';
+import one from './pet-images/1.png';
+import two from './pet-images/2.png';
+import three from './pet-images/3.png';
+import four from './pet-images/4.png';
+import five from './pet-images/5.png';
+import six from './pet-images/6.png';
+import seven from './pet-images/7.png';
+import eight from './pet-images/8.png';
+import nine from './pet-images/9.png';
+import ten from './pet-images/10.png';
+import eleven from './pet-images/11.png';
+import twelve from './pet-images/12.png';
 import adoptButton from './petshop-images/adopt_btn.png';
 import PetShopController from '../../../../classes/interactable/PetShopController';
 import { InteractableID, PlayerID } from '../../../../types/CoveyTownSocket';
@@ -67,10 +78,26 @@ function PetShopSlot({ petCatalog, controller, playersPets }: PetShopProps): JSX
     background = <Image src={slotBackgroundDisabled.src} />;
     adoptElement = <></>;
   }
-  const petImage = <Image src={dog.src} />;
+
+  const petImages = [one, two, three, four, five, six, seven, eight, nine, ten, eleven, twelve];
+
+  // Construct the image source based on petCatalog.type
+  const petImageSrc = petImages[petCatalog.img_id - 1]?.src || '';
+  const petImage = (
+    <Image
+      src={petImageSrc}
+      alt={petCatalog.img_id.toString()}
+      width='50%' // Adjust the width as desired
+      height='50%' // Adjust the height as desired
+      objectFit='cover'
+      position='absolute'
+      bottom='0'
+      left='25%'
+    />
+  );
+  // const petImage = <Image src={dog2.src} />;
   const slot = (
     <Box>
-      {petImage}
       <Text
         pos='absolute'
         top='0'
@@ -94,6 +121,7 @@ function PetShopSlot({ petCatalog, controller, playersPets }: PetShopProps): JSX
           left='50%'
           transform='translate(-50%, -50%)'>
           {slot}
+          {petImage}
         </Box>
       </Box>
       <Box>{adoptElement}</Box>
@@ -156,7 +184,7 @@ function PetShopArea({
       <Image src={shopBackground.src} position='absolute' />
       {/* Grid of Pets */}
       <Grid templateColumns='repeat(3, 1fr)' gap={4} gridAutoFlow='row dense' gridRowGap={10}>
-        {petsCatalog.map((pet, index) => (
+        {petsCatalog.slice(0, 6).map((pet, index) => (
           <PetShopSlot key={index} petCatalog={pet} controller={controller} playersPets={pets} />
         ))}
       </Grid>
