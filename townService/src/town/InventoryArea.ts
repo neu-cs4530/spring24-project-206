@@ -9,7 +9,7 @@ import {
   TownEmitter,
 } from '../types/CoveyTownSocket';
 import InteractableArea from './InteractableArea';
-import { addPet } from './Database';
+import { equipPet, unequipPet } from '../pets/pets-dao';
 
 export default class InventoryArea extends InteractableArea {
   public pets?: Pet[];
@@ -48,12 +48,11 @@ export default class InventoryArea extends InteractableArea {
     command: CommandType,
     player: Player,
   ): InteractableCommandReturnType<CommandType> {
-    if (command.type === 'AdoptPet') {
-      addPet({
-        type: command.petType,
-        playerID: player.id,
-        equipped: true,
-      });
+    if (command.type === 'EquipPet') {
+      equipPet(player.id, command.petType);
+    }
+    if (command.type === 'UnequipPet') {
+      unequipPet(player.id, command.petType);
     }
     return undefined as InteractableCommandReturnType<CommandType>;
   }

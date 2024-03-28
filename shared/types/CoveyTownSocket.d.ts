@@ -256,7 +256,8 @@ export type InteractableCommand =
   | StartGameCommand
   | LeaveGameCommand
   | AdoptCommand
-  | EquipCommand;
+  | EquipCommand
+  | UnequipCommand;
 export interface ViewingAreaUpdateCommand {
   type: "ViewingAreaUpdate";
   update: ViewingArea;
@@ -290,6 +291,12 @@ export interface EquipCommand {
   playerID: PlayerID;
 }
 
+export interface UnequipCommand {
+  type: "UnequipPet";
+  petType: string;
+  playerID: PlayerID;
+}
+
 export type InteractableCommandReturnType<
   CommandType extends InteractableCommand
 > = CommandType extends JoinGameCommand
@@ -303,6 +310,8 @@ export type InteractableCommandReturnType<
   : CommandType extends AdoptCommand
   ? undefined
   : CommandType extends EquipCommand
+  ? undefined
+  : CommandType extends UnequipCommand
   ? undefined
   : never;
 

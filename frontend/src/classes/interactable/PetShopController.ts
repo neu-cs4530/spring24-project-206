@@ -10,6 +10,10 @@ export type PetShopAreaEvents = BaseInteractableEventMap & {
   petChange: (newPets: Pet[] | undefined) => void;
 };
 
+/**
+ * This class is responsible for managing the state of the pet shop,
+ * and for sending commands to the server.
+ */
 export default class PetShopController extends InteractableAreaController<
   PetShopAreaEvents,
   PetShopAreaModel
@@ -25,7 +29,7 @@ export default class PetShopController extends InteractableAreaController<
   }
 
   public async adopt(type: string) {
-    this._pets?.push({ type: type, playerID: this._townController.ourPlayer.id, equipped: true });
+    // this._pets?.push({ type: type, playerID: this._townController.ourPlayer.id, equipped: true });
     await this._townController.sendInteractableCommand(this.id, {
       type: 'AdoptPet',
       petType: type,

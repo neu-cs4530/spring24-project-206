@@ -53,7 +53,7 @@ export default class PetShopArea extends InteractableArea {
       createPet({
         type: command.petType,
         playerID: player.id,
-        equipped: true,
+        equipped: false,
       });
       this._increment(command.petType);
     }

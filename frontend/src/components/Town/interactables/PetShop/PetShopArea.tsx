@@ -80,7 +80,6 @@ function PetShopSlot({ petCatalog, controller, playersPets }: PetShopProps): JSX
   }
 
   const petImages = [one, two, three, four, five, six, seven, eight, nine, ten, eleven, twelve];
-
   // Construct the image source based on petCatalog.type
   const petImageSrc = petImages[petCatalog.img_id - 1]?.src || '';
   const petImage = (
@@ -95,7 +94,7 @@ function PetShopSlot({ petCatalog, controller, playersPets }: PetShopProps): JSX
       left='25%'
     />
   );
-  // const petImage = <Image src={dog2.src} />;
+
   const slot = (
     <Box>
       <Text
@@ -126,6 +125,7 @@ function PetShopSlot({ petCatalog, controller, playersPets }: PetShopProps): JSX
       </Text>
     </Box>
   );
+
   return (
     <Box position='relative' top='115px' left='45px' boxSize='100px' width='55%'>
       <Box position='relative'>
@@ -154,10 +154,12 @@ function PetShopArea({
   playerID: PlayerID;
 }) {
   const controller = usePetShopController(interactableID);
-
   const [petsCatalog, setPlayerCatalog] = useState<PetCatalog[]>([]);
+  const [pets, setPets] = useState<Pet[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
+
   useEffect(() => {
-    const getTheCatalog = async () => {
+    const getCatalog = async () => {
       try {
         const catalog = await findPetsInCatalog();
         setPlayerCatalog(catalog);
@@ -166,28 +168,25 @@ function PetShopArea({
       }
     };
     // Immediately invoke the async function
-    getTheCatalog();
+    getCatalog();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const [pets, setPets] = useState<Pet[]>([]);
   useEffect(() => {
-    const getThePets = async () => {
+    const getPets = async () => {
       try {
-        const playerpets = await findPetsByPlayer(playerID);
-        setPets(playerpets);
+        const playerPets = await findPetsByPlayer(playerID);
+        setPets(playerPets);
       } catch (error) {
         console.error('Error fetching data: ', error);
       }
     };
     // Immediately invoke the async function
-    getThePets();
+    getPets();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const [currentPage, setCurrentPage] = useState(1);
   const petsPerPage = 6; // Number of pets to display per page
-
   // Calculate the index range for the current page
   const indexOfLastPet = currentPage * petsPerPage;
   const indexOfFirstPet = indexOfLastPet - petsPerPage;
