@@ -1,4 +1,5 @@
 import { ITiledMapObject } from '@jonbell/tiled-map-type-guard';
+import { useState, useEffect } from 'react';
 import Player from '../lib/Player';
 import { Pet } from '../lib/Pet';
 import {
@@ -11,6 +12,7 @@ import {
 import InteractableArea from './InteractableArea';
 import { updateCounterForPet } from '../pet-shop/pets-catalog-dao';
 import { createPet } from '../pets/pets-dao';
+import { findOnePlayerCurrency, findPetPrice, incrementOnePlayerCurrency } from './Database';
 
 export default class PetShopArea extends InteractableArea {
   public pets?: Pet[];
@@ -49,13 +51,46 @@ export default class PetShopArea extends InteractableArea {
     command: CommandType,
     player: Player,
   ): InteractableCommandReturnType<CommandType> {
+    const [currency, setCurrency] = useState<number>(0);
+    useEffect(() => {
+      const getCurrency = async () => {
+        try {
+          const fetchedCurrency = await findOnePlayerCurrency(player.id);
+          setCurrency(fetchedCurrency);
+        } catch (error) {
+          console.error('Error fetching player currency: ', error);
+        }
+      };
+      // Immediately invoke the async function
+      getCurrency();
+    }, []);
+    const [price, setPrice] = useState<number>(0);
+    useEffect(() => {
+      const getPrice = async () => {
+        try {
+          const petPrice = await findPetPrice(player.id);
+          setPrice(petPrice);
+        } catch (error) {
+          console.error('Error fetching pet price: ', error);
+        }
+      };
+      // Immediately invoke the async function
+      getPrice();
+    }, []);
     if (command.type === 'AdoptPet') {
-      createPet({
-        type: command.petType,
-        playerID: player.id,
-        equipped: true,
-      });
-      this._increment(command.petType);
+      // TODO: check whether they have sufficient currency
+      if (currency >= price) {
+        createPet({
+          type: command.petType,
+          playerID: player.id,
+          equipped: true,
+        });
+        this._incrementPopularity(command.petType);
+        // TODO: deduct currency
+        this._updateCurrency(player.id, currency - price);
+      } else {
+        console.error('Insufficient funds');
+      }
     }
     return undefined as InteractableCommandReturnType<CommandType>;
   }
@@ -64,7 +99,15 @@ export default class PetShopArea extends InteractableArea {
    * Awaits the update counter method from the backend
    * @param type The type of the pet
    */
-  private async _increment(type: string) {
+  private async _incrementPopularity(type: string) {
     await updateCounterForPet(type);
+  }
+
+  /**
+   * Awaits the deduct currency method from the backend
+   * @param type The type of the pet
+   */
+  private async _updateCurrency(playerID: string, newValue: number) {
+    await incrementOnePlayerCurrency(playerID, newValue);
   }
 }

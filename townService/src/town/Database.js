@@ -20,6 +20,12 @@ export const findPetsInCatalog = async () => {
   return pets;
 };
 
+export const findPetPrice = async type => {
+  const response = await axios.get(`${URL}/pets-catalog`);
+  const pets = response.data;
+  return pets;
+};
+
 export const findAllCurrency = async () => {
   const response = await axios.get(`${URL}/leaderboard`);
   const players = response.data;
