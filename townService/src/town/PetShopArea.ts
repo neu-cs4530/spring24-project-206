@@ -9,7 +9,8 @@ import {
   TownEmitter,
 } from '../types/CoveyTownSocket';
 import InteractableArea from './InteractableArea';
-import { addPet } from './Database';
+import { updateCounterForPet } from '../pet-shop/pets-catalog-dao';
+import { createPet } from '../pets/pets-dao';
 
 export default class PetShopArea extends InteractableArea {
   public pets?: Pet[];
@@ -49,14 +50,21 @@ export default class PetShopArea extends InteractableArea {
     player: Player,
   ): InteractableCommandReturnType<CommandType> {
     if (command.type === 'AdoptPet') {
-      // TODO: check whether they have sufficient currency
-      // TODO: deduct currency
-      addPet({
+      createPet({
         type: command.petType,
         playerID: player.id,
         equipped: true,
       });
+      this._increment(command.petType);
     }
     return undefined as InteractableCommandReturnType<CommandType>;
+  }
+
+  /**
+   * Awaits the update counter method from the backend
+   * @param type The type of the pet
+   */
+  private async _increment(type: string) {
+    await updateCounterForPet(type);
   }
 }
