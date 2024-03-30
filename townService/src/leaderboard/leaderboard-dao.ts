@@ -5,8 +5,8 @@ export const getAllPlayersCurrency = () => leaderboardModel.find();
 
 export const getOnePlayerCurrency = (playerID: string) => leaderboardModel.findOne({ playerID });
 
-export const incrementOnePlayerCurrency = (playerID: string, delta: unknown) =>
-  leaderboardModel.updateOne({ playerID }, { $inc: { counter: delta as number } });
+export const updateOnePlayerCurrency = (playerID: string, delta: unknown) =>
+  leaderboardModel.updateOne({ playerID }, { $set: { counter: delta as number } });
 
 export const createPlayerCurrency = (currencyEntry: LeaderboardEntry) =>
   leaderboardModel.create(currencyEntry);

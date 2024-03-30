@@ -38,8 +38,8 @@ export const findOnePlayerCurrency = async playerID => {
   return currency;
 };
 
-export const incrementOnePlayerCurrency = async (playerID, delta) => {
-  const response = await axios.put(`${URL}/leaderboard/player/${playerID}`, delta);
+export const updateOnePlayerCurrency = async (playerID, updatedValue) => {
+  const response = await axios.put(`${URL}/leaderboard/player/${playerID}`, updatedValue);
   const currency = response.data;
   return currency;
 };

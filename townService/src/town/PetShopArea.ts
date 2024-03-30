@@ -12,7 +12,7 @@ import {
 import InteractableArea from './InteractableArea';
 import { updateCounterForPet } from '../pet-shop/pets-catalog-dao';
 import { createPet } from '../pets/pets-dao';
-import { findOnePlayerCurrency, findPetPrice, incrementOnePlayerCurrency } from './Database';
+import { findOnePlayerCurrency, findPetPrice, updateOnePlayerCurrency } from './Database';
 
 export default class PetShopArea extends InteractableArea {
   public pets?: Pet[];
@@ -47,16 +47,14 @@ export default class PetShopArea extends InteractableArea {
     return new PetShopArea({ id: name, occupants: [] }, rect, broadcastEmitter);
   }
 
-  public handleCommand<CommandType extends InteractableCommand>(
-    command: CommandType,
-    player: Player,
-  ): InteractableCommandReturnType<CommandType> {
+  _fetchCurrency = (playerID: string) => {
     const [currency, setCurrency] = useState<number>(0);
     useEffect(() => {
       const getCurrency = async () => {
         try {
-          const fetchedCurrency = await findOnePlayerCurrency(player.id);
+          const fetchedCurrency = await findOnePlayerCurrency(playerID);
           setCurrency(fetchedCurrency);
+          console.log(`new currency = ${fetchedCurrency}`);
         } catch (error) {
           console.error('Error fetching player currency: ', error);
         }
@@ -64,20 +62,34 @@ export default class PetShopArea extends InteractableArea {
       // Immediately invoke the async function
       getCurrency();
     }, []);
+    return currency;
+  };
+
+  _fetchPetPrice = (type: string) => {
     const [price, setPrice] = useState<number>(0);
     useEffect(() => {
       const getPrice = async () => {
         try {
-          const petPrice = await findPetPrice(player.id);
+          const petPrice = await findPetPrice(type);
           setPrice(petPrice);
+          console.log(`price for ${type} = ${petPrice}`);
         } catch (error) {
-          console.error('Error fetching pet price: ', error);
+          throw new Error('Error fetching pet price: ', error as Error);
         }
       };
       // Immediately invoke the async function
       getPrice();
     }, []);
+    return price;
+  };
+
+  public handleCommand<CommandType extends InteractableCommand>(
+    command: CommandType,
+    player: Player,
+  ): InteractableCommandReturnType<CommandType> {
     if (command.type === 'AdoptPet') {
+      const price = this._fetchPetPrice(command.petType);
+      const currency = this._fetchCurrency(player.id);
       // TODO: check whether they have sufficient currency
       if (currency >= price) {
         createPet({
@@ -108,6 +120,6 @@ export default class PetShopArea extends InteractableArea {
    * @param type The type of the pet
    */
   private async _updateCurrency(playerID: string, newValue: number) {
-    await incrementOnePlayerCurrency(playerID, newValue);
+    await updateOnePlayerCurrency(playerID, newValue);
   }
 }

@@ -19,11 +19,11 @@ const getOnePlayerCurrency = async (req, res) => {
   }
 };
 
-const incrementOnePlayerCurrency = async (req, res) => {
+const updateOnePlayerCurrency = async (req, res) => {
   try {
     const { playerID } = req.params;
-    const { delta } = req.body;
-    const player = await leaderboardDao.incrementOnePlayerCurrency(playerID, delta);
+    const { updatedValue } = req.body;
+    const player = await leaderboardDao.updateOnePlayerCurrency(playerID, updatedValue);
     res.json(player);
   } catch (error) {
     res.status(500).json({ error: 'Error fetching the specific player in the leaderboard' });
@@ -44,7 +44,7 @@ const API_BASE_PATH = '/api/leaderboard';
 const leaderboardController = app => {
   app.get(API_BASE_PATH, getAllPlayersCurrency);
   app.get(`${API_BASE_PATH}/player/:playerID`, getOnePlayerCurrency);
-  app.put(`${API_BASE_PATH}/player/:playerID`, incrementOnePlayerCurrency);
+  app.put(`${API_BASE_PATH}/player/:playerID`, updateOnePlayerCurrency);
   app.post(`${API_BASE_PATH}`, addPlayerCurrency);
 };
 
