@@ -43,14 +43,17 @@ import {
   findPetsInCatalog,
 } from '../../../../../../townService/src/town/Database';
 
+// Defines the props for PetShopSlot component
 interface PetShopProps {
   petCatalog: PetCatalog;
   controller: PetShopController;
   playersPets: Pet[];
 }
 
+// Defines the PetShopSlot component
 function PetShopSlot({ petCatalog, controller, playersPets }: PetShopProps): JSX.Element {
   const toast = useToast();
+  // Initializes the background and adoptElement based on player's ownership of the pet
   let background = <Image src={slotBackground.src} />;
   let adoptElement = (
     <IconButton
@@ -80,15 +83,17 @@ function PetShopSlot({ petCatalog, controller, playersPets }: PetShopProps): JSX
     adoptElement = <></>;
   }
 
+  // Initializes the petImages array to map pet images to their respective IDs
   const petImages = [one, two, three, four, five, six, seven, eight, nine, ten, eleven, twelve];
-  // Construct the image source based on petCatalog.type
+
+  // Constructs the image source based on petCatalog.img_id
   const petImageSrc = petImages[petCatalog.img_id - 1]?.src || '';
   const petImage = (
     <Image
       src={petImageSrc}
       alt={petCatalog.img_id.toString()}
-      width='49%' // Adjust the width as desired
-      height='49%' // Adjust the height as desired
+      width='49%'
+      height='49%'
       objectFit='cover'
       position='absolute'
       bottom='0'
@@ -96,6 +101,8 @@ function PetShopSlot({ petCatalog, controller, playersPets }: PetShopProps): JSX
     />
   );
 
+  // Defines the JSX for slot information
+  // It displays the price, popularity, speed and name for each of the pets in the pet shop
   const slot = (
     <Box>
       <Text
@@ -120,13 +127,14 @@ function PetShopSlot({ petCatalog, controller, playersPets }: PetShopProps): JSX
         fontFamily='monospace'
         fontWeight='bold'
         fontSize='9px'
-        color='black' // Adjust color as needed
+        color='black'
         zIndex='1'>
         {petCatalog.type}
       </Text>
     </Box>
   );
-
+  // Creates a visual representation of a pet shop slot, including the background, pet image,
+  // textual information, and an adopt button, all properly positioned and styled
   return (
     <Box position='relative' top='115px' left='45px' boxSize='100px' width='55%'>
       <Box position='relative'>
@@ -147,6 +155,7 @@ function PetShopSlot({ petCatalog, controller, playersPets }: PetShopProps): JSX
   );
 }
 
+// Defines the PetShopArea component
 function PetShopArea({
   interactableID,
   playerID,
@@ -154,8 +163,12 @@ function PetShopArea({
   interactableID: InteractableID;
   playerID: PlayerID;
 }) {
+  // Initializes the PetShopController hook
   const controller = usePetShopController(interactableID);
+
+  // Initializes the state variables for petsCatalog
   const [petsCatalog, setPlayerCatalog] = useState<PetCatalog[]>([]);
+  // Initializes the state variables for pets
   const [pets, setPets] = useState<Pet[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -170,8 +183,7 @@ function PetShopArea({
     };
     // Immediately invoke the async function
     getCatalog();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [playerID]);
 
   useEffect(() => {
     const getPets = async () => {
@@ -182,10 +194,9 @@ function PetShopArea({
         console.error('Error fetching data: ', error);
       }
     };
-    // Immediately invoke the async function
+    // Immediately invokes the async function
     getPets();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [playerID]);
 
   const petsPerPage = 6; // Number of pets to display per page
   // Calculate the index range for the current page
@@ -193,6 +204,7 @@ function PetShopArea({
   const indexOfFirstPet = indexOfLastPet - petsPerPage;
   const currentPets = petsCatalog.slice(indexOfFirstPet, indexOfLastPet);
 
+  // Defines the JSX for coin count image and displays the player's currency count
   const currency = 10;
   const coinCountImage = (
     <Box position='absolute' right='50' top='0' boxSize='100px'>
@@ -203,10 +215,12 @@ function PetShopArea({
     </Box>
   );
 
+  // Displays the next page of pets
   const nextPage = () => {
     setCurrentPage(currentPage + 1);
   };
 
+  // Displays the previous page of pets
   const prevPage = () => {
     setCurrentPage(currentPage - 1);
   };
