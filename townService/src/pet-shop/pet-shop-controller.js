@@ -15,7 +15,7 @@ const findAllPets = async (req, res) => {
 /*
 Search by pet type
 */
-const findPetByType = async (req, res) => {
+export const findPetByType = async (req, res) => {
   try {
     const { type } = req.params;
     const pet = await petsCatalogDao.findPetByType(type);

@@ -14,22 +14,24 @@ export const findPetsByPlayerAndType = (playerID: string, type: string) =>
 
 export const equipPet = async (playerID: string, type: string) => {
   const pets = await findPetsByPlayer(playerID); // list of pets already owned by this player
-  pets.map(async (pet: any) => await unequipPet(playerID, type));
+  await pets.map(async (pet: any) => await unequipPet(playerID, type));
   const updatedPet = await petsModel.findOneAndUpdate(
     { playerID: playerID, type: type }, // Only update if `playerID` and `type` both match
     { equipped: true }, // Set "equipped" to true
-    { new: true }
+    { new: true },
   );
+  console.log('EQUIP PET');
   console.log(updatedPet);
   return updatedPet;
-}
+};
 
 export const unequipPet = async (playerID: string, type: string) => {
   const updatedPet = await petsModel.findOneAndUpdate(
     { playerID: playerID, type: type }, // Only update if `playerID` and `type` both match
     { equipped: false }, // Set "equipped" to false`
-    { new: true }
+    { new: true },
   );
+  console.log('UNEQUIP PET');
   console.log(updatedPet);
   return updatedPet;
-}
+};

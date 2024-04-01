@@ -22,7 +22,7 @@ import {
   findPetsByPlayer,
   findPetsInCatalog,
 } from '../../../../../../townService/src/town/Database';
-import { findPetByType } from '../../../../../../townService/src/pet-shop/pets-catalog-dao';
+import { findPetByType } from '../../../../../../townService/src/pet-shop/pet-shop-controller';
 // image asset imports
 import closeButton from './petshop-images/x_btn.png';
 import inventoryBackground from './inventory-images/inventory_bg.png';
@@ -51,18 +51,20 @@ import twelve from './pet-images/12.png';
  */
 interface InventoryProps {
   pet: Pet;
+  petCatalog: PetCatalog;
   controller: InventoryAreaController;
 }
 
 /**
  * Returns a pet slot in the inventory.
  */
-function InventorySlot({ pet, controller }: InventoryProps): JSX.Element {
+function InventorySlot({ pet, petCatalog, controller }: InventoryProps): JSX.Element {
   const toast = useToast();
   const toastMessage = pet.equipped ? 'Error unequipping' : 'Error equipping';
   const typeTextColor = '#2CAB3F';
   const slotButton = (
     <IconButton
+      bg={'rgba(255, 255, 255, 0)'}
       icon={
         <Image
           src={pet.equipped ? unequipBtnAsset.src : equipBtnAsset.src} // display "Unequip" button
@@ -93,10 +95,10 @@ function InventorySlot({ pet, controller }: InventoryProps): JSX.Element {
   );
   const petImages = [one, two, three, four, five, six, seven, eight, nine, ten, eleven, twelve];
   // Construct the image source based on petCatalog.type
-  // const petImageSrc = petImages[petCatalog.img_id - 1]?.src || '';
+  const petImageSrc = petImages[petCatalog.img_id - 1]?.src || '';
   const petImage = (
     <Image
-      src={one.src}
+      src={petImageSrc}
       width='49%' // Adjust the width as desired
       height='49%' // Adjust the height as desired
       objectFit='cover'
@@ -107,6 +109,18 @@ function InventorySlot({ pet, controller }: InventoryProps): JSX.Element {
   );
   const slot = (
     <Box>
+      <Text
+        pos='absolute'
+        top='0px'
+        left='initial'
+        width='100%'
+        fontFamily='monospace'
+        fontWeight='bold'
+        backgroundColor='whiteAlpha.600'
+        fontSize='10px'
+        textAlign='center'>
+        Speed: {petCatalog.speed}
+      </Text>
       <Text
         pos='absolute'
         top='-20px'
@@ -173,7 +187,6 @@ function InventoryArea({
     };
 
     getCatalog();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -188,8 +201,20 @@ function InventoryArea({
     };
 
     getPets();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [playerID]);
+
+  function findPetByTypeHelp(type: string): PetCatalog {
+    const petsByType = petsCatalog.filter(pet => pet.type === type);
+    console.log('petsByType');
+    console.log(petsByType);
+    if (petsByType.length === 0) {
+      throw new Error('Catalog does not contain pet of type ' + type);
+    } else if (petsByType.length !== 1) {
+      throw new Error('Catalog contains more than one pet of type ' + type);
+    } else {
+      return petsByType[0];
+    }
+  }
 
   const petsPerPage = 6; // Number of pets to display per page
   // Calculate the index range for the current page
@@ -227,7 +252,12 @@ function InventoryArea({
         gridColumnGap={0}
         justifyContent='center'>
         {currentPets.map((pet, index) => (
-          <InventorySlot key={index} pet={pet} controller={controller} />
+          <InventorySlot
+            key={index}
+            pet={pet}
+            petCatalog={findPetByTypeHelp(pet.type)}
+            controller={controller}
+          />
         ))}
       </Grid>
       {/* Coin Count Image */}
@@ -235,6 +265,7 @@ function InventoryArea({
       {/* back button */}
       <Box position='absolute' left='0' top='410' boxSize='42px'>
         <IconButton
+          bg={'rgba(255, 255, 255, 0)'}
           icon={<Image src={backButton.src} />}
           aria-label={''}
           onClick={prevPage}
@@ -245,6 +276,7 @@ function InventoryArea({
       {/* forward button */}
       <Box position='absolute' right='0' top='410' boxSize='42px'>
         <IconButton
+          bg={'rgba(255, 255, 255, 0)'}
           icon={<Image src={forwardButton.src} />}
           aria-label={''}
           onClick={nextPage}
@@ -257,8 +289,7 @@ function InventoryArea({
 }
 
 /**
- * Using the player ID, renders the pet options that the player can buy
- * @param PlayerID the player ID of the current player
+ * Displays the inventory.
  */
 export default function InventoryAreaWrapper(): JSX.Element {
   // fetch the player ID

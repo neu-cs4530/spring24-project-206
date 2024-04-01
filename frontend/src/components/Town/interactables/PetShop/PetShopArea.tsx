@@ -54,6 +54,7 @@ function PetShopSlot({ petCatalog, controller, playersPets }: PetShopProps): JSX
   let background = <Image src={slotBackground.src} />;
   let adoptElement = (
     <IconButton
+      bg={'rgba(255, 255, 255, 0)'}
       icon={
         <Image
           src={adoptButton.src}
@@ -230,6 +231,7 @@ function PetShopArea({
       {/* back button */}
       <Box position='absolute' left='0' top='410' boxSize='42px'>
         <IconButton
+          bg={'rgba(255, 255, 255, 0)'}
           icon={<Image src={backButton.src} />}
           aria-label={''}
           onClick={prevPage}
@@ -240,6 +242,7 @@ function PetShopArea({
       {/* forward button */}
       <Box position='absolute' right='0' top='410' boxSize='42px'>
         <IconButton
+          bg={'rgba(255, 255, 255, 0)'}
           icon={<Image src={forwardButton.src} />}
           aria-label={''}
           onClick={nextPage}
