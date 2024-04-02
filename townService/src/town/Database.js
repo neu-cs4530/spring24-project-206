@@ -28,13 +28,13 @@ export const findPetPrice = async type => {
 
 export const findAllCurrency = async () => {
   const response = await axios.get(`${URL}/leaderboard`);
-  const players = response.data;
-  return players;
+  const currencies = response.data;
+  return currencies;
 };
 
 export const findOnePlayerCurrency = async playerID => {
   const response = await axios.get(`${URL}/leaderboard/player/${playerID}`);
-  const currency = response.data;
+  const { currency } = response.data;
   return currency;
 };
 

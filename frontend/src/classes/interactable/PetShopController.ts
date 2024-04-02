@@ -8,8 +8,8 @@ import TownController from '../TownController';
 
 export type PetShopAreaEvents = BaseInteractableEventMap & {
   petChange: (newPets: Pet[] | undefined) => void;
+  // TODO: listen to the adopted pet event
 };
-// TODO: we are not using this anywhere....
 
 export default class PetShopController extends InteractableAreaController<
   PetShopAreaEvents,

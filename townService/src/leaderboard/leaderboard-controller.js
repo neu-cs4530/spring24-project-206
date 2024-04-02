@@ -12,8 +12,8 @@ const getAllPlayersCurrency = async (req, res) => {
 const getOnePlayerCurrency = async (req, res) => {
   try {
     const { playerID } = req.params;
-    const player = await leaderboardDao.getOnePlayerCurrency(playerID);
-    res.json(player);
+    const currency = await leaderboardDao.getOnePlayerCurrency(playerID);
+    res.json(currency);
   } catch (error) {
     res.status(500).json({ error: 'Error fetching the specific player in the leaderboard' });
   }
@@ -26,7 +26,7 @@ const updateOnePlayerCurrency = async (req, res) => {
     const player = await leaderboardDao.updateOnePlayerCurrency(playerID, updatedValue);
     res.json(player);
   } catch (error) {
-    res.status(500).json({ error: 'Error fetching the specific player in the leaderboard' });
+    res.status(500).json({ error: 'Error updating the specific player in the leaderboard' });
   }
 };
 

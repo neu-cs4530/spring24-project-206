@@ -13,6 +13,7 @@ import InteractableArea from './InteractableArea';
 import { updateCounterForPet } from '../pet-shop/pets-catalog-dao';
 import { createPet } from '../pets/pets-dao';
 import { findOnePlayerCurrency, findPetPrice, updateOnePlayerCurrency } from './Database';
+import { logError } from '../Utils';
 
 export default class PetShopArea extends InteractableArea {
   public pets?: Pet[];
@@ -107,12 +108,18 @@ export default class PetShopArea extends InteractableArea {
     return undefined as InteractableCommandReturnType<CommandType>;
   }
 
+  // TODO: make an async function that tries to adopt a pet - checks currency and price - emits an event when successful
+
   /**
    * Awaits the update counter method from the backend
    * @param type The type of the pet
    */
   private async _incrementPopularity(type: string) {
-    await updateCounterForPet(type);
+    try {
+      await updateCounterForPet(type);
+    } catch (error) {
+      logError(`Could not update popularity counter: ${(error as Error).message}`);
+    }
   }
 
   /**
@@ -120,6 +127,10 @@ export default class PetShopArea extends InteractableArea {
    * @param type The type of the pet
    */
   private async _updateCurrency(playerID: string, newValue: number) {
-    await updateOnePlayerCurrency(playerID, newValue);
+    try {
+      await updateOnePlayerCurrency(playerID, newValue);
+    } catch (error) {
+      logError(`Could not update currency: ${(error as Error).message}`);
+    }
   }
 }

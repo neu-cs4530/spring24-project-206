@@ -11,5 +11,3 @@ export const findPetsByPlayer = (playerID: string) => petsModel.find({ playerID 
 
 export const findPetsByPlayerAndType = (playerID: string, type: string) =>
   petsModel.find({ playerID, type });
-
-// export const updatePetEquippedStatus = (playerID: string, type: string) => petsModel.updateOne({ type }, { $set: { equipped } }); //TODO: PLS
