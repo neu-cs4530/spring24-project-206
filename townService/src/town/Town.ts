@@ -1,6 +1,8 @@
 import { ITiledMap, ITiledMapObjectLayer } from '@jonbell/tiled-map-type-guard';
 import { nanoid } from 'nanoid';
 import { BroadcastOperator } from 'socket.io';
+import { getOnePlayerCurrency } from '../leaderboard/leaderboard-dao';
+import leaderboardModel from '../leaderboard/leaderboard-model';
 import InvalidParametersError from '../lib/InvalidParametersError';
 import IVideoClient from '../lib/IVideoClient';
 import Player from '../lib/Player';
@@ -22,12 +24,6 @@ import {
 } from '../types/CoveyTownSocket';
 import { logError } from '../Utils';
 import ConversationArea from './ConversationArea';
-import {
-  addPlayerCurrency,
-  findAllCurrency,
-  findOnePlayerCurrency,
-  updateOnePlayerCurrency,
-} from './Database';
 // eslint-disable-next-line import/no-cycle
 import GameAreaFactory from './games/GameAreaFactory';
 import TicTacToeGameArea from './games/TicTacToeGameArea';
@@ -110,7 +106,7 @@ export default class Town {
   private _chatMessages: ChatMessage[] = [];
 
   /** A map to store player IDs with their currency * */
-  private _playerCurrencyMap: CurrencyMap = new Map();
+  private _playerCurrencyMap: CurrencyMap = new Map<string, number>();
 
   /** A map to check if a tic tac toe game has already rewarded a player with currency * */
   private _gameCurrencyAwardedMap: Map<string, boolean> = new Map<string, boolean>();
@@ -119,19 +115,9 @@ export default class Town {
    * Getter for the player currency map
    */
 
-  public async getPlayerCurrencyMap() {
+  public get playerCurrencyMap(): CurrencyMap {
     // TODO: get all players from the database, normalise to a map structure
-    try {
-      const currencyMapFromDatabase = await findAllCurrency();
-      const mapping: CurrencyMap = new Map();
-      for (const entry of currencyMapFromDatabase) {
-        mapping.set(entry.playerID, entry.currency);
-      }
-      return mapping;
-    } catch (error) {
-      logError(`Error fetching the player currency map ${(error as Error).message}`);
-      return new Map();
-    }
+    return this._playerCurrencyMap;
   }
 
   /**
@@ -139,18 +125,13 @@ export default class Town {
    * @param playerID ID of the player
    * @param currency Currency value to set
    */
-  public async setPlayerCurrency(playerID: PlayerID, currency: number) {
+  public setPlayerCurrency(playerID: PlayerID, currency: number): void {
     // TODO: update the player's currency
-    try {
-      await updateOnePlayerCurrency(playerID, currency);
-      this._playerCurrencyMap.set(playerID, currency);
-      // Emit event to all connected sockets with updated all time leaderboard
-      await this._emitAllTimeLeaderboard();
-      // Emit event to all connected sockets with updated current player leaderboard
-      await this._emitCurrentLeaderboard();
-    } catch (error) {
-      logError(`Could not update player currency ${(error as Error).message}`);
-    }
+    this._playerCurrencyMap.set(playerID, currency);
+    // Emit event to all connected sockets with updated all time leaderboard
+    this._emitAllTimeLeaderboard();
+    // Emit event to all connected sockets with updated current player leaderboard
+    this._emitCurrentLeaderboard();
   }
 
   /**
@@ -158,8 +139,9 @@ export default class Town {
    * @param playerID ID of the player
    * @returns Currency value for the player
    */
-  public async getPlayerCurrency(playerID: PlayerID) {
-    return findOnePlayerCurrency(playerID);
+  public getPlayerCurrency(playerID: PlayerID): number | undefined {
+    // TODO: change this to receive from database
+    return this._playerCurrencyMap.get(playerID);
   }
 
   /**
@@ -167,7 +149,7 @@ export default class Town {
    * @param playerID the player ID
    * @returns the player username
    */
-  private _getUsernameFromAllPlayers(playerID: PlayerID): string {
+  private _getUsernameForAllPlayers(playerID: PlayerID): string {
     const player = this._allPlayers.find(eachPlayer => eachPlayer.id === playerID);
     return player ? player.userName : 'Unknown';
   }
@@ -177,7 +159,7 @@ export default class Town {
    * @param playerID the player ID
    * @returns the player username
    */
-  private _getUsernameFromCurrentPlayers(playerID: PlayerID): string {
+  private _getUsernameForCurrentPlayers(playerID: PlayerID): string {
     const player = this._players.find(eachPlayer => eachPlayer.id === playerID);
     return player ? player.userName : '';
   }
@@ -200,18 +182,13 @@ export default class Town {
    * This method emits the all-time leaderboard data to the frontend when called.
    * It sends information about player IDs, their corresponding currency counts, and usernames.
    */
-  private async _emitAllTimeLeaderboard() {
-    try {
-      await this.getPlayerCurrencyMap();
-    } catch (error) {
-      logError(`Could not fetch player currency map ${(error as Error).message}`);
-    }
+  private _emitAllTimeLeaderboard(): void {
     // Extract player IDs, usernames, and currency counts from playerCurrencyMap
-    const currencyPlayerIDList = Array.from(this._playerCurrencyMap.keys());
+    const currencyPlayerIDList = Array.from(this.playerCurrencyMap.keys());
     const currencyUsernameList = currencyPlayerIDList.map(playerID =>
-      this._getUsernameFromAllPlayers(playerID),
+      this._getUsernameForAllPlayers(playerID),
     );
-    const currencyCountList = Array.from(this._playerCurrencyMap.values());
+    const currencyCountList = Array.from(this.playerCurrencyMap.values());
 
     // Emit the all-time leaderboard data to connected sockets
     this._connectedSockets.forEach(socket => {
@@ -227,16 +204,13 @@ export default class Town {
    * This method emits the current leaderboard data to the frontend when called.
    * It sends information about player IDs, their corresponding currency counts, and usernames.
    */
-  private async _emitCurrentLeaderboard() {
+  private _emitCurrentLeaderboard(): void {
     // Extract player IDs, usernames, and currency counts from playerCurrencyMap
-    const currencyPlayerIDList = this.players.map(player => player.id);
-    console.log(currencyPlayerIDList);
+    const currencyPlayerIDList = Array.from(this.playerCurrencyMap.keys());
     const currencyUsernameList = currencyPlayerIDList.map(playerID =>
-      this._getUsernameFromCurrentPlayers(playerID),
+      this._getUsernameForCurrentPlayers(playerID),
     );
-    const currencyCountList = currencyPlayerIDList.map(
-      playerID => this._playerCurrencyMap.get(playerID) ?? 0,
-    );
+    const currencyCountList = Array.from(this.playerCurrencyMap.values());
 
     // Emit the current leaderboard data to all connected sockets
     this._connectedSockets.forEach(socket => {
@@ -258,18 +232,10 @@ export default class Town {
     const newPlayer = new Player(userName, socket.to(this._townID));
     this._players.push(newPlayer);
     this._allPlayers.push(newPlayer);
-    try {
-      await addPlayerCurrency({ playerID: newPlayer.id, currency: 0 });
-      // Creates the leaderboards for a player who just joined
-      await this._emitAllTimeLeaderboard();
-      await this._emitCurrentLeaderboard();
-    } catch (error) {
-      logError(
-        `Could not add new player + currency to the leaderboard ${(error as Error).message}`,
-      );
-    }
     this._connectedSockets.add(socket);
-
+    // Creates the leaderboards for a player who just joined
+    this._emitAllTimeLeaderboard();
+    this._emitCurrentLeaderboard();
     // Create a video token for this user to join this town
     newPlayer.videoToken = await this._videoClient.getTokenForTown(this._townID, newPlayer.id);
 
@@ -279,12 +245,12 @@ export default class Town {
     // Register an event listener for the client socket: if the client disconnects,
     // clean up our listener adapter, and then let the CoveyTownController know that the
     // player's session is disconnected
-    socket.on('disconnect', async () => {
+    socket.on('disconnect', () => {
       this._removePlayer(newPlayer);
       // Needs to update the current leaderboard and remove the player who left from the current
       // leaderboard and all-time leaderboard
-      await this._emitAllTimeLeaderboard();
-      await this._emitCurrentLeaderboard();
+      this._emitAllTimeLeaderboard();
+      this._emitCurrentLeaderboard();
       this._connectedSockets.delete(socket);
     });
 
@@ -349,15 +315,18 @@ export default class Town {
               if (!this._gameCurrencyAwardedMap.has(gameID)) {
                 // Gets the winning player's ID
                 const winnerID = ticTacToeGameArea.game.state.winner;
-                try {
-                  this._awardCurrency(winnerID, gameID);
-                } catch (error) {
-                  logError(
-                    `There was an issue awarding currency for ${winnerID}: ${
-                      (error as Error).message
-                    }`,
-                  );
+                // Get the current currency amount for the winner
+                const winnerCurrency = this.getPlayerCurrency(winnerID);
+                // If winner's currency is undefined, set it to a default amount (1 in this case)
+                if (winnerCurrency === undefined) {
+                  // Add default currency amount for the winner
+                  this.setPlayerCurrency(winnerID, 1); // TODO:
+                } else {
+                  // Increment currency for the winner
+                  this.setPlayerCurrency(winnerID, winnerCurrency + 1); // TODO:
                 }
+                // Mark that currency has been awarded for this game
+                this._gameCurrencyAwardedMap.set(gameID, true);
               }
             }
           }
@@ -395,27 +364,6 @@ export default class Town {
       }
     });
     return newPlayer;
-  }
-
-  private async _awardCurrency(winnerID: PlayerID, gameID: string) {
-    try {
-      // Get the current currency amount for the winner
-      const winnerCurrency = await this.getPlayerCurrency(winnerID);
-      // If winner's currency is undefined, set it to a default amount (1 in this case)
-      if (winnerCurrency === undefined) {
-        // Add default currency amount for the winner
-        updateOnePlayerCurrency(winnerID, 1);
-        this.setPlayerCurrency(winnerID, 1);
-      } else {
-        // Increment currency for the winner
-        updateOnePlayerCurrency(winnerID, winnerCurrency + 1);
-        this.setPlayerCurrency(winnerID, winnerCurrency + 1);
-      }
-      // Mark that currency has been awarded for this game
-      this._gameCurrencyAwardedMap.set(gameID, true);
-    } catch (error) {
-      logError(`Could not award currency to the user ${(error as Error).message}`);
-    }
   }
 
   /**
