@@ -181,6 +181,7 @@ function InventoryArea({
       try {
         const catalog = await findPetsInCatalog();
         setPetsCatalog(catalog);
+        console.log('UPDATED CATALOG');
       } catch (e) {
         console.error('Error fetching data: ', e);
       }
@@ -204,6 +205,9 @@ function InventoryArea({
   }, [playerID]);
 
   function findPetByTypeHelp(type: string): PetCatalog {
+    console.log('FIND HELP');
+    console.log('petsCatalog');
+    console.log(petsCatalog);
     const petsByType = petsCatalog.filter(pet => pet.type === type);
     console.log('petsByType');
     console.log(petsByType);
@@ -245,21 +249,23 @@ function InventoryArea({
       {/* Inventory Background */}
       <Image src={inventoryBackground.src} position='absolute' />
       {/* Grid of Pets */}
-      <Grid
-        templateColumns='repeat(3, 1fr)'
-        gridAutoFlow='row dense'
-        gridRowGap={62}
-        gridColumnGap={0}
-        justifyContent='center'>
-        {currentPets.map((pet, index) => (
-          <InventorySlot
-            key={index}
-            pet={pet}
-            petCatalog={findPetByTypeHelp(pet.type)}
-            controller={controller}
-          />
-        ))}
-      </Grid>
+      {petsCatalog.length > 0 && (
+        <Grid
+          templateColumns='repeat(3, 1fr)'
+          gridAutoFlow='row dense'
+          gridRowGap={62}
+          gridColumnGap={0}
+          justifyContent='center'>
+          {currentPets.map((pet, index) => (
+            <InventorySlot
+              key={index}
+              pet={pet}
+              petCatalog={findPetByTypeHelp(pet.type)}
+              controller={controller}
+            />
+          ))}
+        </Grid>
+      )}
       {/* Coin Count Image */}
       {coinCountImage}
       {/* back button */}
