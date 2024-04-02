@@ -204,7 +204,6 @@ function PetShopArea({
   const indexOfFirstPet = indexOfLastPet - petsPerPage;
   const currentPets = petsCatalog.slice(indexOfFirstPet, indexOfLastPet);
 
-  // Defines the JSX for coin count image and displays the player's currency count
   const currency = 10;
   const coinCountImage = (
     <Box position='absolute' right='50' top='0' boxSize='100px'>
@@ -215,12 +214,10 @@ function PetShopArea({
     </Box>
   );
 
-  // Displays the next page of pets
   const nextPage = () => {
     setCurrentPage(currentPage + 1);
   };
 
-  // Displays the previous page of pets
   const prevPage = () => {
     setCurrentPage(currentPage - 1);
   };
@@ -245,7 +242,6 @@ function PetShopArea({
       {/* back button */}
       <Box position='absolute' left='0' top='410' boxSize='42px'>
         <IconButton
-          bg={'rgba(255, 255, 255, 0)'}
           icon={<Image src={backButton.src} />}
           aria-label={''}
           onClick={prevPage}
@@ -256,7 +252,6 @@ function PetShopArea({
       {/* forward button */}
       <Box position='absolute' right='0' top='410' boxSize='42px'>
         <IconButton
-          bg={'rgba(255, 255, 255, 0)'}
           icon={<Image src={forwardButton.src} />}
           aria-label={''}
           onClick={nextPage}

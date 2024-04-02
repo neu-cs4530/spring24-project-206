@@ -20,7 +20,7 @@ export const equipPet = async (playerID: string, type: string) => {
     { equipped: true }, // Set "equipped" to true
     { new: true },
   );
-  console.log('EQUIP PET');
+  console.log('EQUIP ' + type);
   console.log(updatedPet);
   return updatedPet;
 };
@@ -31,7 +31,7 @@ export const unequipPet = async (playerID: string, type: string) => {
     { equipped: false }, // Set "equipped" to false`
     { new: true },
   );
-  console.log('UNEQUIP PET');
+  console.log('UNEQUIP ' + type);
   console.log(updatedPet);
   return updatedPet;
 };
