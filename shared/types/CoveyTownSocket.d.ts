@@ -20,10 +20,8 @@ export type TownJoinResponse = {
 export type CurrencyChangeResponse = {
   // A list of the player IDs
   currencyPlayerIDs: string[];
-  // A list of player currencies
-  currencyCounts: number[];
-  // A list of player usernames
-  currencyPlayerUsernames: string[];
+  // A list of player currencies and usernames
+  currencyDetails: { currency?: number; username: string }[];
 };
 
 export type InteractableType =
@@ -35,7 +33,7 @@ export type InteractableType =
   | "InventoryArea";
 
 // Define the map to store player IDs and their currency
-type CurrencyMap = Map<PlayerID, number>;
+type CurrencyMap = Map<PlayerID, { currency?: number; username: string }>;
 
 export interface Interactable {
   type: InteractableType;

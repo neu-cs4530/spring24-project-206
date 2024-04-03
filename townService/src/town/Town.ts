@@ -104,8 +104,11 @@ export default class Town {
 
   private _chatMessages: ChatMessage[] = [];
 
-  /** A map to store player IDs with their currency * */
-  private _playerCurrencyMap: CurrencyMap = new Map<string, number>();
+  /** A map to store player IDs with their currency and username * */
+  private _playerCurrencyMap: CurrencyMap = new Map<
+    string,
+    { currency: number; username: string }
+  >();
 
   /** A map to check if a tic tac toe game has already rewarded a player with currency * */
   private _gameCurrencyAwardedMap: Map<string, boolean> = new Map<string, boolean>();
@@ -124,7 +127,10 @@ export default class Town {
    * @param currency Currency value to set
    */
   public setPlayerCurrency(playerID: PlayerID, currency: number): void {
-    this._playerCurrencyMap.set(playerID, currency);
+    const username = this._getUsernameForAllPlayers(playerID);
+    // Set the player's currency
+    this._playerCurrencyMap.set(playerID, { currency, username });
+
     // Emit event to all connected sockets with updated all time leaderboard
     this._emitAllTimeLeaderboard();
     // Emit event to all connected sockets with updated current player leaderboard
@@ -137,7 +143,7 @@ export default class Town {
    * @returns Currency value for the player
    */
   public getPlayerCurrency(playerID: PlayerID): number | undefined {
-    return this._playerCurrencyMap.get(playerID);
+    return this._playerCurrencyMap.get(playerID)?.currency;
   }
 
   /**
@@ -181,17 +187,16 @@ export default class Town {
   private _emitAllTimeLeaderboard(): void {
     // Extract player IDs, usernames, and currency counts from playerCurrencyMap
     const currencyPlayerIDList = Array.from(this.playerCurrencyMap.keys());
-    const currencyUsernameList = currencyPlayerIDList.map(playerID =>
-      this._getUsernameForAllPlayers(playerID),
-    );
-    const currencyCountList = Array.from(this.playerCurrencyMap.values());
+    const leaderboardData = Array.from(this.playerCurrencyMap.entries()).map(([playerID]) => ({
+      currency: this.getPlayerCurrency(playerID),
+      username: this._getUsernameForAllPlayers(playerID),
+    }));
 
     // Emit the all-time leaderboard data to connected sockets
     this._connectedSockets.forEach(socket => {
       socket.emit('allTimeCurrencyChanged', {
         currencyPlayerIDs: currencyPlayerIDList,
-        currencyCounts: currencyCountList,
-        currencyPlayerUsernames: currencyUsernameList,
+        currencyDetails: leaderboardData,
       });
     });
   }
@@ -203,17 +208,16 @@ export default class Town {
   private _emitCurrentLeaderboard(): void {
     // Extract player IDs, usernames, and currency counts from playerCurrencyMap
     const currencyPlayerIDList = Array.from(this.playerCurrencyMap.keys());
-    const currencyUsernameList = currencyPlayerIDList.map(playerID =>
-      this._getUsernameForCurrentPlayers(playerID),
-    );
-    const currencyCountList = Array.from(this.playerCurrencyMap.values());
+    const leaderboardData = Array.from(this.playerCurrencyMap.entries()).map(([playerID]) => ({
+      currency: this.getPlayerCurrency(playerID),
+      username: this._getUsernameForCurrentPlayers(playerID),
+    }));
 
     // Emit the current leaderboard data to all connected sockets
     this._connectedSockets.forEach(socket => {
       socket.emit('currentCurrencyChanged', {
         currencyPlayerIDs: currencyPlayerIDList,
-        currencyCounts: currencyCountList,
-        currencyPlayerUsernames: currencyUsernameList,
+        currencyDetails: leaderboardData,
       });
     });
   }

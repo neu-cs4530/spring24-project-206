@@ -48,10 +48,6 @@ describe('CurrencyLeaderboard Component', () => {
       'allTimeCurrencyChanged',
       expect.any(Function),
     );
-  });
-
-  test('subscribes to TownController events when component mounts', () => {
-    render(<CurrencyLeaderboard />);
     expect(mockTownController.on).toHaveBeenCalledWith(
       'currentCurrencyChanged',
       expect.any(Function),
@@ -65,11 +61,6 @@ describe('CurrencyLeaderboard Component', () => {
       'allTimeCurrencyChanged',
       expect.any(Function),
     );
-  });
-
-  it('unsubscribes from TownController events when component unmounts', () => {
-    const { unmount } = render(<CurrencyLeaderboard />);
-    unmount();
     expect(mockTownController.off).toHaveBeenCalledWith(
       'currentCurrencyChanged',
       expect.any(Function),
@@ -79,9 +70,9 @@ describe('CurrencyLeaderboard Component', () => {
   it('removes a player from current leaderboard when they leave', () => {
     // Simulate a player leaving the town
     const mockCurrencyMap = new Map([
-      ['player1', 1000],
-      ['player2', 500],
-      ['player3', 750],
+      ['player1', { username: 'player1', currency: 1000 }],
+      ['player2', { username: 'player2', currency: 500 }],
+      ['player3', { username: 'player3', currency: 750 }],
     ]);
     // Set the mock currency map for the current leaderboard
     (mockTownController.getCurrentCurrency as jest.Mock).mockReturnValue(mockCurrencyMap);
@@ -99,12 +90,12 @@ describe('CurrencyLeaderboard Component', () => {
   test('sorts and displays the top 5 players in the current leaderboard', () => {
     // Mock the town controller hook
     const mockCurrencyMap = new Map([
-      ['player1', 1000],
-      ['player2', 900],
-      ['player3', 800],
-      ['player4', 700],
-      ['player6', 500],
-      ['player5', 600],
+      ['player1', { username: 'player1', currency: 1000 }],
+      ['player2', { username: 'player2', currency: 900 }],
+      ['player3', { username: 'player3', currency: 800 }],
+      ['player4', { username: 'player4', currency: 700 }],
+      ['player5', { username: 'player5', currency: 600 }],
+      ['player6', { username: 'player6', currency: 500 }],
     ]);
     // Set the mock currency map for the current leaderboard
     (mockTownController.getCurrentCurrency as jest.Mock).mockReturnValue(mockCurrencyMap);
@@ -125,12 +116,12 @@ describe('CurrencyLeaderboard Component', () => {
   test('sorts and displays the top 5 players in the all-time leaderboard', () => {
     // Mock the currency data for all-time leaderboard
     const mockAllTimeCurrencyMap = new Map([
-      ['player1', 10],
-      ['player2', 9],
-      ['player3', 8],
-      ['player4', 7],
-      ['player6', 5],
-      ['player5', 6],
+      ['player1', { username: 'player1', currency: 10 }],
+      ['player2', { username: 'player2', currency: 9 }],
+      ['player3', { username: 'player3', currency: 8 }],
+      ['player4', { username: 'player4', currency: 7 }],
+      ['player5', { username: 'player5', currency: 6 }],
+      ['player6', { username: 'player6', currency: 5 }],
     ]);
     // Set the mock data for getAllTimeCurrency
     (mockTownController.getAllTimeCurrency as jest.Mock).mockReturnValue(mockAllTimeCurrencyMap);

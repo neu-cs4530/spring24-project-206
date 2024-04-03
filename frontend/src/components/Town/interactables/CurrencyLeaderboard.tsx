@@ -18,7 +18,9 @@ const CurrencyLeaderboard: React.FC = () => {
     const updateAllTimeLeaderboard = (currencyMap: CurrencyMap) => {
       if (!currencyMap) return;
       // Sort players by currency amount and extract the top 5
-      const sortedPlayers = Array.from(currencyMap).sort((a, b) => b[1] - a[1]);
+      const sortedPlayers = Array.from(currencyMap).sort(
+        (a, b) => (b[1].currency ?? 0) - (a[1].currency ?? 0),
+      );
       const top5Players = sortedPlayers.slice(0, 5);
       // Convert the top 5 players into a Map and update state
       const leaderboardMap = new Map(top5Players);
@@ -29,7 +31,9 @@ const CurrencyLeaderboard: React.FC = () => {
     const updateCurrentLeaderboard = (currencyMap: CurrencyMap) => {
       if (!currencyMap) return;
       // Sort players by currency amount and extract the top 5
-      const sortedPlayers = Array.from(currencyMap).sort((a, b) => b[1] - a[1]);
+      const sortedPlayers = Array.from(currencyMap).sort(
+        (a, b) => (b[1].currency ?? 0) - (a[1].currency ?? 0),
+      );
       const top5Players = sortedPlayers.slice(0, 5);
       // Convert the top 5 players into a Map and update state
       const leaderboardMap = new Map(top5Players);
@@ -69,9 +73,9 @@ const CurrencyLeaderboard: React.FC = () => {
       </Heading>
       {/* List of players and their currency in the all-time leaderboard */}
       <ul>
-        {Array.from(allTimeLeaderboard.entries()).map(([playerID, currency]) => (
+        {Array.from(allTimeLeaderboard.entries()).map(([playerID, currencyData]) => (
           <li key={playerID}>
-            {playerID}: {currency}
+            {currencyData.username}: {currencyData.currency}
           </li>
         ))}
       </ul>
@@ -83,9 +87,9 @@ const CurrencyLeaderboard: React.FC = () => {
       </Heading>
       {/* List of players and their currency in the current leaderboard */}
       <ul>
-        {Array.from(currentLeaderboard.entries()).map(([playerID, currency]) => (
+        {Array.from(currentLeaderboard.entries()).map(([playerID, currencyData]) => (
           <li key={playerID}>
-            {playerID}: {currency}
+            {currencyData.username}: {currencyData.currency}
           </li>
         ))}
       </ul>
