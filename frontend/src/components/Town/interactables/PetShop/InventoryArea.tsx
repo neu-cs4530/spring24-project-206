@@ -181,7 +181,6 @@ function InventoryArea({
       try {
         const catalog = await findPetsInCatalog();
         setPetsCatalog(catalog);
-        console.log('UPDATED CATALOG');
       } catch (e) {
         console.error('Error fetching data: ', e);
       }
@@ -205,12 +204,7 @@ function InventoryArea({
   }, [playerID]);
 
   function findPetByTypeHelp(type: string): PetCatalog {
-    console.log('FIND HELP');
-    console.log('petsCatalog');
-    console.log(petsCatalog);
     const petsByType = petsCatalog.filter(pet => pet.type === type);
-    console.log('petsByType');
-    console.log(petsByType);
     if (petsByType.length === 0) {
       throw new Error('Catalog does not contain pet of type ' + type);
     } else if (petsByType.length !== 1) {
