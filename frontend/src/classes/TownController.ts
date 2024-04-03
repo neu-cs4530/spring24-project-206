@@ -518,12 +518,14 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
      * currencyCounts is the list of currencies
      * currencyPlayerUsernames is the list of player usernames
      */
-    this._socket.on('allTimeCurrencyChanged', ({ currencyCounts, currencyPlayerUsernames }) => {
-      const currencyMap = new Map();
-      currencyPlayerUsernames.forEach((playerID, index) => {
-        currencyMap.set(playerID, currencyCounts[index]);
+    this._socket.on('allTimeCurrencyChanged', ({ currencyPlayerIDs, currencyDetails }) => {
+      const currencyMap = new Map<string, { currency?: number; username: string }>();
+      currencyDetails.forEach((currencyData, index) => {
+        const { currency, username } = currencyData;
+        currencyMap.set(currencyPlayerIDs[index], { currency, username });
       });
       this._allTimeCurrency = currencyMap;
+      console.log(this._allTimeCurrency);
       // Emit currency change event with the all time currency map
       this.emit('allTimeCurrencyChanged', this._allTimeCurrency);
     });
@@ -535,15 +537,16 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
      * currencyCounts is the list of currencies
      * currencyPlayerUsernames is the list of player usernames
      */
-    this._socket.on('currentCurrencyChanged', ({ currencyCounts, currencyPlayerUsernames }) => {
-      const currencyMap = new Map();
-      currencyPlayerUsernames.forEach((playerID, index) => {
-        const currency = currencyCounts[index];
-        if (playerID !== '' && playerID !== undefined) {
-          currencyMap.set(playerID, currency);
+    this._socket.on('currentCurrencyChanged', ({ currencyPlayerIDs, currencyDetails }) => {
+      const currencyMap = new Map<string, { currency?: number; username: string }>();
+      currencyDetails.forEach((currencyData, index) => {
+        const { currency, username } = currencyData;
+        if (currencyData.username !== '' && currencyData.username !== undefined) {
+          currencyMap.set(currencyPlayerIDs[index], { currency, username });
         }
       });
       this._currentCurrency = currencyMap;
+      console.log(this._currentCurrency);
       // Emit currency change event with the current currency map
       this.emit('currentCurrencyChanged', this._currentCurrency);
     });
