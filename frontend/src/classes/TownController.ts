@@ -540,7 +540,7 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
       const currencyMap = new Map<string, { currency?: number; username: string }>();
       currencyDetails.forEach((currencyData, index) => {
         const { currency, username } = currencyData;
-        if (currencyData.username !== '' && currencyData.username !== undefined) {
+        if (username !== '' && username !== undefined) {
           currencyMap.set(currencyPlayerIDs[index], { currency, username });
         }
       });

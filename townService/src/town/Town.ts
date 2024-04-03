@@ -125,7 +125,8 @@ export default class Town {
    * @param playerID ID of the player
    * @param currency Currency value to set
    */
-  public setPlayerCurrency(playerID: PlayerID, currency: number, username: string): void {
+  public setPlayerCurrency(playerID: PlayerID, currency: number): void {
+    const username = this._getUsernameForAllPlayers(playerID);
     // Set the player's currency
     this._playerCurrencyMap.set(playerID, { currency, username });
 
@@ -185,12 +186,10 @@ export default class Town {
   private _emitAllTimeLeaderboard(): void {
     // Extract player IDs, usernames, and currency counts from playerCurrencyMap
     const currencyPlayerIDList = Array.from(this.playerCurrencyMap.keys());
-    const leaderboardData = Array.from(this.playerCurrencyMap.entries()).map(
-      ([playerID, playerData]) => ({
-        currency: this.getPlayerCurrency(playerID),
-        username: this._getUsernameForAllPlayers(playerID),
-      }),
-    );
+    const leaderboardData = Array.from(this.playerCurrencyMap.entries()).map(([playerID]) => ({
+      currency: this.getPlayerCurrency(playerID),
+      username: this._getUsernameForAllPlayers(playerID),
+    }));
 
     // Emit the all-time leaderboard data to connected sockets
     this._connectedSockets.forEach(socket => {
@@ -208,12 +207,10 @@ export default class Town {
   private _emitCurrentLeaderboard(): void {
     // Extract player IDs, usernames, and currency counts from playerCurrencyMap
     const currencyPlayerIDList = Array.from(this.playerCurrencyMap.keys());
-    const leaderboardData = Array.from(this.playerCurrencyMap.entries()).map(
-      ([playerID, playerData]) => ({
-        currency: this.getPlayerCurrency(playerID),
-        username: this._getUsernameForCurrentPlayers(playerID),
-      }),
-    );
+    const leaderboardData = Array.from(this.playerCurrencyMap.entries()).map(([playerID]) => ({
+      currency: this.getPlayerCurrency(playerID),
+      username: this._getUsernameForCurrentPlayers(playerID),
+    }));
 
     // Emit the current leaderboard data to all connected sockets
     this._connectedSockets.forEach(socket => {
@@ -319,15 +316,13 @@ export default class Town {
                 const winnerID = ticTacToeGameArea.game.state.winner;
                 // Get the current currency amount for the winner
                 const winnerCurrency = this.getPlayerCurrency(winnerID);
-                // Get the username for the winner
-                const winnerUsername = this._getUsernameForCurrentPlayers(winnerID);
                 // If winner's currency is undefined, set it to a default amount (1 in this case)
                 if (winnerCurrency === undefined) {
                   // Add default currency amount for the winner
-                  this.setPlayerCurrency(winnerID, 1, winnerUsername);
+                  this.setPlayerCurrency(winnerID, 1);
                 } else {
                   // Increment currency for the winner
-                  this.setPlayerCurrency(winnerID, winnerCurrency + 1, winnerUsername);
+                  this.setPlayerCurrency(winnerID, winnerCurrency + 1);
                 }
                 // Mark that currency has been awarded for this game
                 this._gameCurrencyAwardedMap.set(gameID, true);
