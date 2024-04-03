@@ -40,8 +40,8 @@ export const findOnePlayerCurrency = async playerID => {
 
 export const updateOnePlayerCurrency = async (playerID, updatedValue) => {
   const response = await axios.put(`${URL}/leaderboard/player/${playerID}`, updatedValue);
-  const currency = response.data;
-  return currency;
+  const oldPlayer = response.data;
+  return oldPlayer;
 };
 
 export const addPlayerCurrency = async leaderboardEntry => {
