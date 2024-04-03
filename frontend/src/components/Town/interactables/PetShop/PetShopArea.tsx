@@ -14,34 +14,34 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { useInteractable, usePetShopController } from '../../../../classes/TownController';
 import useTownController from '../../../../hooks/useTownController';
 import PetShop from './PetShop';
-import shopBackground from './petshop-images/shop_bg.png';
-import closeButton from './petshop-images/x_btn.png';
-import coinCount from './petshop-images/coin_count.png';
-import forwardButton from './petshop-images/forward_btn.png';
-import backButton from './petshop-images/back_btn.png';
-import slotBackground from './petshop-images/pet_slot_bg.png';
-import slotBackgroundDisabled from './petshop-images/pet_slot_bg_disabled.png';
 import { PetCatalog } from '../../../../../../townService/src/lib/PetCatalog';
 import { Pet } from '../../../../../../townService/src/lib/Pet';
-import one from './pet-images/1.png';
-import two from './pet-images/2.png';
-import three from './pet-images/3.png';
-import four from './pet-images/4.png';
-import five from './pet-images/5.png';
-import six from './pet-images/6.png';
-import seven from './pet-images/7.png';
-import eight from './pet-images/8.png';
-import nine from './pet-images/9.png';
-import ten from './pet-images/10.png';
-import eleven from './pet-images/11.png';
-import twelve from './pet-images/12.png';
-import adoptButton from './petshop-images/adopt_btn.png';
 import PetShopController from '../../../../classes/interactable/PetShopController';
 import { InteractableID, PlayerID } from '../../../../types/CoveyTownSocket';
 import {
   findPetsByPlayer,
   findPetsInCatalog,
 } from '../../../../../../townService/src/town/Database';
+import CurrencyDisplay from './CurrencyDisplay';
+import shopBackground from '../../../../../public/assets/pet-shop/ui/shop_bg.png';
+import closeButton from '../../../../../public/assets/pet-shop/ui/close_btn.png';
+import forwardButton from '../../../../../public/assets/pet-shop/ui/forward_btn.png';
+import backButton from '../../../../../public/assets/pet-shop/ui/back_btn.png';
+import slotBackground from '../../../../../public/assets/pet-shop/ui/pet_slot_bg.png';
+import slotBackgroundDisabled from '../../../../../public/assets/pet-shop/ui/pet_slot_bg_disabled.png';
+import adoptButton from '../../../../../public/assets/pet-shop/ui/adopt_btn.png';
+import one from '../../../../../public/assets/pet-shop/pet-sprites/1.png';
+import two from '../../../../../public/assets/pet-shop/pet-sprites/2.png';
+import three from '../../../../../public/assets/pet-shop/pet-sprites/3.png';
+import four from '../../../../../public/assets/pet-shop/pet-sprites/4.png';
+import five from '../../../../../public/assets/pet-shop/pet-sprites/5.png';
+import six from '../../../../../public/assets/pet-shop/pet-sprites/6.png';
+import seven from '../../../../../public/assets/pet-shop/pet-sprites/7.png';
+import eight from '../../../../../public/assets/pet-shop/pet-sprites/8.png';
+import nine from '../../../../../public/assets/pet-shop/pet-sprites/9.png';
+import ten from '../../../../../public/assets/pet-shop/pet-sprites/10.png';
+import eleven from '../../../../../public/assets/pet-shop/pet-sprites/11.png';
+import twelve from '../../../../../public/assets/pet-shop/pet-sprites/12.png';
 
 // Defines the props for PetShopSlot component
 interface PetShopProps {
@@ -50,6 +50,11 @@ interface PetShopProps {
   playersPets: Pet[];
 }
 
+// Color of pet type text
+const TYPE_COLOR = '#4f361c';
+// Color of pet information
+const TEXT_COLOR = '#88643e';
+
 // Defines the PetShopSlot component
 function PetShopSlot({ petCatalog, controller, playersPets }: PetShopProps): JSX.Element {
   const toast = useToast();
@@ -57,7 +62,8 @@ function PetShopSlot({ petCatalog, controller, playersPets }: PetShopProps): JSX
   let background = <Image src={slotBackground.src} />;
   let adoptElement = (
     <IconButton
-      bg={'rgba(255, 255, 255, 0)'}
+      bg='transparent'
+      _hover={{ bg: 'transparent' }}
       icon={
         <Image
           src={adoptButton.src}
@@ -113,21 +119,22 @@ function PetShopSlot({ petCatalog, controller, playersPets }: PetShopProps): JSX
         fontFamily='monospace'
         fontWeight='bold'
         backgroundColor='whiteAlpha.600'
-        fontSize='10px'
+        fontSize='9px'
+        color={TEXT_COLOR}
         textAlign='center'>
         Price: {petCatalog.price} <br /> Popularity: {petCatalog.counter} <br /> Speed:{' '}
         {petCatalog.speed}
       </Text>
       <Text
         pos='absolute'
-        top='-20px'
+        top='-23px'
         left='0'
         width='100%' // Ensure the text spans the entire width of the box
         textAlign='center' // Center the text horizontally
         fontFamily='monospace'
         fontWeight='bold'
-        fontSize='9px'
-        color='black'
+        fontSize='10px'
+        color={TYPE_COLOR}
         zIndex='1'>
         {petCatalog.type}
       </Text>
@@ -204,16 +211,6 @@ function PetShopArea({
   const indexOfFirstPet = indexOfLastPet - petsPerPage;
   const currentPets = petsCatalog.slice(indexOfFirstPet, indexOfLastPet);
 
-  const currency = 10;
-  const coinCountImage = (
-    <Box position='absolute' right='50' top='0' boxSize='100px'>
-      <Image src={coinCount.src} />
-      <Text position='relative' top='-35%' left='35%' fontFamily='monospace' fontWeight='bold'>
-        {currency}
-      </Text>
-    </Box>
-  );
-
   const nextPage = () => {
     setCurrentPage(currentPage + 1);
   };
@@ -238,10 +235,12 @@ function PetShopArea({
         ))}
       </Grid>
       {/* Coin Count Image */}
-      {coinCountImage}
+      <CurrencyDisplay currency={10} />
       {/* back button */}
       <Box position='absolute' left='0' top='410' boxSize='42px'>
         <IconButton
+          bg='transparent'
+          _hover={{ bg: 'transparent' }}
           icon={<Image src={backButton.src} />}
           aria-label={''}
           onClick={prevPage}
@@ -252,6 +251,8 @@ function PetShopArea({
       {/* forward button */}
       <Box position='absolute' right='0' top='410' boxSize='42px'>
         <IconButton
+          bg='transparent'
+          _hover={{ bg: 'transparent' }}
           icon={<Image src={forwardButton.src} />}
           aria-label={''}
           onClick={nextPage}
@@ -281,6 +282,7 @@ export default function PetShopAreaWrapper(): JSX.Element {
         <ModalOverlay />
         <ModalContent bgColor='transparent'>
           <ModalCloseButton
+            color='transparent'
             bgImage={closeButton.src}
             objectFit='fill'
             bgSize='contain'
