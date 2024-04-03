@@ -11,6 +11,10 @@ export type PetShopAreaEvents = BaseInteractableEventMap & {
   // TODO: listen to the adopted pet event
 };
 
+/**
+ * This class is responsible for managing the state of the pet shop,
+ * and for sending commands to the server.
+ */
 export default class PetShopController extends InteractableAreaController<
   PetShopAreaEvents,
   PetShopAreaModel

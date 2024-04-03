@@ -33,6 +33,7 @@ import {
   isPetShopArea,
   isTicTacToeArea,
   isViewingArea,
+  isInventoryArea,
 } from '../types/TypeUtils';
 import ConnectFourAreaController from './interactable/ConnectFourAreaController';
 import ConversationAreaController from './interactable/ConversationAreaController';
@@ -46,6 +47,7 @@ import TicTacToeAreaController from './interactable/TicTacToeAreaController';
 import ViewingAreaController from './interactable/ViewingAreaController';
 import PlayerController from './PlayerController';
 import PetShop from '../components/Town/interactables/PetShop/PetShop';
+import InventoryAreaController from './interactable/InventoryAreaController';
 
 const CALCULATE_NEARBY_PLAYERS_DELAY_MS = 300;
 const SOCKET_COMMAND_TIMEOUT_MS = 5000;
@@ -389,6 +391,13 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
     return ret as PetShopController[];
   }
 
+  public get inventoryArea(): InventoryAreaController[] {
+    const ret = this._interactableControllers.filter(
+      eachInteractable => eachInteractable instanceof InventoryAreaController,
+    );
+    return ret as InventoryAreaController[];
+  }
+
   /**
    * Begin interacting with an interactable object. Emits an event to all listeners.
    * @param interactedObj
@@ -515,13 +524,14 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
      * Upon a change in the currency from the backend, it pushes the update to the frontend here
      * for all time players
      *
-     * currencyCounts is the list of currencies
-     * currencyPlayerUsernames is the list of player usernames
+     * currencyPlayerIDs is the list of player IDs
+     * currencyDetails is the list of player usernames and currencies
      */
-    this._socket.on('allTimeCurrencyChanged', ({ currencyCounts, currencyPlayerUsernames }) => {
-      const currencyMap = new Map();
-      currencyPlayerUsernames.forEach((playerID, index) => {
-        currencyMap.set(playerID, currencyCounts[index]);
+    this._socket.on('allTimeCurrencyChanged', ({ currencyPlayerIDs, currencyDetails }) => {
+      const currencyMap = new Map<string, { currency?: number; username: string }>();
+      currencyDetails.forEach((currencyData, index) => {
+        const { currency, username } = currencyData;
+        currencyMap.set(currencyPlayerIDs[index], { currency, username });
       });
       this._allTimeCurrency = currencyMap;
       // Emit currency change event with the all time currency map
@@ -532,15 +542,15 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
      * Upon a change in the currency from the backend, it pushes the update to the frontend here
      * for current players
      *
-     * currencyCounts is the list of currencies
-     * currencyPlayerUsernames is the list of player usernames
+     * currencyPlayerIDs is the list of player IDs
+     * currencyDetails is the list of player usernames and currencies
      */
-    this._socket.on('currentCurrencyChanged', ({ currencyCounts, currencyPlayerUsernames }) => {
-      const currencyMap = new Map();
-      currencyPlayerUsernames.forEach((playerID, index) => {
-        const currency = currencyCounts[index];
-        if (playerID !== '' && playerID !== undefined) {
-          currencyMap.set(playerID, currency);
+    this._socket.on('currentCurrencyChanged', ({ currencyPlayerIDs, currencyDetails }) => {
+      const currencyMap = new Map<string, { currency?: number; username: string }>();
+      currencyDetails.forEach((currencyData, index) => {
+        const { currency, username } = currencyData;
+        if (username !== '' && username !== undefined) {
+          currencyMap.set(currencyPlayerIDs[index], { currency, username });
         }
       });
       this._currentCurrency = currencyMap;
@@ -718,6 +728,10 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
             this._interactableControllers.push(
               new PetShopController(eachInteractable.id, this, []),
             );
+          } else if (isInventoryArea(eachInteractable)) {
+            this._interactableControllers.push(
+              new InventoryAreaController(eachInteractable.id, this, []),
+            );
           }
         });
         this._userID = initialData.userID;
@@ -880,16 +894,48 @@ export function useInteractableAreaController<T>(interactableAreaID: string): T 
   return interactableAreaController as unknown as T;
 }
 
+/**
+ * A react hook to retrieve a pet shop area controller.
+ *
+ * This function will throw an error if the pet shop area controller does not exist.
+ *
+ * This hook relies on the TownControllerContext.
+ *
+ * @param interactableAreaID The ID of the pet shop area to retrieve the controller for
+ * @throws Error if there is no pet shop area controller matching the specified ID
+ */
 export function usePetShopController(interactableAreaID: string): PetShopController {
   const townController = useTownController();
 
-  const interactableAreaController = townController.petShopArea.find(
+  const petShopAreaController = townController.petShopArea.find(
     eachArea => eachArea.id == interactableAreaID,
   );
-  if (!interactableAreaController) {
-    throw new Error(`Requested interactable area ${interactableAreaID} does not exist`);
+  if (!petShopAreaController) {
+    throw new Error(`Requested pet shop area ${interactableAreaID} does not exist`);
   }
-  return interactableAreaController as PetShopController;
+  return petShopAreaController as PetShopController;
+}
+
+/**
+ * A react hook to retrieve an inventory area controller.
+ *
+ * This function will throw an error if the inventory area controller does not exist.
+ *
+ * This hook relies on the TownControllerContext.
+ *
+ * @param interactableAreaID The ID of the inventory area to retrieve the controller for
+ * @throws Error if there is no inventory area controller matching the specified ID
+ */
+export function useInventoryAreaController(interactableAreaID: string): InventoryAreaController {
+  const townController = useTownController();
+
+  const inventoryAreaController = townController.inventoryArea.find(
+    eachArea => eachArea.id == interactableAreaID,
+  );
+  if (!inventoryAreaController) {
+    throw new Error(`Requested inventory area ${interactableAreaID} does not exist`);
+  }
+  return inventoryAreaController as InventoryAreaController;
 }
 
 /**

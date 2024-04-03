@@ -20,10 +20,8 @@ export type TownJoinResponse = {
 export type CurrencyChangeResponse = {
   // A list of the player IDs
   currencyPlayerIDs: string[];
-  // A list of player currencies
-  currencyCounts: number[];
-  // A list of player usernames
-  currencyPlayerUsernames: string[];
+  // A list of player currencies and usernames
+  currencyDetails: { currency?: number; username: string }[];
 };
 
 export type InteractableType =
@@ -35,7 +33,7 @@ export type InteractableType =
   | "InventoryArea";
 
 // Define the map to store player IDs and their currency
-type CurrencyMap = Map<PlayerID, number>;
+type CurrencyMap = Map<PlayerID, { currency?: number; username: string }>;
 
 export interface Interactable {
   type: InteractableType;
@@ -82,6 +80,10 @@ export interface ConversationArea extends Interactable {
 }
 
 export interface PetShopArea extends Interactable {
+  pets?: Pet[];
+}
+
+export interface InventoryArea extends Interactable {
   pets?: Pet[];
 }
 
@@ -251,7 +253,9 @@ export type InteractableCommand =
   | GameMoveCommand<ConnectFourMove>
   | StartGameCommand
   | LeaveGameCommand
-  | AdoptCommand;
+  | AdoptCommand
+  | EquipCommand
+  | UnequipCommand;
 export interface ViewingAreaUpdateCommand {
   type: "ViewingAreaUpdate";
   update: ViewingArea;
@@ -279,6 +283,18 @@ export interface AdoptCommand {
   playerID: PlayerID;
 }
 
+export interface EquipCommand {
+  type: "EquipPet";
+  petType: string;
+  playerID: PlayerID;
+}
+
+export interface UnequipCommand {
+  type: "UnequipPet";
+  petType: string;
+  playerID: PlayerID;
+}
+
 export type InteractableCommandReturnType<
   CommandType extends InteractableCommand
 > = CommandType extends JoinGameCommand
@@ -290,6 +306,10 @@ export type InteractableCommandReturnType<
   : CommandType extends LeaveGameCommand
   ? undefined
   : CommandType extends AdoptCommand
+  ? undefined
+  : CommandType extends EquipCommand
+  ? undefined
+  : CommandType extends UnequipCommand
   ? undefined
   : never;
 
