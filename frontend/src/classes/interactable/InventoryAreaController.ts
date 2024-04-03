@@ -5,6 +5,7 @@ import InteractableAreaController, {
 import { InventoryArea as InventoryAreaModel } from '../../types/CoveyTownSocket';
 import { Pet } from '../../../../townService/src/lib/Pet';
 import TownController from '../TownController';
+import PetController from '../PetController';
 
 export type InventoryAreaEvents = BaseInteractableEventMap & {
   petChange: (newPets: Pet[] | undefined) => void;
@@ -35,10 +36,18 @@ export default class InventoryAreaController extends InteractableAreaController<
    */
   public async equip(type: string) {
     // TODO: update pets field
+    const playerController = this._townController.ourPlayer;
+    const playerID = playerController.id;
+    const playerLoc = playerController.location;
+    playerController.equippedPet = PetController.fromPetModel({
+      type,
+      playerID,
+      location: { x: playerLoc.x, y: playerLoc.y, rotation: playerLoc.rotation },
+    });
     await this._townController.sendInteractableCommand(this.id, {
       type: 'EquipPet',
       petType: type,
-      playerID: this._townController.ourPlayer.id,
+      playerID,
     });
   }
 
@@ -49,6 +58,7 @@ export default class InventoryAreaController extends InteractableAreaController<
    */
   public async unequip(type: string) {
     // TODO: update pets field
+    this._townController.ourPlayer.equippedPet = undefined;
     await this._townController.sendInteractableCommand(this.id, {
       type: 'UnequipPet',
       petType: type,
