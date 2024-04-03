@@ -230,10 +230,12 @@ export default class Town {
    */
   async addPlayer(userName: string, socket: CoveyTownSocket): Promise<Player> {
     const newPlayer = new Player(userName, socket.to(this._townID));
+    console.log(`new player ID = ${newPlayer.id}`);
     this._players.push(newPlayer);
     this._allPlayers.push(newPlayer);
     try {
-      await addPlayerCurrency({ playerID: newPlayer.id, currency: 0 });
+      const player = await addPlayerCurrency({ playerID: newPlayer.id, currency: 0 });
+      console.log(player);
     } catch (error) {
       console.log(`Could not add new player currency to database: ${(error as Error).message}`);
     }

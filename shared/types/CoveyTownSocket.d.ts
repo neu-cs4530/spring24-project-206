@@ -313,7 +313,8 @@ export interface ServerToClientEvents {
   allTimeCurrencyChanged: (currency: CurrencyChangeResponse) => void;
   currentCurrencyChanged: (currency: CurrencyChangeResponse) => void;
   // TODO: implement 'petCatalogChange' event
-  // TODO: add an event that signifies the pet was adopted
+  // TODO: add an event that signifies the pet was adopted vvv
+  // petAdopted: (playerID: playerID) => void;
 }
 
 export interface ClientToServerEvents {

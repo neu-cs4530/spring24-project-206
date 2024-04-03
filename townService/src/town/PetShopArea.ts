@@ -1,5 +1,4 @@
 import { ITiledMapObject } from '@jonbell/tiled-map-type-guard';
-import { useState, useEffect } from 'react';
 import Player from '../lib/Player';
 import { Pet } from '../lib/Pet';
 import {
@@ -48,67 +47,15 @@ export default class PetShopArea extends InteractableArea {
     return new PetShopArea({ id: name, occupants: [] }, rect, broadcastEmitter);
   }
 
-  _fetchCurrency = (playerID: string) => {
-    const [currency, setCurrency] = useState<number>(0);
-    useEffect(() => {
-      const getCurrency = async () => {
-        try {
-          const fetchedCurrency = await findOnePlayerCurrency(playerID);
-          setCurrency(fetchedCurrency);
-          console.log(`new currency = ${fetchedCurrency}`);
-        } catch (error) {
-          console.error('Error fetching player currency: ', error);
-        }
-      };
-      // Immediately invoke the async function
-      getCurrency();
-    }, []);
-    return currency;
-  };
-
-  _fetchPetPrice = (type: string) => {
-    const [price, setPrice] = useState<number>(0);
-    useEffect(() => {
-      const getPrice = async () => {
-        try {
-          const petPrice = await findPetPrice(type);
-          setPrice(petPrice);
-          console.log(`price for ${type} = ${petPrice}`);
-        } catch (error) {
-          throw new Error('Error fetching pet price: ', error as Error);
-        }
-      };
-      // Immediately invoke the async function
-      getPrice();
-    }, []);
-    return price;
-  };
-
   public handleCommand<CommandType extends InteractableCommand>(
     command: CommandType,
     player: Player,
   ): InteractableCommandReturnType<CommandType> {
     if (command.type === 'AdoptPet') {
-      const price = this._fetchPetPrice(command.petType);
-      const currency = this._fetchCurrency(player.id);
-      // TODO: check whether they have sufficient currency
-      if (currency >= price) {
-        createPet({
-          type: command.petType,
-          playerID: player.id,
-          equipped: true,
-        });
-        this._incrementPopularity(command.petType);
-        // TODO: deduct currency
-        this._updateCurrency(player.id, currency - price);
-      } else {
-        console.error('Insufficient funds');
-      }
+      this._adoptPet(command.petType, player.id);
     }
     return undefined as InteractableCommandReturnType<CommandType>;
   }
-
-  // TODO: make an async function that tries to adopt a pet - checks currency and price - emits an event when successful
 
   /**
    * Awaits the update counter method from the backend
@@ -131,6 +78,47 @@ export default class PetShopArea extends InteractableArea {
       await updateOnePlayerCurrency(playerID, newValue);
     } catch (error) {
       logError(`Could not update currency: ${(error as Error).message}`);
+    }
+  }
+
+  /**
+   * Attempts to adopt the pet
+   * @param playerID the ID of the current player
+   * @param petType the type of the pet being adopted
+   */
+  private async _adoptPet(playerID: string, petType: string) {
+    console.log(playerID);
+    console.log(petType);
+    console.log('IN ADOPT PET - town service');
+    console.log('currency!');
+    const currency = await findOnePlayerCurrency(playerID);
+    console.log(currency);
+    const petPrice = await findPetPrice(petType);
+    console.log('pet price!');
+    console.log(petPrice);
+
+    if (currency === null || petPrice === null) {
+      throw new Error('why null');
+    }
+
+    if (currency < petPrice) {
+      throw new Error(`Insufficient currency to adopt pet!`);
+    } else {
+      // make sure that the pet has not already been bought by the player
+      // const adoptedPets = await findPetsByPlayer(playerID);
+      // console.log(adoptedPets);
+      // if the pet already exists, throw an error?
+      // throw new Error(`Pet has already been adopted!`);
+      // else make the purchase
+      const newPet = await createPet({
+        type: petType,
+        playerID,
+        equipped: false,
+      });
+      await this._updateCurrency(playerID, currency - petPrice);
+      await this._incrementPopularity(petType);
+      this.pets?.push(newPet);
+      // townEmitter.emit('petAdopted', this.pets);
     }
   }
 }

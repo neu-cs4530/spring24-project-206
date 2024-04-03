@@ -39,6 +39,7 @@ import adoptButton from './petshop-images/adopt_btn.png';
 import PetShopController from '../../../../classes/interactable/PetShopController';
 import { InteractableID, PlayerID } from '../../../../types/CoveyTownSocket';
 import {
+  findOnePlayerCurrency,
   findPetsByPlayer,
   findPetsInCatalog,
 } from '../../../../../../townService/src/town/Database';
@@ -178,22 +179,39 @@ function PetShopArea({
     };
     // Immediately invokes the async function
     getTheCatalog();
-  }, [playerID]);
+  }, [playerID, petsCatalog]);
 
   // Initializes the state variables for pets
   const [pets, setPets] = useState<Pet[]>([]);
   useEffect(() => {
     const getThePets = async () => {
       try {
-        const playerpets = await findPetsByPlayer(playerID);
-        setPets(playerpets);
+        const playerPets = await findPetsByPlayer(playerID);
+        setPets(playerPets);
       } catch (error) {
         console.error('Error fetching data: ', error);
       }
     };
     // Immediately invokes the async function
     getThePets();
-  }, [playerID]);
+  }, [playerID, pets]);
+
+  // Initializes the currency variable
+  const [currency, setCurrency] = useState(0);
+  useEffect(() => {
+    const getTheCurrency = async () => {
+      try {
+        const playerCurrency = await findOnePlayerCurrency(playerID);
+        console.log('currency in front end');
+        console.log(playerCurrency);
+        setCurrency(playerCurrency);
+      } catch (error) {
+        console.error('Error fetching currency: ', error);
+      }
+    };
+    // Immediately invokes the async function
+    getTheCurrency();
+  }, [playerID, currency]);
 
   // Initializes state variables for pagination
   const [currentPage, setCurrentPage] = useState(1);
@@ -206,7 +224,6 @@ function PetShopArea({
   const currentPets = petsCatalog.slice(indexOfFirstPet, indexOfLastPet);
 
   // Defines the JSX for coin count image and displays the player's currency count
-  const currency = 10;
   const coinCountImage = (
     <Box position='absolute' right='50' top='0' boxSize='100px'>
       <Image src={coinCount.src} />
