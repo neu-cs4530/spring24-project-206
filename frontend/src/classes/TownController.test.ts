@@ -471,47 +471,41 @@ describe('TownController', () => {
     });
 
     test('updates all-time currency map correctly', () => {
-      const currencyCounts = [100, 200, 300];
-      const currencyPlayerUsernames = ['player1', 'player2', 'player3'];
-
-      // Convert arrays to Map
-      const currencyMap = new Map<string, number>();
-      currencyPlayerUsernames.forEach((playerID, index) => {
-        currencyMap.set(playerID, currencyCounts[index]);
-      });
+      const mockCurrencyMap = new Map([
+        ['player1', { username: 'player1', currency: 100 }],
+        ['player2', { username: 'player2', currency: 200 }],
+        ['player3', { username: 'player3', currency: 350 }],
+      ]);
 
       // Listen for the 'allTimeCurrencyChanged' event before emitting it
       townController.once('allTimeCurrencyChanged', (allTimeCurrencyMap: CurrencyMap) => {
         // Assert that the currency map is updated correctly
-        expect(allTimeCurrencyMap.get('player1')).toBe(100);
-        expect(allTimeCurrencyMap.get('player2')).toBe(200);
-        expect(allTimeCurrencyMap.get('player3')).toBe(300);
+        expect(allTimeCurrencyMap.get('player1')?.currency).toBe(100);
+        expect(allTimeCurrencyMap.get('player2')?.currency).toBe(200);
+        expect(allTimeCurrencyMap.get('player3')?.currency).toBe(350);
       });
 
       // Emit the 'allTimeCurrencyChanged' event with mock data
-      townController.emit('allTimeCurrencyChanged', currencyMap);
+      townController.emit('allTimeCurrencyChanged', mockCurrencyMap);
     });
 
     test('updates current currency map correctly', () => {
-      const currencyCounts = [50, 75, 100];
-      const currencyPlayerUsernames = ['player4', 'player5', 'player6'];
-
-      // Convert arrays to Map
-      const currencyMap = new Map<string, number>();
-      currencyPlayerUsernames.forEach((playerID, index) => {
-        currencyMap.set(playerID, currencyCounts[index]);
-      });
+      const mockCurrencyMap = new Map([
+        ['player4', { username: 'player4', currency: 50 }],
+        ['player5', { username: 'player5', currency: 75 }],
+        ['player6', { username: 'player6', currency: 100 }],
+      ]);
 
       // Listen for the 'currentCurrencyChanged' event before emitting it
       townController.once('currentCurrencyChanged', (currentCurrencyMap: CurrencyMap) => {
         // Assert that the currency map is updated correctly
-        expect(currentCurrencyMap.get('player4')).toBe(50);
-        expect(currentCurrencyMap.get('player5')).toBe(75);
-        expect(currentCurrencyMap.get('player6')).toBe(100);
+        expect(currentCurrencyMap.get('player4')?.currency).toBe(50);
+        expect(currentCurrencyMap.get('player5')?.currency).toBe(75);
+        expect(currentCurrencyMap.get('player6')?.currency).toBe(100);
       });
 
       // Emit the 'currentCurrencyChanged' event with mock data
-      townController.emit('currentCurrencyChanged', currencyMap);
+      townController.emit('currentCurrencyChanged', mockCurrencyMap);
     });
   });
 });

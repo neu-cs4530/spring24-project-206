@@ -1,6 +1,6 @@
 import { EventEmitter } from 'events';
 import TypedEmitter from 'typed-emitter';
-import { EquippedPet, Player as PlayerModel, PlayerLocation } from '../types/CoveyTownSocket';
+import { Player as PlayerModel, PlayerLocation } from '../types/CoveyTownSocket';
 import PetController from './PetController';
 
 export const MOVEMENT_SPEED = 175;
