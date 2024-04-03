@@ -11,8 +11,9 @@ import {
 import InteractableArea from './InteractableArea';
 import { updateCounterForPet } from '../pet-shop/pets-catalog-dao';
 import { createPet } from '../pets/pets-dao';
-import { findOnePlayerCurrency, findPetPrice, updateOnePlayerCurrency } from './Database';
+import { findOnePlayerCurrency, findPetPrice } from './Database';
 import { logError } from '../Utils';
+import { updateOnePlayerCurrency } from '../leaderboard/leaderboard-dao';
 
 export default class PetShopArea extends InteractableArea {
   public pets?: Pet[];
@@ -52,7 +53,7 @@ export default class PetShopArea extends InteractableArea {
     player: Player,
   ): InteractableCommandReturnType<CommandType> {
     if (command.type === 'AdoptPet') {
-      this._adoptPet(command.petType, player.id);
+      this._adoptPet(player.id, command.petType);
     }
     return undefined as InteractableCommandReturnType<CommandType>;
   }
@@ -75,7 +76,11 @@ export default class PetShopArea extends InteractableArea {
    */
   private async _updateCurrency(playerID: string, newValue: number) {
     try {
-      await updateOnePlayerCurrency(playerID, newValue);
+      console.log('updating currency');
+      console.log(`playerID = ${playerID}`);
+      console.log(`new value: ${newValue}`);
+      const res = await updateOnePlayerCurrency(playerID, newValue);
+      console.log(`new player = ${res}`);
     } catch (error) {
       logError(`Could not update currency: ${(error as Error).message}`);
     }
@@ -87,15 +92,8 @@ export default class PetShopArea extends InteractableArea {
    * @param petType the type of the pet being adopted
    */
   private async _adoptPet(playerID: string, petType: string) {
-    console.log(playerID);
-    console.log(petType);
-    console.log('IN ADOPT PET - town service');
-    console.log('currency!');
     const currency = await findOnePlayerCurrency(playerID);
-    console.log(currency);
     const petPrice = await findPetPrice(petType);
-    console.log('pet price!');
-    console.log(petPrice);
 
     if (currency === null || petPrice === null) {
       throw new Error('why null');

@@ -202,8 +202,6 @@ function PetShopArea({
     const getTheCurrency = async () => {
       try {
         const playerCurrency = await findOnePlayerCurrency(playerID);
-        console.log('currency in front end');
-        console.log(playerCurrency);
         setCurrency(playerCurrency);
       } catch (error) {
         console.error('Error fetching currency: ', error);

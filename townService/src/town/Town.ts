@@ -234,10 +234,9 @@ export default class Town {
     this._players.push(newPlayer);
     this._allPlayers.push(newPlayer);
     try {
-      const player = await addPlayerCurrency({ playerID: newPlayer.id, currency: 0 });
-      console.log(player);
+      await addPlayerCurrency({ playerID: newPlayer.id, currency: 0 });
     } catch (error) {
-      console.log(`Could not add new player currency to database: ${(error as Error).message}`);
+      logError(`Could not add new player currency to database: ${(error as Error).message}`);
     }
     this._connectedSockets.add(socket);
     // Creates the leaderboards for a player who just joined

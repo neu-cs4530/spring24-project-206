@@ -22,8 +22,8 @@ export const findPetsInCatalog = async () => {
 
 export const findPetPrice = async type => {
   const response = await axios.get(`/pets-catalog/type/${type}`);
-  const pets = response.data;
-  return pets;
+  const { price } = response.data;
+  return price;
 };
 
 export const findAllCurrency = async () => {
