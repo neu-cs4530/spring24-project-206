@@ -103,7 +103,7 @@ export default class Town {
 
   private _chatMessages: ChatMessage[] = [];
 
-  /** A map to store player IDs with their currency * */
+  /** A map to store player IDs with their currency and username * */
   private _playerCurrencyMap: CurrencyMap = new Map<
     string,
     { currency: number; username: string }
@@ -126,10 +126,9 @@ export default class Town {
    * @param currency Currency value to set
    */
   public setPlayerCurrency(playerID: PlayerID, currency: number, username: string): void {
-    // Set the player's currency to 1 in the player currency map
+    // Set the player's currency
     this._playerCurrencyMap.set(playerID, { currency, username });
 
-    // this._playerCurrencyMap.set(playerID, currency);
     // Emit event to all connected sockets with updated all time leaderboard
     this._emitAllTimeLeaderboard();
     // Emit event to all connected sockets with updated current player leaderboard
@@ -320,6 +319,7 @@ export default class Town {
                 const winnerID = ticTacToeGameArea.game.state.winner;
                 // Get the current currency amount for the winner
                 const winnerCurrency = this.getPlayerCurrency(winnerID);
+                // Get the username for the winner
                 const winnerUsername = this._getUsernameForCurrentPlayers(winnerID);
                 // If winner's currency is undefined, set it to a default amount (1 in this case)
                 if (winnerCurrency === undefined) {

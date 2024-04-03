@@ -515,8 +515,8 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
      * Upon a change in the currency from the backend, it pushes the update to the frontend here
      * for all time players
      *
-     * currencyCounts is the list of currencies
-     * currencyPlayerUsernames is the list of player usernames
+     * currencyPlayerIDs is the list of player IDs
+     * currencyDetails is the list of player usernames and currencies
      */
     this._socket.on('allTimeCurrencyChanged', ({ currencyPlayerIDs, currencyDetails }) => {
       const currencyMap = new Map<string, { currency?: number; username: string }>();
@@ -525,7 +525,6 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
         currencyMap.set(currencyPlayerIDs[index], { currency, username });
       });
       this._allTimeCurrency = currencyMap;
-      console.log(this._allTimeCurrency);
       // Emit currency change event with the all time currency map
       this.emit('allTimeCurrencyChanged', this._allTimeCurrency);
     });
@@ -534,8 +533,8 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
      * Upon a change in the currency from the backend, it pushes the update to the frontend here
      * for current players
      *
-     * currencyCounts is the list of currencies
-     * currencyPlayerUsernames is the list of player usernames
+     * currencyPlayerIDs is the list of player IDs
+     * currencyDetails is the list of player usernames and currencies
      */
     this._socket.on('currentCurrencyChanged', ({ currencyPlayerIDs, currencyDetails }) => {
       const currencyMap = new Map<string, { currency?: number; username: string }>();
@@ -546,7 +545,6 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
         }
       });
       this._currentCurrency = currencyMap;
-      console.log(this._currentCurrency);
       // Emit currency change event with the current currency map
       this.emit('currentCurrencyChanged', this._currentCurrency);
     });

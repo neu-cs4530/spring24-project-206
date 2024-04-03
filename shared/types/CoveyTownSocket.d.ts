@@ -20,7 +20,7 @@ export type TownJoinResponse = {
 export type CurrencyChangeResponse = {
   // A list of the player IDs
   currencyPlayerIDs: string[];
-  // A list of player currencies
+  // A list of player currencies and usernames
   currencyDetails: { currency?: number; username: string }[];
 };
 
