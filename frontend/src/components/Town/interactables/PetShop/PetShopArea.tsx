@@ -57,6 +57,7 @@ function PetShopSlot({ petCatalog, controller, playersPets }: PetShopProps): JSX
   let background = <Image src={slotBackground.src} />;
   let adoptElement = (
     <IconButton
+      bg={'rgba(255, 255, 255, 0)'}
       icon={
         <Image
           src={adoptButton.src}
@@ -76,7 +77,7 @@ function PetShopSlot({ petCatalog, controller, playersPets }: PetShopProps): JSX
       aria-label={'adopt-button'}
     />
   );
-  // If the pet is owned, it visually indicates that it cannot be adopted again
+  // if the player has not bought the pet, make the
   if (playersPets.map(pet => pet.type).includes(petCatalog.type)) {
     background = <Image src={slotBackgroundDisabled.src} />;
     adoptElement = <></>;
@@ -121,8 +122,8 @@ function PetShopSlot({ petCatalog, controller, playersPets }: PetShopProps): JSX
         pos='absolute'
         top='-20px'
         left='0'
-        width='100%' // Ensures the text spans the entire width of the box
-        textAlign='center' // Centers the text horizontally
+        width='100%' // Ensure the text spans the entire width of the box
+        textAlign='center' // Center the text horizontally
         fontFamily='monospace'
         fontWeight='bold'
         fontSize='9px'
@@ -167,8 +168,12 @@ function PetShopArea({
 
   // Initializes the state variables for petsCatalog
   const [petsCatalog, setPlayerCatalog] = useState<PetCatalog[]>([]);
+  // Initializes the state variables for pets
+  const [pets, setPets] = useState<Pet[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
+
   useEffect(() => {
-    const getTheCatalog = async () => {
+    const getCatalog = async () => {
       try {
         const catalog = await findPetsInCatalog();
         setPlayerCatalog(catalog);
@@ -176,36 +181,29 @@ function PetShopArea({
         console.error('Error fetching data: ', error);
       }
     };
-    // Immediately invokes the async function
-    getTheCatalog();
+    // Immediately invoke the async function
+    getCatalog();
   }, [playerID]);
 
-  // Initializes the state variables for pets
-  const [pets, setPets] = useState<Pet[]>([]);
   useEffect(() => {
-    const getThePets = async () => {
+    const getPets = async () => {
       try {
-        const playerpets = await findPetsByPlayer(playerID);
-        setPets(playerpets);
+        const playerPets = await findPetsByPlayer(playerID);
+        setPets(playerPets);
       } catch (error) {
         console.error('Error fetching data: ', error);
       }
     };
     // Immediately invokes the async function
-    getThePets();
+    getPets();
   }, [playerID]);
 
-  // Initializes state variables for pagination
-  const [currentPage, setCurrentPage] = useState(1);
-  // Number of pets to display per page
-  const petsPerPage = 6;
-
+  const petsPerPage = 6; // Number of pets to display per page
   // Calculate the index range for the current page
   const indexOfLastPet = currentPage * petsPerPage;
   const indexOfFirstPet = indexOfLastPet - petsPerPage;
   const currentPets = petsCatalog.slice(indexOfFirstPet, indexOfLastPet);
 
-  // Defines the JSX for coin count image and displays the player's currency count
   const currency = 10;
   const coinCountImage = (
     <Box position='absolute' right='50' top='0' boxSize='100px'>
@@ -216,12 +214,10 @@ function PetShopArea({
     </Box>
   );
 
-  // Displays the next page of pets
   const nextPage = () => {
     setCurrentPage(currentPage + 1);
   };
 
-  // Displays the previous page of pets
   const prevPage = () => {
     setCurrentPage(currentPage - 1);
   };

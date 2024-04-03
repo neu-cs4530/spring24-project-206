@@ -28,6 +28,7 @@ import TicTacToeGameArea from './games/TicTacToeGameArea';
 import InteractableArea from './InteractableArea';
 import PetShopArea from './PetShopArea';
 import ViewingArea from './ViewingArea';
+import InventoryArea from './InventoryArea';
 
 /**
  * The Town class implements the logic for each town: managing the various events that
@@ -567,11 +568,18 @@ export default class Town {
         PetShopArea.fromMapObject(eachInteractableObj, this._broadcastEmitter),
       );
 
+    const inventoryAreas = objectLayer.objects
+      .filter(eachObject => eachObject.type === 'InventoryArea')
+      .map(eachInteractableObj =>
+        InventoryArea.fromMapObject(eachInteractableObj, this._broadcastEmitter),
+      );
+
     this._interactables = this._interactables
       .concat(viewingAreas)
       .concat(conversationAreas)
       .concat(gameAreas)
-      .concat(petAreas);
+      .concat(petAreas)
+      .concat(inventoryAreas);
     this._validateInteractables();
   }
 

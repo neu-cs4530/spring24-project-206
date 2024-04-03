@@ -5,18 +5,17 @@ import {
   BoundingBox,
   InteractableCommand,
   InteractableCommandReturnType,
-  PetShopArea as PetShopAreaModel,
+  InventoryArea as InventoryAreaModel,
   TownEmitter,
 } from '../types/CoveyTownSocket';
 import InteractableArea from './InteractableArea';
-import { updateCounterForPet } from '../pet-shop/pets-catalog-dao';
-import { createPet } from '../pets/pets-dao';
+import { equipPet, unequipPet } from '../pets/pets-dao';
 
-export default class PetShopArea extends InteractableArea {
+export default class InventoryArea extends InteractableArea {
   public pets?: Pet[];
 
   public constructor(
-    { pets, id }: Omit<PetShopAreaModel, 'type'>,
+    { pets, id }: Omit<InventoryAreaModel, 'type'>,
     coordinates: BoundingBox,
     townEmitter: TownEmitter,
   ) {
@@ -24,47 +23,37 @@ export default class PetShopArea extends InteractableArea {
     this.pets = pets;
   }
 
-  public toModel(): PetShopAreaModel {
+  public toModel(): InventoryAreaModel {
     return {
       id: this.id,
       occupants: this.occupants.map(player => player.id),
       pets: this.pets,
-      type: 'PetShopArea',
+      type: 'InventoryArea',
     };
   }
 
   public static fromMapObject(
     mapObject: ITiledMapObject,
     broadcastEmitter: TownEmitter,
-  ): PetShopArea {
+  ): InventoryArea {
     const { name, width, height } = mapObject;
     if (!width || !height) {
       throw new Error(`Malformed viewing area ${name}`);
     }
     const rect: BoundingBox = { x: mapObject.x, y: mapObject.y, width, height };
-    return new PetShopArea({ id: name, occupants: [] }, rect, broadcastEmitter);
+    return new InventoryArea({ id: name, occupants: [] }, rect, broadcastEmitter);
   }
 
   public handleCommand<CommandType extends InteractableCommand>(
     command: CommandType,
     player: Player,
   ): InteractableCommandReturnType<CommandType> {
-    if (command.type === 'AdoptPet') {
-      createPet({
-        type: command.petType,
-        playerID: player.id,
-        equipped: false,
-      });
-      this._increment(command.petType);
+    if (command.type === 'EquipPet') {
+      equipPet(player.id, command.petType);
+    }
+    if (command.type === 'UnequipPet') {
+      unequipPet(player.id, command.petType);
     }
     return undefined as InteractableCommandReturnType<CommandType>;
-  }
-
-  /**
-   * Awaits the update counter method from the backend
-   * @param type The type of the pet
-   */
-  private async _increment(type: string) {
-    await updateCounterForPet(type);
   }
 }

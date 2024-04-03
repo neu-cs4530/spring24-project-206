@@ -85,6 +85,10 @@ export interface PetShopArea extends Interactable {
   pets?: Pet[];
 }
 
+export interface InventoryArea extends Interactable {
+  pets?: Pet[];
+}
+
 export interface BoundingBox {
   x: number;
   y: number;
@@ -251,7 +255,9 @@ export type InteractableCommand =
   | GameMoveCommand<ConnectFourMove>
   | StartGameCommand
   | LeaveGameCommand
-  | AdoptCommand;
+  | AdoptCommand
+  | EquipCommand
+  | UnequipCommand;
 export interface ViewingAreaUpdateCommand {
   type: "ViewingAreaUpdate";
   update: ViewingArea;
@@ -279,6 +285,18 @@ export interface AdoptCommand {
   playerID: PlayerID;
 }
 
+export interface EquipCommand {
+  type: "EquipPet";
+  petType: string;
+  playerID: PlayerID;
+}
+
+export interface UnequipCommand {
+  type: "UnequipPet";
+  petType: string;
+  playerID: PlayerID;
+}
+
 export type InteractableCommandReturnType<
   CommandType extends InteractableCommand
 > = CommandType extends JoinGameCommand
@@ -290,6 +308,10 @@ export type InteractableCommandReturnType<
   : CommandType extends LeaveGameCommand
   ? undefined
   : CommandType extends AdoptCommand
+  ? undefined
+  : CommandType extends EquipCommand
+  ? undefined
+  : CommandType extends UnequipCommand
   ? undefined
   : never;
 
