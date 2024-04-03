@@ -42,6 +42,7 @@ import {
   findPetsByPlayer,
   findPetsInCatalog,
 } from '../../../../../../townService/src/town/Database';
+import CurrencyDisplay from './CurrencyDisplay';
 
 // Defines the props for PetShopSlot component
 interface PetShopProps {
@@ -50,6 +51,11 @@ interface PetShopProps {
   playersPets: Pet[];
 }
 
+// Color of pet type text
+const TYPE_COLOR = '#4f361c';
+// Color of pet information
+const TEXT_COLOR = '#88643e';
+
 // Defines the PetShopSlot component
 function PetShopSlot({ petCatalog, controller, playersPets }: PetShopProps): JSX.Element {
   const toast = useToast();
@@ -57,7 +63,7 @@ function PetShopSlot({ petCatalog, controller, playersPets }: PetShopProps): JSX
   let background = <Image src={slotBackground.src} />;
   let adoptElement = (
     <IconButton
-      bg={'rgba(255, 255, 255, 0)'}
+      bg='transparent'
       icon={
         <Image
           src={adoptButton.src}
@@ -113,7 +119,8 @@ function PetShopSlot({ petCatalog, controller, playersPets }: PetShopProps): JSX
         fontFamily='monospace'
         fontWeight='bold'
         backgroundColor='whiteAlpha.600'
-        fontSize='10px'
+        fontSize='9px'
+        color={TEXT_COLOR}
         textAlign='center'>
         Price: {petCatalog.price} <br /> Popularity: {petCatalog.counter} <br /> Speed:{' '}
         {petCatalog.speed}
@@ -127,7 +134,7 @@ function PetShopSlot({ petCatalog, controller, playersPets }: PetShopProps): JSX
         fontFamily='monospace'
         fontWeight='bold'
         fontSize='9px'
-        color='black'
+        color={TYPE_COLOR}
         zIndex='1'>
         {petCatalog.type}
       </Text>
@@ -204,16 +211,6 @@ function PetShopArea({
   const indexOfFirstPet = indexOfLastPet - petsPerPage;
   const currentPets = petsCatalog.slice(indexOfFirstPet, indexOfLastPet);
 
-  const currency = 10;
-  const coinCountImage = (
-    <Box position='absolute' right='50' top='0' boxSize='100px'>
-      <Image src={coinCount.src} />
-      <Text position='relative' top='-35%' left='35%' fontFamily='monospace' fontWeight='bold'>
-        {currency}
-      </Text>
-    </Box>
-  );
-
   const nextPage = () => {
     setCurrentPage(currentPage + 1);
   };
@@ -238,10 +235,11 @@ function PetShopArea({
         ))}
       </Grid>
       {/* Coin Count Image */}
-      {coinCountImage}
+      <CurrencyDisplay currency={10} />
       {/* back button */}
       <Box position='absolute' left='0' top='410' boxSize='42px'>
         <IconButton
+          bg='transparent'
           icon={<Image src={backButton.src} />}
           aria-label={''}
           onClick={prevPage}
@@ -252,6 +250,7 @@ function PetShopArea({
       {/* forward button */}
       <Box position='absolute' right='0' top='410' boxSize='42px'>
         <IconButton
+          bg='transparent'
           icon={<Image src={forwardButton.src} />}
           aria-label={''}
           onClick={nextPage}

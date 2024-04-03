@@ -22,15 +22,12 @@ import {
   findPetsByPlayer,
   findPetsInCatalog,
 } from '../../../../../../townService/src/town/Database';
-import { findPetByType } from '../../../../../../townService/src/pet-shop/pet-shop-controller';
-// image asset imports
 import closeButton from './petshop-images/x_btn.png';
 import inventoryBackground from './inventory-images/inventory_bg.png';
 import unequippedSlot from './inventory-images/inventory_slot_bg.png';
 import equippedSlot from './inventory-images/inventory_slot_bg_equipped.png';
 import equipBtnAsset from './inventory-images/equip_btn.png';
 import unequipBtnAsset from './inventory-images/unequip_btn.png';
-import coinCount from './petshop-images/coin_count.png';
 import backButton from './petshop-images/back_btn.png';
 import forwardButton from './petshop-images/forward_btn.png';
 import one from './pet-images/1.png';
@@ -45,6 +42,11 @@ import nine from './pet-images/9.png';
 import ten from './pet-images/10.png';
 import eleven from './pet-images/11.png';
 import twelve from './pet-images/12.png';
+import CurrencyDisplay from './CurrencyDisplay';
+
+// Color of pet type and information
+const TEXT_COLOR = '#2CAB3F';
+const TRANSPARENT = 'rgba(255, 255, 255, 0)';
 
 /**
  * The pet and controller taken in by a InventorySlot.
@@ -61,10 +63,10 @@ interface InventoryProps {
 function InventorySlot({ pet, petCatalog, controller }: InventoryProps): JSX.Element {
   const toast = useToast();
   const toastMessage = pet.equipped ? 'Error unequipping' : 'Error equipping';
-  const typeTextColor = '#2CAB3F';
   const slotButton = (
     <IconButton
-      bg={'rgba(255, 255, 255, 0)'}
+      bg='transparent'
+      _hover={{ bg: 'transparent' }}
       icon={
         <Image
           src={pet.equipped ? unequipBtnAsset.src : equipBtnAsset.src} // display "Unequip" button
@@ -117,7 +119,8 @@ function InventorySlot({ pet, petCatalog, controller }: InventoryProps): JSX.Ele
         fontFamily='monospace'
         fontWeight='bold'
         backgroundColor='whiteAlpha.600'
-        fontSize='10px'
+        fontSize='9px'
+        color={TEXT_COLOR}
         textAlign='center'>
         Speed: {petCatalog.speed}
       </Text>
@@ -130,7 +133,7 @@ function InventorySlot({ pet, petCatalog, controller }: InventoryProps): JSX.Ele
         fontFamily='monospace'
         fontWeight='bold'
         fontSize='9px'
-        color={typeTextColor} // Adjust color as needed
+        color={TEXT_COLOR} // Adjust color as needed
         zIndex='1'>
         {pet.type}
       </Text>
@@ -220,16 +223,6 @@ function InventoryArea({
   const indexOfFirstPet = indexOfLastPet - petsPerPage;
   const currentPets = pets.slice(indexOfFirstPet, indexOfLastPet);
 
-  const currency = 10;
-  const coinCountImage = (
-    <Box position='absolute' right='50' top='0' boxSize='100px'>
-      <Image src={coinCount.src} />
-      <Text position='relative' top='-35%' left='35%' fontFamily='monospace' fontWeight='bold'>
-        {currency}
-      </Text>
-    </Box>
-  );
-
   const nextPage = () => {
     setCurrentPage(currentPage + 1);
   };
@@ -261,11 +254,12 @@ function InventoryArea({
         </Grid>
       )}
       {/* Coin Count Image */}
-      {coinCountImage}
+      <CurrencyDisplay currency={10} />
       {/* back button */}
       <Box position='absolute' left='0' top='410' boxSize='42px'>
         <IconButton
-          bg={'rgba(255, 255, 255, 0)'}
+          bg='transparent'
+          _hover={{ bg: 'transparent' }}
           icon={<Image src={backButton.src} />}
           aria-label={''}
           onClick={prevPage}
@@ -276,7 +270,8 @@ function InventoryArea({
       {/* forward button */}
       <Box position='absolute' right='0' top='410' boxSize='42px'>
         <IconButton
-          bg={'rgba(255, 255, 255, 0)'}
+          bg='transparent'
+          _hover={{ bg: 'transparent' }}
           icon={<Image src={forwardButton.src} />}
           aria-label={''}
           onClick={nextPage}
