@@ -1,5 +1,5 @@
 import { Box, Image, Text } from '@chakra-ui/react';
-import coinCount from './petshop-images/coin_count.png';
+import coinCount from '../../../../../public/assets/pet-shop/ui/coin_count.png';
 import React from 'react';
 
 // Color of currency display

@@ -22,31 +22,31 @@ import {
   findPetsByPlayer,
   findPetsInCatalog,
 } from '../../../../../../townService/src/town/Database';
-import closeButton from './petshop-images/x_btn.png';
-import inventoryBackground from './inventory-images/inventory_bg.png';
-import unequippedSlot from './inventory-images/inventory_slot_bg.png';
-import equippedSlot from './inventory-images/inventory_slot_bg_equipped.png';
-import equipBtnAsset from './inventory-images/equip_btn.png';
-import unequipBtnAsset from './inventory-images/unequip_btn.png';
-import backButton from './petshop-images/back_btn.png';
-import forwardButton from './petshop-images/forward_btn.png';
-import one from './pet-images/1.png';
-import two from './pet-images/2.png';
-import three from './pet-images/3.png';
-import four from './pet-images/4.png';
-import five from './pet-images/5.png';
-import six from './pet-images/6.png';
-import seven from './pet-images/7.png';
-import eight from './pet-images/8.png';
-import nine from './pet-images/9.png';
-import ten from './pet-images/10.png';
-import eleven from './pet-images/11.png';
-import twelve from './pet-images/12.png';
+import closeButton from '../../../../../public/assets/pet-shop/ui/close_btn.png';
+import inventoryBackground from '../../../../../public/assets/pet-shop/ui/inventory_bg.png';
+import unequippedSlot from '../../../../../public/assets/pet-shop/ui/inventory_slot_bg.png';
+import equippedSlot from '../../../../../public/assets/pet-shop/ui/inventory_slot_bg_equipped.png';
+import equipBtnAsset from '../../../../../public/assets/pet-shop/ui/equip_btn.png';
+import unequipBtnAsset from '../../../../../public/assets/pet-shop/ui/unequip_btn.png';
+import backButton from '../../../../../public/assets/pet-shop/ui/back_btn.png';
+import forwardButton from '../../../../../public/assets/pet-shop/ui/forward_btn.png';
+import one from '../../../../../public/assets/pet-shop/pet-sprites/1.png';
+import two from '../../../../../public/assets/pet-shop/pet-sprites/2.png';
+import three from '../../../../../public/assets/pet-shop/pet-sprites/3.png';
+import four from '../../../../../public/assets/pet-shop/pet-sprites/4.png';
+import five from '../../../../../public/assets/pet-shop/pet-sprites/5.png';
+import six from '../../../../../public/assets/pet-shop/pet-sprites/6.png';
+import seven from '../../../../../public/assets/pet-shop/pet-sprites/7.png';
+import eight from '../../../../../public/assets/pet-shop/pet-sprites/8.png';
+import nine from '../../../../../public/assets/pet-shop/pet-sprites/9.png';
+import ten from '../../../../../public/assets/pet-shop/pet-sprites/10.png';
+import eleven from '../../../../../public/assets/pet-shop/pet-sprites/11.png';
+import twelve from '../../../../../public/assets/pet-shop/pet-sprites/12.png';
 import CurrencyDisplay from './CurrencyDisplay';
 
 // Color of pet type and information
 const TEXT_COLOR = '#2CAB3F';
-const TRANSPARENT = 'rgba(255, 255, 255, 0)';
+const EQUIPPED_TEXT_COLOR = '#B73848';
 
 /**
  * The pet and controller taken in by a InventorySlot.
@@ -120,20 +120,20 @@ function InventorySlot({ pet, petCatalog, controller }: InventoryProps): JSX.Ele
         fontWeight='bold'
         backgroundColor='whiteAlpha.600'
         fontSize='9px'
-        color={TEXT_COLOR}
+        color={pet.equipped ? EQUIPPED_TEXT_COLOR : TEXT_COLOR}
         textAlign='center'>
         Speed: {petCatalog.speed}
       </Text>
       <Text
         pos='absolute'
-        top='-20px'
+        top='-23px'
         left='0'
         width='100%' // Ensure the text spans the entire width of the box
         textAlign='center' // Center the text horizontally
         fontFamily='monospace'
         fontWeight='bold'
-        fontSize='9px'
-        color={TEXT_COLOR} // Adjust color as needed
+        fontSize='10px'
+        color={pet.equipped ? EQUIPPED_TEXT_COLOR : TEXT_COLOR} // Adjust color as needed
         zIndex='1'>
         {pet.type}
       </Text>
@@ -301,6 +301,7 @@ export default function InventoryAreaWrapper(): JSX.Element {
         <ModalOverlay />
         <ModalContent bgColor='transparent'>
           <ModalCloseButton
+            color='transparent'
             bgImage={closeButton.src}
             objectFit='fill'
             bgSize='contain'
