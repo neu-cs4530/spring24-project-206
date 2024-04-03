@@ -2,9 +2,7 @@ import InteractableAreaController, {
   BaseInteractableEventMap,
   INVENTORY_AREA_TYPE,
 } from './InteractableAreaController';
-import {
-  InventoryArea as InventoryAreaModel
-} from '../../types/CoveyTownSocket';
+import { InventoryArea as InventoryAreaModel } from '../../types/CoveyTownSocket';
 import { Pet } from '../../../../townService/src/lib/Pet';
 import TownController from '../TownController';
 
