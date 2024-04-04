@@ -241,6 +241,7 @@ export default class Town {
       throw new Error(`Could not add new player currency to database: ${(error as Error).message}`);
     }
     this._connectedSockets.add(socket);
+    console.log(`new player ID = ${newPlayer.id}`);
     // Creates the leaderboards for a player who just joined
     this._emitAllTimeLeaderboard();
     this._emitCurrentLeaderboard();

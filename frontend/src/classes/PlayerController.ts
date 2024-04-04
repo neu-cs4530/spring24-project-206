@@ -7,7 +7,7 @@ export const MOVEMENT_SPEED = 175;
 
 export type PlayerEvents = {
   movement: (newLocation: PlayerLocation) => void;
-  equippedPetChanged: (update: EquippedPetUpdate) => void;
+  equippedPetChange: (update: EquippedPetUpdate) => void;
 };
 
 export type PlayerGameObjects = {
@@ -36,7 +36,7 @@ export default class PlayerController extends (EventEmitter as new () => TypedEm
   set location(newLocation: PlayerLocation) {
     this._location = newLocation;
     this._updateGameComponentLocation();
-    this.emit('movement', newLocation);
+    // this.emit('movement', newLocation);
   }
 
   get location(): PlayerLocation {
@@ -52,7 +52,7 @@ export default class PlayerController extends (EventEmitter as new () => TypedEm
   }
 
   set equippedPet(newPet: PetController | undefined) {
-    this.emit('equippedPetChanged', { toBeUnequipped: this._equippedPet, toBeEquipped: newPet });
+    this.emit('equippedPetChange', { toBeUnequipped: this._equippedPet, toBeEquipped: newPet });
     this._equippedPet = newPet;
   }
 

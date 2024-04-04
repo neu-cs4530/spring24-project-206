@@ -47,8 +47,8 @@ export type TownSettingsUpdate = {
 };
 
 export type EquippedPetUpdate = {
-  toBeUnequipped?: PetController;
-  toBeEquipped?: PetController;
+  toBeUnequipped?: EquippedPet;
+  toBeEquipped?: EquippedPet;
 };
 
 export type Direction = "front" | "back" | "left" | "right";
@@ -367,6 +367,8 @@ export interface ServerToClientEvents {
   // TODO: add an event that signifies the pet was adopted vvv
   // petAdopted: (playerID: playerID) => void;
   insufficientCurrency: () => void;
+  // petEquipped: (update: EquippedPetUpdate) => void;
+  // clients talk to each other through the server
 }
 
 export interface ClientToServerEvents {
@@ -376,4 +378,5 @@ export interface ClientToServerEvents {
   interactableCommand: (
     command: InteractableCommand & InteractableCommandBase
   ) => void;
+  petEquipment: (update: EquippedPetUpdate) => void;
 }

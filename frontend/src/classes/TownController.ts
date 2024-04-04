@@ -49,6 +49,7 @@ import ViewingAreaController from './interactable/ViewingAreaController';
 import PlayerController from './PlayerController';
 import PetShop from '../components/Town/interactables/PetShop/PetShop';
 import InventoryAreaController from './interactable/InventoryAreaController';
+import PetController from './PetController';
 
 const CALCULATE_NEARBY_PLAYERS_DELAY_MS = 300;
 const SOCKET_COMMAND_TIMEOUT_MS = 5000;
@@ -493,6 +494,7 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
      */
     this._socket.on('playerMoved', movedPlayer => {
       const playerToUpdate = this.players.find(eachPlayer => eachPlayer.id === movedPlayer.id);
+      // TODO: move the pet
       if (playerToUpdate) {
         if (playerToUpdate === this._ourPlayer) {
           /*
@@ -574,9 +576,18 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
       this.emit('insufficientCurrency');
     });
 
-    this._socket.on('equippedPetChanged', (update: EquippedPetUpdate) => {
-      this.emit('equippedPetChanged', update);
+    this._socket.on('insufficientCurrency', () => {
+      this.emit('insufficientCurrency');
     });
+
+    // this._socket.on('equippedPetChanged', (update: EquippedPetUpdate) => {
+    // this._socket.on('petEquipped', (update: EquippedPetUpdate) => {
+    //   const { toBeEquipped, toBeUnequipped } = update;
+    //   if (toBeUnequipped && toBeUnequipped.playerID === this.ourPlayer.id) {
+    //     // this.ourPlayer.equip
+    //   }
+    //   this.emit('equippedPetChanged', update);
+    // });
   }
 
   /**
