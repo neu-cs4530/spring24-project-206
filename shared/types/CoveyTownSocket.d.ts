@@ -60,6 +60,7 @@ export interface EquippedPet {
   type: string;
   playerID: PlayerID;
   location: PetLocation;
+  imgID: number;
 }
 
 export type XY = { x: number; y: number };

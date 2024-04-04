@@ -6,6 +6,8 @@ import { InventoryArea as InventoryAreaModel } from '../../types/CoveyTownSocket
 import { Pet } from '../../../../townService/src/lib/Pet';
 import TownController from '../TownController';
 import PetController from '../PetController';
+import { findPetImgId } from '../../../../townService/src/town/Database';
+import PlayerController from '../PlayerController';
 
 export type InventoryAreaEvents = BaseInteractableEventMap & {
   petChange: (newPets: Pet[] | undefined) => void;
@@ -39,10 +41,12 @@ export default class InventoryAreaController extends InteractableAreaController<
     const playerController = this._townController.ourPlayer;
     const playerID = playerController.id;
     const playerLoc = playerController.location;
+    const imgID = await findPetImgId(type);
     playerController.equippedPet = PetController.fromPetModel({
       type,
       playerID,
       location: { x: playerLoc.x, y: playerLoc.y, rotation: playerLoc.rotation },
+      imgID,
     });
     await this._townController.sendInteractableCommand(this.id, {
       type: 'EquipPet',
@@ -73,7 +77,7 @@ export default class InventoryAreaController extends InteractableAreaController<
    */
   set pets(newPets: Pet[] | undefined) {
     if (this._pets !== newPets) {
-      this.emit('petInventoryChange', newPets);
+      this.emit('petChange', newPets);
     }
     this._pets = newPets;
   }

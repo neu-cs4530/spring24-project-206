@@ -8,6 +8,7 @@ export const MOVEMENT_SPEED = 175;
 
 export type PlayerEvents = {
   movement: (newLocation: PlayerLocation) => void;
+  equippedPetChange: (oldPet: PetController | undefined, newPet: PetController | undefined) => void;
 };
 
 export type PlayerGameObjects = {
@@ -52,7 +53,7 @@ export default class PlayerController extends (EventEmitter as new () => TypedEm
   }
 
   set equippedPet(newPet: PetController | undefined) {
-    TownGameScene.deletePetSprite(this._equippedPet);
+    this.emit('equippedPetChange', this._equippedPet, newPet);
     this._equippedPet = newPet;
   }
 

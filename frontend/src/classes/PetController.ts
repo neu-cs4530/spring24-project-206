@@ -58,7 +58,7 @@ export default class PetController extends (EventEmitter as new () => TypedEmitt
   }
 
   toPetModel(): PetModel {
-    return { type: this.type, playerID: this.playerID, location: this.location };
+    return { type: this.type, playerID: this.playerID, location: this.location, imgID: this.imgID };
   }
 
   private _updateGameComponentLocation() {

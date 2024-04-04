@@ -197,7 +197,10 @@ export default class TownGameScene extends Phaser.Scene {
 
   updatePlayers(players: PlayerController[]) {
     //Make sure that each player has sprites
-    players.map(eachPlayer => this.createPlayerSprites(eachPlayer));
+    players.map(eachPlayer => {
+      this.createPlayerSprites(eachPlayer);
+      this.createPetSprite(eachPlayer.equippedPet);
+    });
 
     // Remove disconnected players from board
     const disconnectedPlayers = this._players.filter(
@@ -582,7 +585,7 @@ export default class TownGameScene extends Phaser.Scene {
     this._onGameReadyListeners.forEach(listener => listener());
     this._onGameReadyListeners = [];
     this.coveyTownController.addListener('playersChanged', players => this.updatePlayers(players));
-    this.coveyTownController.addListener('playersChanged', players => this.updatePlayers(players));
+    // TODO: add listener for 'equipPet', oldPet, newPet => {deletePetSprite(oldPet); createPetSprite(newPet)}
   }
 
   createPlayerSprites(player: PlayerController) {
@@ -611,9 +614,9 @@ export default class TownGameScene extends Phaser.Scene {
     }
   }
 
-  createPetSprite(pet: PetController, imgID: number) {
-    if (!pet.gameObjects) {
-      const imgKey = PET_SPRITE_PREFIX + imgID;
+  createPetSprite(pet: PetController | undefined) {
+    if (pet && !pet.gameObjects) {
+      const imgKey = PET_SPRITE_PREFIX + pet.imgID;
       const sprite = this.physics.add
         .sprite(pet.location.x, pet.location.y, imgKey)
         .setSize(30, 40)
@@ -633,7 +636,7 @@ export default class TownGameScene extends Phaser.Scene {
     }
   }
 
-  static deletePetSprite(pet: PetController | undefined) {
+  deletePetSprite(pet: PetController | undefined) {
     if (pet && pet.gameObjects) {
       const { sprite, label } = pet.gameObjects;
       if (sprite && label) {
