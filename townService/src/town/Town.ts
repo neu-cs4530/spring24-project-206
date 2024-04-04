@@ -9,6 +9,7 @@ import { isViewingArea } from '../TestUtils';
 import {
   ChatMessage,
   ConversationArea as ConversationAreaModel,
+  PetShopArea as PetShopAreaModel,
   CoveyTownSocket,
   CurrencyMap,
   Interactable,
@@ -482,6 +483,34 @@ export default class Town {
       return false;
     }
     area.updateModel(viewingArea);
+    area.addPlayersWithinBounds(this._players);
+    this._broadcastEmitter.emit('interactableUpdate', area.toModel());
+    return true;
+  }
+
+  /**
+   * Creates a new pet shop area in this town if there is not currently an active
+   * pet area with the same ID. The pet area ID must match the name of a
+   * pet area that exists in this town's map
+   *
+   * If successful creating the pet shop area, this method:
+   *    Adds any players who are in the region defined by the pet area to it
+   *    Notifies all players in the town that the pet area has been updated by
+   *      emitting an interactableUpdate event
+   *
+   * @param petArea Information describing the pet area to create.
+   *
+   * @returns True if the pet area was created or false if there is no known
+   * pet area with the specified ID or if there is already an active pet area
+   * with the specified ID
+   */
+  public addPetShopArea(petShopArea: PetShopAreaModel): boolean {
+    const area = this._interactables.find(
+      eachArea => eachArea.id === petShopArea.id,
+    ) as PetShopArea;
+    if (!area) {
+      return false;
+    }
     area.addPlayersWithinBounds(this._players);
     this._broadcastEmitter.emit('interactableUpdate', area.toModel());
     return true;
