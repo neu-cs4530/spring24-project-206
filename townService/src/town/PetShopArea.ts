@@ -12,11 +12,12 @@ import InteractableArea from './InteractableArea';
 import { updateCounterForPet } from '../pet-shop/pets-catalog-dao';
 import { createPet } from '../pets/pets-dao';
 import { findOnePlayerCurrency, findPetPrice } from './Database';
-import { logError } from '../Utils';
 import { updateOnePlayerCurrency } from '../leaderboard/leaderboard-dao';
 
 export default class PetShopArea extends InteractableArea {
   public pets?: Pet[];
+
+  private _emitter: TownEmitter;
 
   public constructor(
     { pets, id }: Omit<PetShopAreaModel, 'type'>,
@@ -24,6 +25,7 @@ export default class PetShopArea extends InteractableArea {
     townEmitter: TownEmitter,
   ) {
     super(id, coordinates, townEmitter);
+    this._emitter = townEmitter;
     this.pets = pets;
   }
 
@@ -54,10 +56,13 @@ export default class PetShopArea extends InteractableArea {
   ): InteractableCommandReturnType<CommandType> {
     if (command.type === 'AdoptPet') {
       this._adoptPet(player.id, command.petType);
+      this._emitAreaChanged();
     }
     return undefined as InteractableCommandReturnType<CommandType>;
   }
 
+  // back end is throwing the error, the front end should catch it and then throw it again
+  // relay the error message from the front end to the back end - look at the control flow
   /**
    * Awaits the update counter method from the backend
    * @param type The type of the pet
@@ -66,7 +71,7 @@ export default class PetShopArea extends InteractableArea {
     try {
       await updateCounterForPet(type);
     } catch (error) {
-      logError(`Could not update popularity counter: ${(error as Error).message}`);
+      throw new Error(`Could not update popularity counter: ${(error as Error).message}`);
     }
   }
 
@@ -82,7 +87,7 @@ export default class PetShopArea extends InteractableArea {
       const res = await updateOnePlayerCurrency(playerID, newValue);
       console.log(`new player = ${res}`);
     } catch (error) {
-      logError(`Could not update currency: ${(error as Error).message}`);
+      throw new Error(`Could not update currency: ${(error as Error).message}`);
     }
   }
 
@@ -100,14 +105,9 @@ export default class PetShopArea extends InteractableArea {
     }
 
     if (currency < petPrice) {
-      throw new Error(`Insufficient currency to adopt pet!`);
+      // emit an insufficient currency event to the front end
+      this._emitter.emit('insufficientCurrency');
     } else {
-      // make sure that the pet has not already been bought by the player
-      // const adoptedPets = await findPetsByPlayer(playerID);
-      // console.log(adoptedPets);
-      // if the pet already exists, throw an error?
-      // throw new Error(`Pet has already been adopted!`);
-      // else make the purchase
       const newPet = await createPet({
         type: petType,
         playerID,
@@ -116,7 +116,6 @@ export default class PetShopArea extends InteractableArea {
       await this._updateCurrency(playerID, currency - petPrice);
       await this._incrementPopularity(petType);
       this.pets?.push(newPet);
-      // townEmitter.emit('petAdopted', this.pets);
     }
   }
 }

@@ -58,7 +58,6 @@ const TEXT_COLOR = '#88643e';
 
 // Defines the PetShopSlot component
 function PetShopSlot({ petCatalog, controller, playersPets }: PetShopProps): JSX.Element {
-  const toast = useToast();
   // Initializes the background and adoptElement based on player's ownership of the pet
   let background = <Image src={slotBackground.src} />;
   let adoptElement = (
@@ -69,15 +68,7 @@ function PetShopSlot({ petCatalog, controller, playersPets }: PetShopProps): JSX
         <Image
           src={adoptButton.src}
           onClick={async () => {
-            try {
-              await controller.adopt(petCatalog.type);
-            } catch (e) {
-              toast({
-                title: 'Error adopting',
-                description: (e as Error).toString(),
-                status: 'error',
-              });
-            }
+            await controller.adopt(petCatalog.type);
           }}
         />
       }
@@ -171,14 +162,31 @@ function PetShopArea({
   interactableID: InteractableID;
   playerID: PlayerID;
 }) {
+  const townController = useTownController();
   // Initializes the PetShopController hook
-  const controller = usePetShopController(interactableID);
+  const petShopController = usePetShopController(interactableID);
 
   // Initializes the state variables for petsCatalog
   const [petsCatalog, setPlayerCatalog] = useState<PetCatalog[]>([]);
   // Initializes the state variables for pets
   const [pets, setPets] = useState<Pet[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
+
+  const toast = useToast();
+
+  useEffect(() => {
+    const insufficientCurrencyListener = () => {
+      toast({
+        title: 'Could not adopt pet',
+        description: 'Insufficient funds',
+        status: 'warning',
+      });
+    };
+    townController.addListener('insufficientCurrency', insufficientCurrencyListener);
+    return () => {
+      townController.removeListener('insufficientCurrency', insufficientCurrencyListener);
+    };
+  }, [petShopController, townController, toast]);
 
   useEffect(() => {
     const getCatalog = async () => {
@@ -247,7 +255,12 @@ function PetShopArea({
         gridColumnGap={0}
         justifyContent='center'>
         {currentPets.map((pet, index) => (
-          <PetShopSlot key={index} petCatalog={pet} controller={controller} playersPets={pets} />
+          <PetShopSlot
+            key={index}
+            petCatalog={pet}
+            controller={petShopController}
+            playersPets={pets}
+          />
         ))}
       </Grid>
       {/* Coin Count Image */}

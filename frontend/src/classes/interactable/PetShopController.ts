@@ -30,20 +30,16 @@ export default class PetShopController extends InteractableAreaController<
   }
 
   public async adopt(type: string) {
-    try {
-      this._pets?.push({
-        type: type,
-        playerID: this._townController.ourPlayer.id,
-        equipped: false,
-      });
-      await this._townController.sendInteractableCommand(this.id, {
-        type: 'AdoptPet',
-        petType: type,
-        playerID: this._townController.ourPlayer.id,
-      });
-    } catch (error) {
-      throw new Error(`could not adopt pet: ${(error as Error).message}`);
-    }
+    await this._townController.sendInteractableCommand(this.id, {
+      type: 'AdoptPet',
+      petType: type,
+      playerID: this._townController.ourPlayer.id,
+    });
+    this._pets?.push({
+      type: type,
+      playerID: this._townController.ourPlayer.id,
+      equipped: false,
+    });
   }
 
   set pets(newPets: Pet[] | undefined) {

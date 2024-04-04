@@ -239,7 +239,7 @@ export default class Town {
     try {
       await addPlayerCurrency({ playerID: newPlayer.id, currency: 0 });
     } catch (error) {
-      logError(`Could not add new player currency to database: ${(error as Error).message}`);
+      throw new Error(`Could not add new player currency to database: ${(error as Error).message}`);
     }
     this._connectedSockets.add(socket);
     // Creates the leaderboards for a player who just joined
@@ -387,7 +387,9 @@ export default class Town {
       const currency = await findOnePlayerCurrency(winner);
       await updateOnePlayerCurrency(winner, currency + 1);
     } catch (error) {
-      logError(`Could not update database with the awarded currency: ${(error as Error).message}`);
+      throw new Error(
+        `Could not update database with the awarded currency: ${(error as Error).message}`,
+      );
     }
   }
 
