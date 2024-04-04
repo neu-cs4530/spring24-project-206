@@ -11,7 +11,10 @@ import Inventory from './interactables/PetShop/Inventory';
 import PetShop from './interactables/PetShop/PetShop';
 import Transporter from './interactables/Transporter';
 import ViewingArea from './interactables/ViewingArea';
+import PetController from '../../classes/PetController';
 
+// prefix of pet sprite keys
+const PET_SPRITE_PREFIX = 'Pet_Sprite_';
 // Still not sure what the right type is here... "Interactable" doesn't do it
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function interactableTypeForObjectType(type: string): any {
@@ -42,6 +45,8 @@ export default class TownGameScene extends Phaser.Scene {
   }
 
   private _players: PlayerController[] = [];
+
+  private _pets: PetController[] = [];
 
   private _interactables: Interactable[] = [];
 
@@ -139,6 +144,55 @@ export default class TownGameScene extends Phaser.Scene {
       this._resourcePathPrefix + '/assets/atlas/atlas.png',
       this._resourcePathPrefix + '/assets/atlas/atlas.json',
     );
+    // loading pet sprites
+    this.load.image(
+      PET_SPRITE_PREFIX + 1,
+      this._resourcePathPrefix + '/assets/pet-shop/pet-sprites/1.png',
+    );
+    this.load.image(
+      PET_SPRITE_PREFIX + 2,
+      this._resourcePathPrefix + '/assets/pet-shop/pet-sprites/2.png',
+    );
+    this.load.image(
+      PET_SPRITE_PREFIX + 3,
+      this._resourcePathPrefix + '/assets/pet-shop/pet-sprites/3.png',
+    );
+    this.load.image(
+      PET_SPRITE_PREFIX + 4,
+      this._resourcePathPrefix + '/assets/pet-shop/pet-sprites/4.png',
+    );
+    this.load.image(
+      PET_SPRITE_PREFIX + 5,
+      this._resourcePathPrefix + '/assets/pet-shop/pet-sprites/5.png',
+    );
+    this.load.image(
+      PET_SPRITE_PREFIX + 6,
+      this._resourcePathPrefix + '/assets/pet-shop/pet-sprites/6.png',
+    );
+    this.load.image(
+      PET_SPRITE_PREFIX + 7,
+      this._resourcePathPrefix + '/assets/pet-shop/pet-sprites/7.png',
+    );
+    this.load.image(
+      PET_SPRITE_PREFIX + 8,
+      this._resourcePathPrefix + '/assets/pet-shop/pet-sprites/8.png',
+    );
+    this.load.image(
+      PET_SPRITE_PREFIX + 9,
+      this._resourcePathPrefix + '/assets/pet-shop/pet-sprites/9.png',
+    );
+    this.load.image(
+      PET_SPRITE_PREFIX + 10,
+      this._resourcePathPrefix + '/assets/pet-shop/pet-sprites/10.png',
+    );
+    this.load.image(
+      PET_SPRITE_PREFIX + 11,
+      this._resourcePathPrefix + '/assets/pet-shop/pet-sprites/11.png',
+    );
+    this.load.image(
+      PET_SPRITE_PREFIX + 12,
+      this._resourcePathPrefix + '/assets/pet-shop/pet-sprites/12.png',
+    );
   }
 
   updatePlayers(players: PlayerController[]) {
@@ -156,6 +210,15 @@ export default class TownGameScene extends Phaser.Scene {
         if (sprite && label) {
           sprite.destroy();
           label.destroy();
+        }
+
+        if (disconnectedPlayer.equippedPet && disconnectedPlayer.equippedPet.gameObjects) {
+          // eslint-disable-next-line @typescript-eslint/no-shadow
+          const { sprite, label } = disconnectedPlayer.equippedPet.gameObjects;
+          if (sprite && label) {
+            sprite.destroy();
+            label.destroy();
+          }
         }
       }
     });
@@ -519,6 +582,7 @@ export default class TownGameScene extends Phaser.Scene {
     this._onGameReadyListeners.forEach(listener => listener());
     this._onGameReadyListeners = [];
     this.coveyTownController.addListener('playersChanged', players => this.updatePlayers(players));
+    this.coveyTownController.addListener('playersChanged', players => this.updatePlayers(players));
   }
 
   createPlayerSprites(player: PlayerController) {
@@ -544,6 +608,38 @@ export default class TownGameScene extends Phaser.Scene {
         locationManagedByGameScene: false,
       };
       this._collidingLayers.forEach(layer => this.physics.add.collider(sprite, layer));
+    }
+  }
+
+  createPetSprite(pet: PetController, imgID: number) {
+    if (!pet.gameObjects) {
+      const imgKey = PET_SPRITE_PREFIX + imgID;
+      const sprite = this.physics.add
+        .sprite(pet.location.x, pet.location.y, imgKey)
+        .setSize(30, 40)
+        .setOffset(0, 24);
+      const label = this.add.text(pet.location.x, pet.location.y - 20, pet.type, {
+        font: '10px monospace',
+        color: '#000000',
+        // padding: {x: 20, y: 10},
+        backgroundColor: '#ffffff',
+      });
+      pet.gameObjects = {
+        sprite,
+        label,
+        locationManagedByGameScene: false,
+      };
+      this._collidingLayers.forEach(layer => this.physics.add.collider(sprite, layer));
+    }
+  }
+
+  static deletePetSprite(pet: PetController | undefined) {
+    if (pet && pet.gameObjects) {
+      const { sprite, label } = pet.gameObjects;
+      if (sprite && label) {
+        sprite.destroy();
+        label.destroy();
+      }
     }
   }
 

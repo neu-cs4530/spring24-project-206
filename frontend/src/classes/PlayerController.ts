@@ -2,6 +2,7 @@ import { EventEmitter } from 'events';
 import TypedEmitter from 'typed-emitter';
 import { Player as PlayerModel, PlayerLocation } from '../types/CoveyTownSocket';
 import PetController from './PetController';
+import TownGameScene from '../components/Town/TownGameScene';
 
 export const MOVEMENT_SPEED = 175;
 
@@ -51,7 +52,12 @@ export default class PlayerController extends (EventEmitter as new () => TypedEm
   }
 
   set equippedPet(newPet: PetController | undefined) {
+    TownGameScene.deletePetSprite(this._equippedPet);
     this._equippedPet = newPet;
+  }
+
+  get equippedPet(): PetController | undefined {
+    return this._equippedPet;
   }
 
   toPlayerModel(): PlayerModel {

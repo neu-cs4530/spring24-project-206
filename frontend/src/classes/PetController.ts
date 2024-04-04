@@ -23,13 +23,16 @@ export default class PetController extends (EventEmitter as new () => TypedEmitt
 
   private readonly _playerID: PlayerID;
 
+  private readonly _imgID: number;
+
   public gameObjects?: PetGameObjects;
 
-  constructor(type: string, playerID: PlayerID, location: PetLocation) {
+  constructor(type: string, playerID: PlayerID, location: PetLocation, imgID: number) {
     super();
     this._type = type;
     this._playerID = playerID;
     this._location = location;
+    this._imgID = imgID;
   }
 
   set location(newLocation: PetLocation) {
@@ -50,6 +53,10 @@ export default class PetController extends (EventEmitter as new () => TypedEmitt
     return this._playerID;
   }
 
+  get imgID(): number {
+    return this._imgID;
+  }
+
   toPetModel(): PetModel {
     return { type: this.type, playerID: this.playerID, location: this.location };
   }
@@ -63,6 +70,6 @@ export default class PetController extends (EventEmitter as new () => TypedEmitt
   }
 
   static fromPetModel(modelPet: PetModel): PetController {
-    return new PetController(modelPet.type, modelPet.playerID, modelPet.location);
+    return new PetController(modelPet.type, modelPet.playerID, modelPet.location, modelPet.imgID);
   }
 }
