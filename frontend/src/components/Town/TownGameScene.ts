@@ -585,7 +585,10 @@ export default class TownGameScene extends Phaser.Scene {
     this._onGameReadyListeners.forEach(listener => listener());
     this._onGameReadyListeners = [];
     this.coveyTownController.addListener('playersChanged', players => this.updatePlayers(players));
-    // TODO: add listener for 'equipPet', oldPet, newPet => {deletePetSprite(oldPet); createPetSprite(newPet)}
+    this.coveyTownController.addListener('equippedPetChanged', update => {
+      this.deletePetSprite(update.toBeUnequipped);
+      this.createPetSprite(update.toBeEquipped);
+    });
   }
 
   createPlayerSprites(player: PlayerController) {

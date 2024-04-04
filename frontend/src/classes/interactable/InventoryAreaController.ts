@@ -7,10 +7,9 @@ import { Pet } from '../../../../townService/src/lib/Pet';
 import TownController from '../TownController';
 import PetController from '../PetController';
 import { findPetImgId } from '../../../../townService/src/town/Database';
-import PlayerController from '../PlayerController';
 
 export type InventoryAreaEvents = BaseInteractableEventMap & {
-  petChange: (newPets: Pet[] | undefined) => void;
+  inventoryAreaChange: (newPets: Pet[] | undefined) => void;
 };
 
 /**
@@ -77,7 +76,7 @@ export default class InventoryAreaController extends InteractableAreaController<
    */
   set pets(newPets: Pet[] | undefined) {
     if (this._pets !== newPets) {
-      this.emit('petChange', newPets);
+      this.emit('inventoryAreaChange', newPets);
     }
     this._pets = newPets;
   }

@@ -1,14 +1,13 @@
 import { EventEmitter } from 'events';
 import TypedEmitter from 'typed-emitter';
-import { Player as PlayerModel, PlayerLocation } from '../types/CoveyTownSocket';
+import { EquippedPetUpdate, Player as PlayerModel, PlayerLocation } from '../types/CoveyTownSocket';
 import PetController from './PetController';
-import TownGameScene from '../components/Town/TownGameScene';
 
 export const MOVEMENT_SPEED = 175;
 
 export type PlayerEvents = {
   movement: (newLocation: PlayerLocation) => void;
-  equippedPetChange: (oldPet: PetController | undefined, newPet: PetController | undefined) => void;
+  equippedPetChanged: (update: EquippedPetUpdate) => void;
 };
 
 export type PlayerGameObjects = {
@@ -53,7 +52,7 @@ export default class PlayerController extends (EventEmitter as new () => TypedEm
   }
 
   set equippedPet(newPet: PetController | undefined) {
-    this.emit('equippedPetChange', this._equippedPet, newPet);
+    this.emit('equippedPetChanged', { toBeUnequipped: this._equippedPet, toBeEquipped: newPet });
     this._equippedPet = newPet;
   }
 

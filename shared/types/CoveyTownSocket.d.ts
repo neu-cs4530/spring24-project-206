@@ -46,6 +46,11 @@ export type TownSettingsUpdate = {
   isPubliclyListed?: boolean;
 };
 
+export type EquippedPetUpdate = {
+  toBeUnequipped?: PetController;
+  toBeEquipped?: PetController;
+};
+
 export type Direction = "front" | "back" | "left" | "right";
 
 export type PlayerID = string;
@@ -357,6 +362,7 @@ export interface ServerToClientEvents {
   commandResponse: (response: InteractableCommandResponse) => void;
   allTimeCurrencyChanged: (currency: CurrencyChangeResponse) => void;
   currentCurrencyChanged: (currency: CurrencyChangeResponse) => void;
+  equippedPetChanged: (update: EquippedPetUpdate) => void;
 }
 
 export interface ClientToServerEvents {

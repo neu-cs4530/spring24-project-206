@@ -16,6 +16,7 @@ import {
   ChatMessage,
   CoveyTownSocket,
   CurrencyMap,
+  EquippedPetUpdate,
   GameState,
   Interactable as InteractableAreaModel,
   InteractableCommand,
@@ -132,6 +133,12 @@ export type TownEvents = {
    * @param currency a CurrencyMap object representing current currency changes.
    */
   currentCurrencyChanged: (currency: CurrencyMap) => void;
+
+  /**
+   * Event handler for the 'equippedPetChanged' event.
+   * @param update the pet to be unequipped and the pet to be equipped.
+   */
+  equippedPetChanged: (update: EquippedPetUpdate) => void;
 };
 
 /**
@@ -384,14 +391,14 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
     return ret as GameAreaController<GameState, GameEventTypes>[];
   }
 
-  public get petShopArea(): PetShopController[] {
+  public get petShopAreas(): PetShopController[] {
     const ret = this._interactableControllers.filter(
       eachInteractable => eachInteractable instanceof PetShopController,
     );
     return ret as PetShopController[];
   }
 
-  public get inventoryArea(): InventoryAreaController[] {
+  public get inventoryAreas(): InventoryAreaController[] {
     const ret = this._interactableControllers.filter(
       eachInteractable => eachInteractable instanceof InventoryAreaController,
     );
@@ -556,6 +563,10 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
       this._currentCurrency = currencyMap;
       // Emit currency change event with the current currency map
       this.emit('currentCurrencyChanged', this._currentCurrency);
+    });
+
+    this._socket.on('equippedPetChanged', (update: EquippedPetUpdate) => {
+      this.emit('equippedPetChanged', update);
     });
   }
 
@@ -907,7 +918,7 @@ export function useInteractableAreaController<T>(interactableAreaID: string): T 
 export function usePetShopController(interactableAreaID: string): PetShopController {
   const townController = useTownController();
 
-  const petShopAreaController = townController.petShopArea.find(
+  const petShopAreaController = townController.petShopAreas.find(
     eachArea => eachArea.id == interactableAreaID,
   );
   if (!petShopAreaController) {
@@ -929,13 +940,26 @@ export function usePetShopController(interactableAreaID: string): PetShopControl
 export function useInventoryAreaController(interactableAreaID: string): InventoryAreaController {
   const townController = useTownController();
 
-  const inventoryAreaController = townController.inventoryArea.find(
+  const inventoryAreaController = townController.inventoryAreas.find(
     eachArea => eachArea.id == interactableAreaID,
   );
   if (!inventoryAreaController) {
     throw new Error(`Requested inventory area ${interactableAreaID} does not exist`);
   }
   return inventoryAreaController as InventoryAreaController;
+  // const [inventoryAreas, setInventoryAreas] = useState<InventoryAreaController[]>(
+  //   townController.inventoryAreas.filter(eachArea => !eachArea.isEmpty()),
+  // );
+  //
+  // useEffect(() => {
+  //   const updater = (update: Pet[]) => {
+  //     // dunno
+  //   };
+  //   townController.addListener('inventoryAreaChange', updater);
+  //   return () => {
+  //     townController.removeListener('inventoryAreaChange', updater);
+  //   };
+  // }, [townController, setInventoryAreas]);
 }
 
 /**
