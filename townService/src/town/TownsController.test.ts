@@ -15,6 +15,11 @@ import {
 } from '../TestUtils';
 import { TownsController } from './TownsController';
 
+// Mock the addPlayerCurrency function
+jest.mock('./Database', () => ({
+  addPlayerCurrency: jest.fn().mockResolvedValue({}),
+}));
+
 type TestTownData = {
   friendlyName: string;
   townID: string;

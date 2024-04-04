@@ -332,6 +332,10 @@ export interface ServerToClientEvents {
   commandResponse: (response: InteractableCommandResponse) => void;
   allTimeCurrencyChanged: (currency: CurrencyChangeResponse) => void;
   currentCurrencyChanged: (currency: CurrencyChangeResponse) => void;
+  // TODO: implement 'petCatalogChange' event
+  // TODO: add an event that signifies the pet was adopted vvv
+  // petAdopted: (playerID: playerID) => void;
+  insufficientCurrency: () => void;
 }
 
 export interface ClientToServerEvents {
