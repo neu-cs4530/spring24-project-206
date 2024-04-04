@@ -19,6 +19,7 @@ import { InteractableID, PlayerID } from '../../../../../../shared/types/CoveyTo
 import { PetCatalog } from '../../../../../../townService/src/lib/PetCatalog';
 import { Pet } from '../../../../../../townService/src/lib/Pet';
 import {
+  findOnePlayerCurrency,
   findPetsByPlayer,
   findPetsInCatalog,
 } from '../../../../../../townService/src/town/Database';
@@ -206,6 +207,21 @@ function InventoryArea({
     getPets();
   }, [playerID, pets]);
 
+  // Initializes the currency variable
+  const [currency, setCurrency] = useState(0);
+  useEffect(() => {
+    const getTheCurrency = async () => {
+      try {
+        const playerCurrency = await findOnePlayerCurrency(playerID);
+        setCurrency(playerCurrency);
+      } catch (error) {
+        console.error('Error fetching currency: ', error);
+      }
+    };
+    // Immediately invokes the async function
+    getTheCurrency();
+  }, [playerID, currency]);
+
   function findPetByTypeHelp(type: string): PetCatalog {
     const petsByType = petsCatalog.filter(pet => pet.type === type);
     if (petsByType.length === 0) {
@@ -254,7 +270,7 @@ function InventoryArea({
         </Grid>
       )}
       {/* Coin Count Image */}
-      <CurrencyDisplay currency={10} />
+      <CurrencyDisplay currency={currency} />
       {/* back button */}
       <Box position='absolute' left='0' top='410' boxSize='42px'>
         <IconButton

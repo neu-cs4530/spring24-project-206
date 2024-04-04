@@ -22,7 +22,7 @@ export const unequipPet = async (playerID: string, type: string) => {
 };
 export const equipPet = async (playerID: string, type: string) => {
   const pets = await findPetsByPlayer(playerID); // list of pets already owned by this player
-  await pets.map((pet: any) => unequipPet(playerID, pet.type));
+  pets.forEach(pet => unequipPet(playerID, pet.type));
   const updatedPet = await petsModel.findOneAndUpdate(
     { playerID, type }, // Only update if `playerID` and `type` both match
     { equipped: true }, // Set "equipped" to true

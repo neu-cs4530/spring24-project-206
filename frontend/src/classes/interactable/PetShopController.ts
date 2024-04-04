@@ -8,6 +8,7 @@ import TownController from '../TownController';
 
 export type PetShopAreaEvents = BaseInteractableEventMap & {
   petChange: (newPets: Pet[] | undefined) => void;
+  // TODO: listen to the adopted pet event
 };
 
 /**
@@ -29,17 +30,21 @@ export default class PetShopController extends InteractableAreaController<
   }
 
   public async adopt(type: string) {
-    // this._pets?.push({ type: type, playerID: this._townController.ourPlayer.id, equipped: true });
     await this._townController.sendInteractableCommand(this.id, {
       type: 'AdoptPet',
       petType: type,
       playerID: this._townController.ourPlayer.id,
     });
+    this._pets?.push({
+      type: type,
+      playerID: this._townController.ourPlayer.id,
+      equipped: false,
+    });
   }
 
   set pets(newPets: Pet[] | undefined) {
     if (this._pets !== newPets) {
-      this.emit('petCatalogChange', newPets);
+      this.emit('petChange', newPets);
     }
     this._pets = newPets;
   }

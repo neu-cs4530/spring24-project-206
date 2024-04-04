@@ -5,7 +5,7 @@ const findAllPets = async (req, res) => {
     const pets = await petsDao.findAllPets();
     res.json(pets);
   } catch (error) {
-    res.status(500).json({ error: 'Internal Server Error' });
+    res.status(500).json({ error: 'Error fetching all pets from the inventory' });
   }
 };
 
@@ -18,7 +18,7 @@ const findPetByType = async (req, res) => {
     const pet = await petsDao.findPetByType(type);
     res.json(pet);
   } catch (error) {
-    res.status(500).json({ error: 'Internal Server Error' });
+    res.status(500).json({ error: 'Error fetching pets of a type from the inventory' });
   }
 };
 
@@ -31,7 +31,7 @@ const findPetsByPlayer = async (req, res) => {
     const pet = await petsDao.findPetsByPlayer(playerID);
     res.json(pet);
   } catch (error) {
-    res.status(500).json({ error: 'Internal Server Error' });
+    res.status(500).json({ error: 'Error fetching all pets of the player' });
   }
 };
 
@@ -44,7 +44,7 @@ const findPetsByPlayerAndType = async (req, res) => {
     const pet = await petsDao.findPetsByPlayerAndType(playerID, type);
     res.json(pet);
   } catch (error) {
-    res.status(500).json({ error: 'Internal Server Error' });
+    res.status(500).json({ error: 'Error fetching pets of certain type of certain player' });
   }
 };
 
@@ -62,20 +62,9 @@ const createPet = async (req, res) => {
     const pet = await petsDao.createPet(req.body);
     res.json(pet);
   } catch (error) {
-    res.status(500).json({ error: 'Internal Server Error' });
+    res.status(500).json({ error: 'Error creating pet in the inventory' });
   }
 };
-
-// const updatePetEquippedStatus = async (req, res) => {
-//   try {
-//     const { type, equipped } = req.body; // FIXME: add playerID
-//     const pet = await petsDao.updatePetEquippedStatus(playerID, type);
-
-//     res.json(pet);
-//   } catch (error) {
-//     res.status(500).json({ error: 'Internal Server Error' });
-//   }
-// };
 
 const API_BASE_PATH = '/api/pets';
 

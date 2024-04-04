@@ -135,6 +135,11 @@ export type TownEvents = {
   currentCurrencyChanged: (currency: CurrencyMap) => void;
 
   /**
+   * Event indicating the unsuccessful purchase of a pet.
+   */
+  insufficientCurrency: () => void;
+
+  /**
    * Event handler for the 'equippedPetChanged' event.
    * @param update the pet to be unequipped and the pet to be equipped.
    */
@@ -563,6 +568,10 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
       this._currentCurrency = currencyMap;
       // Emit currency change event with the current currency map
       this.emit('currentCurrencyChanged', this._currentCurrency);
+    });
+
+    this._socket.on('insufficientCurrency', () => {
+      this.emit('insufficientCurrency');
     });
 
     this._socket.on('equippedPetChanged', (update: EquippedPetUpdate) => {

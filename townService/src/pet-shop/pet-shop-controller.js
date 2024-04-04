@@ -13,9 +13,9 @@ const findAllPets = async (req, res) => {
 };
 
 /*
-Search by pet type
-*/
-export const findPetByType = async (req, res) => {
+ * Search by pet type
+ */
+const findPetByType = async (req, res) => {
   try {
     const { type } = req.params;
     const pet = await petsCatalogDao.findPetByType(type);
@@ -31,10 +31,23 @@ export const findPetByType = async (req, res) => {
 export const incrementCounter = async (req, res) => {
   try {
     const { type } = req.params;
-    const pet = await petsCatalogDao.updateCounterForPet(type);
-    res.json(pet);
+    const updatedCounter = await petsCatalogDao.updateCounterForPet(type);
+    res.json(updatedCounter);
   } catch (error) {
-    res.status(500).json({ error: 'Internal Server Error' });
+    res.status(500).json({ error: "Error incrementing the pet's popularity" });
+  }
+};
+
+/**
+ * find the pet's price
+ */
+export const findPetPrice = async (req, res) => {
+  try {
+    const { type } = req.params;
+    const price = await petsCatalogDao.findPetPrice(type);
+    res.json(price);
+  } catch (error) {
+    res.status(500).json({ error: "Error incrementing the pet's popularity" });
   }
 };
 
@@ -44,6 +57,7 @@ const petsCatalogController = app => {
   app.get(API_BASE_PATH, findAllPets);
   app.get(`${API_BASE_PATH}/type/:type`, findPetByType);
   app.put(`${API_BASE_PATH}/type/:type`, incrementCounter);
+  app.get(`${API_BASE_PATH}/price/type/:type`, findPetPrice);
 };
 
 export default petsCatalogController;
