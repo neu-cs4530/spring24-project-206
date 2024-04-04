@@ -190,7 +190,7 @@ function InventoryArea({
     };
 
     getCatalog();
-  }, []);
+  }, [playerID]);
 
   useEffect(() => {
     // get the player's pets
@@ -204,7 +204,7 @@ function InventoryArea({
     };
 
     getPets();
-  }, [playerID]);
+  }, [playerID, pets]);
 
   function findPetByTypeHelp(type: string): PetCatalog {
     const petsByType = petsCatalog.filter(pet => pet.type === type);
