@@ -233,7 +233,6 @@ export default class Town {
    */
   async addPlayer(userName: string, socket: CoveyTownSocket): Promise<Player> {
     const newPlayer = new Player(userName, socket.to(this._townID));
-    console.log(`new player ID = ${newPlayer.id}`);
     this._players.push(newPlayer);
     this._allPlayers.push(newPlayer);
     try {

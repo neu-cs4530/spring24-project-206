@@ -81,11 +81,7 @@ export default class PetShopArea extends InteractableArea {
    */
   private async _updateCurrency(playerID: string, newValue: number) {
     try {
-      console.log('updating currency');
-      console.log(`playerID = ${playerID}`);
-      console.log(`new value: ${newValue}`);
-      const res = await updateOnePlayerCurrency(playerID, newValue);
-      console.log(`new player = ${res}`);
+      await updateOnePlayerCurrency(playerID, newValue);
     } catch (error) {
       throw new Error(`Could not update currency: ${(error as Error).message}`);
     }

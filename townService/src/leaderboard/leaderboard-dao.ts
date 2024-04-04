@@ -1,4 +1,4 @@
-import leaderboardModel from './leaderboard-model.js';
+import leaderboardModel from './leaderboard-model';
 import { LeaderboardEntry } from '../lib/LeaderboardEntry';
 
 export const getAllPlayersCurrency = () => leaderboardModel.find();
