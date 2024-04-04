@@ -22,6 +22,11 @@ import {
 import ConversationArea from './ConversationArea';
 import Town from './Town';
 
+// Mock the addPlayerCurrency function
+jest.mock('./Database', () => ({
+  addPlayerCurrency: jest.fn().mockResolvedValue({}),
+}));
+
 const mockTwilioVideo = mockDeep<TwilioVideo>();
 jest.spyOn(TwilioVideo, 'getInstance').mockReturnValue(mockTwilioVideo);
 
