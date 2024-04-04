@@ -95,7 +95,7 @@ export default function TownMap(): JSX.Element {
 
       <div id='map-container' />
       <div id='social-container'>
-        <SocialSidebar />
+        <SocialSidebar townController={coveyTownController} />
       </div>
     </div>
   );
