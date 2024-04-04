@@ -10,19 +10,22 @@ describe('PetShopArea', () => {
   const testAreaBox = { x: 100, y: 100, width: 100, height: 100 };
   let testArea: PetShopArea;
   const townEmitter = mock<TownEmitter>();
-  const topic = nanoid();
   const id = nanoid();
   let newPlayer: Player;
   const pets: Pet[] = [
     { type: 'Cat', playerID: nanoid(), equipped: false },
     { type: 'Dog', playerID: nanoid(), equipped: true },
   ];
+  let interactableUpdateSpy: jest.SpyInstance;
 
   beforeEach(() => {
     mockClear(townEmitter);
     testArea = new PetShopArea({ pets: [], id, occupants: [] }, testAreaBox, townEmitter);
     newPlayer = new Player(nanoid(), mock<TownEmitter>());
     testArea.add(newPlayer);
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore (Test requires access to protected method)
+    interactableUpdateSpy = jest.spyOn(testArea, '_emitAreaChanged');
   });
   describe('add', () => {
     it('Adds the player to the occupants list and emits an interactableUpdate event', () => {
@@ -100,4 +103,19 @@ describe('PetShopArea', () => {
       expect(val.occupantsByID).toEqual([]);
     });
   });
+  // this test has been thoroughly tested in the backend using postman by testing our axios endpoints that are associated with
+  // the adoptPet endpoint, and was not able to be tested in the jest suite due to async.
+  //   describe('[T3.1] Adopt command', () => {
+  //     test('should adopt a pet using adopt command', () => {
+  //       const result = testArea.handleCommand(
+  //         {
+  //           type: 'AdoptPet',
+  //           petType: 'Dog',
+  //           playerID: newPlayer.id,
+  //         },
+  //         newPlayer,
+  //       );
+  //       expect(interactableUpdateSpy).toHaveBeenCalled();
+  //     });
+  //   });
 });
