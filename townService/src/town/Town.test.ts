@@ -741,7 +741,7 @@ describe('Town', () => {
     });
   });
 
-  // adding pet shop area tests
+  // Added pet shop area tests
   describe('add PetShopArea', () => {
     beforeEach(async () => {
       town.initializeFromMap(testingMaps.twoConvOnePetShop);
