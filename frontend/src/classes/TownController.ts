@@ -49,7 +49,6 @@ import ViewingAreaController from './interactable/ViewingAreaController';
 import PlayerController from './PlayerController';
 import PetShop from '../components/Town/interactables/PetShop/PetShop';
 import InventoryAreaController from './interactable/InventoryAreaController';
-import PetController from './PetController';
 
 const CALCULATE_NEARBY_PLAYERS_DELAY_MS = 300;
 const SOCKET_COMMAND_TIMEOUT_MS = 5000;
@@ -397,14 +396,14 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
     return ret as GameAreaController<GameState, GameEventTypes>[];
   }
 
-  public get petShopAreas(): PetShopController[] {
+  public get petShopArea(): PetShopController[] {
     const ret = this._interactableControllers.filter(
       eachInteractable => eachInteractable instanceof PetShopController,
     );
     return ret as PetShopController[];
   }
 
-  public get inventoryAreas(): InventoryAreaController[] {
+  public get inventoryArea(): InventoryAreaController[] {
     const ret = this._interactableControllers.filter(
       eachInteractable => eachInteractable instanceof InventoryAreaController,
     );
@@ -580,14 +579,9 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
       this.emit('insufficientCurrency');
     });
 
-    // this._socket.on('equippedPetChanged', (update: EquippedPetUpdate) => {
-    // this._socket.on('petEquipped', (update: EquippedPetUpdate) => {
-    //   const { toBeEquipped, toBeUnequipped } = update;
-    //   if (toBeUnequipped && toBeUnequipped.playerID === this.ourPlayer.id) {
-    //     // this.ourPlayer.equip
-    //   }
-    //   this.emit('equippedPetChanged', update);
-    // });
+    this._socket.on('equippedPetChanged', (update: EquippedPetUpdate) => {
+      this.emit('equippedPetChanged', update);
+    });
   }
 
   /**
@@ -938,7 +932,7 @@ export function useInteractableAreaController<T>(interactableAreaID: string): T 
 export function usePetShopController(interactableAreaID: string): PetShopController {
   const townController = useTownController();
 
-  const petShopAreaController = townController.petShopAreas.find(
+  const petShopAreaController = townController.petShopArea.find(
     eachArea => eachArea.id == interactableAreaID,
   );
   if (!petShopAreaController) {
@@ -960,7 +954,7 @@ export function usePetShopController(interactableAreaID: string): PetShopControl
 export function useInventoryAreaController(interactableAreaID: string): InventoryAreaController {
   const townController = useTownController();
 
-  const inventoryAreaController = townController.inventoryAreas.find(
+  const inventoryAreaController = townController.inventoryArea.find(
     eachArea => eachArea.id == interactableAreaID,
   );
   if (!inventoryAreaController) {
