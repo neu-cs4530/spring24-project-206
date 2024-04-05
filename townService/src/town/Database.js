@@ -1,6 +1,7 @@
 import axios from 'axios';
+import 'dotenv/config';
 
-axios.defaults.baseURL = 'http://localhost:8081/api'; // FIXME: change url
+axios.defaults.baseURL = process.env.AXIOS_BASE_URL;
 
 export const addPet = async data => {
   const response = await axios.post(`/pets`, data);
