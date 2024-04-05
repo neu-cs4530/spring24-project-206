@@ -15,6 +15,9 @@ import PetController from '../../classes/PetController';
 
 // prefix of pet sprite keys
 const PET_SPRITE_PREFIX = 'Pet_Sprite_';
+// prefix of pet animations
+const PET_ANIMATION_PREFIX = 'Pet_Animation_';
+const ANIMATIONS = ["alert", 'disgust', 'happy', 'love', 'sad']
 // Still not sure what the right type is here... "Interactable" doesn't do it
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function interactableTypeForObjectType(type: string): any {
@@ -192,6 +195,27 @@ export default class TownGameScene extends Phaser.Scene {
     this.load.image(
       PET_SPRITE_PREFIX + 12,
       this._resourcePathPrefix + '/assets/pet-shop/pet-sprites/12.png',
+    );
+    // loading emotes
+    this.load.image(
+      PET_ANIMATION_PREFIX + 'alert',
+      this._resourcePathPrefix + '/assets/pet-shop/emotes/alert.png',
+    );
+    this.load.image(
+      PET_ANIMATION_PREFIX + 'disgust',
+      this._resourcePathPrefix + '/assets/pet-shop/emotes/disgust.png',
+    );
+    this.load.image(
+      PET_ANIMATION_PREFIX + 'happy',
+      this._resourcePathPrefix + '/assets/pet-shop/emotes/happy.png',
+    );
+    this.load.image(
+      PET_ANIMATION_PREFIX + 'love',
+      this._resourcePathPrefix + '/assets/pet-shop/emotes/love.png',
+    );
+    this.load.image(
+      PET_ANIMATION_PREFIX + 'sad',
+      this._resourcePathPrefix + '/assets/pet-shop/emotes/sad.png',
     );
   }
 
@@ -636,6 +660,19 @@ export default class TownGameScene extends Phaser.Scene {
         locationManagedByGameScene: false,
       };
       this._collidingLayers.forEach(layer => this.physics.add.collider(sprite, layer));
+      const nearby = this.coveyTownController.nearbyPlayers();
+      const animation = this.randomAnimation();
+      for (const nearPlayer of nearby) {
+        if (nearPlayer.equippedPet) {
+          nearPlayer.equippedPet.animation = animation;
+          const animationImgKey = PET_ANIMATION_PREFIX + nearPlayer.equippedPet._animation;
+          const animationSprite = this.physics.add
+          .sprite(pet.location.x, pet.location.y, animationImgKey)
+          .setSize(30, 40)
+          .setOffset(0, 24);
+          this._collidingLayers.forEach(layer => this.physics.add.collider(animationSprite, layer));
+        }
+      }
     }
   }
 
@@ -647,6 +684,18 @@ export default class TownGameScene extends Phaser.Scene {
         label.destroy();
       }
     }
+  }
+
+  getRandomInt(min: number, max: number): number {
+    const minCeiled = Math.ceil(min);
+    const maxFloored = Math.floor(max);
+    // The maximum is exclusive and the minimum is inclusive
+    return Math.floor(Math.random() * (maxFloored - minCeiled) + minCeiled); 
+  }
+  
+
+  randomAnimation(): string {
+    return ANIMATIONS.slice(this.getRandomInt(0, ANIMATIONS.length))[0];
   }
 
   pause() {
