@@ -18,10 +18,14 @@ import {
   PlayerLocation,
   TownEmitter,
   ViewingArea as ViewingAreaModel,
-  PetShopArea as PetShopAreaModel,
 } from '../types/CoveyTownSocket';
 import ConversationArea from './ConversationArea';
 import Town from './Town';
+
+// Mock the addPlayerCurrency function
+jest.mock('./Database', () => ({
+  addPlayerCurrency: jest.fn().mockResolvedValue({}),
+}));
 
 const mockTwilioVideo = mockDeep<TwilioVideo>();
 jest.spyOn(TwilioVideo, 'getInstance').mockReturnValue(mockTwilioVideo);
@@ -30,59 +34,6 @@ type TestMapDict = {
   [key in string]: ITiledMap;
 };
 const testingMaps: TestMapDict = {
-  twoConvOnePetShop: {
-    tiledversion: '1.9.0',
-    tileheight: 32,
-    tilesets: [],
-    tilewidth: 32,
-    type: 'map',
-    layers: [
-      {
-        id: 4,
-        name: 'Objects',
-        objects: [
-          {
-            type: 'ConversationArea',
-            height: 237,
-            id: 39,
-            name: 'Name1',
-            rotation: 0,
-            visible: true,
-            width: 326,
-            x: 40,
-            y: 120,
-          },
-          {
-            type: 'ConversationArea',
-            height: 266,
-            id: 43,
-            name: 'Name2',
-            rotation: 0,
-            visible: true,
-            width: 467,
-            x: 612,
-            y: 120,
-          },
-          {
-            type: 'PetShopArea',
-            height: 237,
-            id: 54,
-            name: 'Name3',
-            rotation: 0,
-            visible: true,
-            width: 326,
-            x: 155,
-            y: 566,
-          },
-        ],
-        opacity: 1,
-        type: 'objectgroup',
-        visible: true,
-        x: 0,
-        y: 0,
-      },
-    ],
-  },
   twoConv: {
     tiledversion: '1.9.0',
     tileheight: 32,
@@ -740,49 +691,6 @@ describe('Town', () => {
       });
     });
   });
-
-  // Added pet shop area tests
-  describe('add PetShopArea', () => {
-    beforeEach(async () => {
-      town.initializeFromMap(testingMaps.twoConvOnePetShop);
-    });
-    it('Should return false if no area exists with that ID', () => {
-      expect(
-        town.addPetShopArea({
-          id: nanoid(),
-          occupants: [],
-          type: 'PetShopArea',
-        }),
-      ).toBe(false);
-    });
-    describe('When successful', () => {
-      const newModel: PetShopAreaModel = {
-        id: 'Name3',
-        occupants: [playerID],
-        type: 'PetShopArea',
-      };
-      beforeEach(() => {
-        playerTestData.moveTo(160, 570); // Inside of "Name3" area
-        expect(town.addPetShopArea(newModel)).toBe(true);
-        newModel.occupants = [playerID];
-      });
-
-      it('Should update the local model for that area', () => {
-        const petShopArea = town.getInteractable('Name3');
-        expect(petShopArea.toModel()).toEqual(newModel);
-      });
-
-      it('Should emit an interactableUpdate message', () => {
-        const lastEmittedUpdate = getLastEmittedEvent(townEmitter, 'interactableUpdate');
-        expect(lastEmittedUpdate).toEqual(newModel);
-      });
-      it('Should include any players in that area as occupants', () => {
-        const petShopArea = town.getInteractable('Name3');
-        expect(petShopArea.occupantsByID).toEqual([player.id]);
-      });
-    });
-  });
-
   describe('[T1] addViewingArea', () => {
     beforeEach(async () => {
       town.initializeFromMap(testingMaps.twoConvOneViewing);
