@@ -73,8 +73,7 @@ app.use(
 );
 
 // connect to mongo
-const CONNECTION_STRING =
-  'mongodb+srv://ananya:cWxO4lhcRGjkMx9S@personal-pet-collection.hbmnsu4.mongodb.net/pet-collection?retryWrites=true&w=majority&appName=personal-pet-collection';
+const CONNECTION_STRING = `mongodb+srv://${process.env.MONGODB_USERNAME}:${process.env.MONGODB_PASSWORD}@personal-pet-collection.hbmnsu4.mongodb.net/pet-collection?retryWrites=true&w=majority&appName=personal-pet-collection`;
 console.log('Trying to connect to MongoDB...');
 mongoose
   .connect(CONNECTION_STRING)
