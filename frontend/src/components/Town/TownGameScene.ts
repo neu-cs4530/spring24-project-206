@@ -321,7 +321,9 @@ export default class TownGameScene extends Phaser.Scene {
       }
 
       // Normalize and scale the velocity so that player can't move faster along a diagonal
-      gameObjects.sprite.body.velocity.normalize().scale(this.coveyTownController.ourPlayer.movementSpeed);
+      gameObjects.sprite.body.velocity
+        .normalize()
+        .scale(this.coveyTownController.ourPlayer.movementSpeed);
 
       const isMoving = primaryDirection !== undefined;
       gameObjects.label.setX(body.x);

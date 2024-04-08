@@ -40,10 +40,10 @@ export default class InventoryAreaController extends InteractableAreaController<
     const playerLoc = playerController.location;
     const imgID = await findPetImgId(type);
     const toBeEquipped: EquippedPet = {
-      type, 
-      playerID, 
-      location: { x: playerLoc.x, y: playerLoc.y, rotation: playerLoc.rotation }, 
-      imgID
+      type,
+      playerID,
+      location: { x: playerLoc.x, y: playerLoc.y, rotation: playerLoc.rotation },
+      imgID,
     };
     this._townController.equipPet(toBeEquipped);
 
