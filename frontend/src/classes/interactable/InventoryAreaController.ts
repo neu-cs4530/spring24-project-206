@@ -5,12 +5,10 @@ import InteractableAreaController, {
 import { EquippedPet, InventoryArea as InventoryAreaModel } from '../../types/CoveyTownSocket';
 import { Pet } from '../../../../townService/src/lib/Pet';
 import TownController from '../TownController';
-import { findPetImgId } from '../../../../townService/src/town/Database';
+import { findPetImgId, findPetSpeed } from '../../../../townService/src/town/Database';
 
 export type InventoryAreaEvents = BaseInteractableEventMap & {
   petChange: (newPets: Pet[] | undefined) => void;
-  petEquipped: (toBeEquipped: EquippedPet) => void;
-  petUnequipped: (toBeUnequipped: EquippedPet) => void;
 };
 
 /**
@@ -48,6 +46,9 @@ export default class InventoryAreaController extends InteractableAreaController<
       imgID
     };
     this._townController.equipPet(toBeEquipped);
+
+    const speedFactor = await findPetSpeed(type);
+    playerController.multiplySpeedBy(speedFactor);
     await this._townController.sendInteractableCommand(this.id, {
       type: 'EquipPet',
       petType: type,
@@ -62,6 +63,7 @@ export default class InventoryAreaController extends InteractableAreaController<
    */
   public async unequip(type: string) {
     this._townController.unequipPet();
+    this._townController.ourPlayer.resetSpeed();
     await this._townController.sendInteractableCommand(this.id, {
       type: 'UnequipPet',
       petType: type,

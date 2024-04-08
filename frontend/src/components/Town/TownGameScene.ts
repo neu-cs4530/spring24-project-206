@@ -1,6 +1,6 @@
 import assert from 'assert';
 import Phaser from 'phaser';
-import PlayerController, { DEFAULT_SPEED } from '../../classes/PlayerController';
+import PlayerController from '../../classes/PlayerController';
 import TownController from '../../classes/TownController';
 import { PlayerLocation } from '../../types/CoveyTownSocket';
 import { Callback } from '../VideoCall/VideoFrontend/types';
@@ -291,19 +291,19 @@ export default class TownGameScene extends Phaser.Scene {
       const primaryDirection = this.getNewMovementDirection();
       switch (primaryDirection) {
         case 'left':
-          body.setVelocityX(-DEFAULT_SPEED);
+          body.setVelocityX(-this.coveyTownController.ourPlayer.movementSpeed);
           gameObjects.sprite.anims.play('misa-left-walk', true);
           break;
         case 'right':
-          body.setVelocityX(DEFAULT_SPEED);
+          body.setVelocityX(this.coveyTownController.ourPlayer.movementSpeed);
           gameObjects.sprite.anims.play('misa-right-walk', true);
           break;
         case 'front':
-          body.setVelocityY(DEFAULT_SPEED);
+          body.setVelocityY(this.coveyTownController.ourPlayer.movementSpeed);
           gameObjects.sprite.anims.play('misa-front-walk', true);
           break;
         case 'back':
-          body.setVelocityY(-DEFAULT_SPEED);
+          body.setVelocityY(-this.coveyTownController.ourPlayer.movementSpeed);
           gameObjects.sprite.anims.play('misa-back-walk', true);
           break;
         default:
@@ -321,7 +321,7 @@ export default class TownGameScene extends Phaser.Scene {
       }
 
       // Normalize and scale the velocity so that player can't move faster along a diagonal
-      gameObjects.sprite.body.velocity.normalize().scale(DEFAULT_SPEED);
+      gameObjects.sprite.body.velocity.normalize().scale(this.coveyTownController.ourPlayer.movementSpeed);
 
       const isMoving = primaryDirection !== undefined;
       gameObjects.label.setX(body.x);

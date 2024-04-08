@@ -23,14 +23,14 @@ export default class PlayerController extends (EventEmitter as new () => TypedEm
 
   public gameObjects?: PlayerGameObjects;
 
-  // private _movementSpeed: number;
+  private _movementSpeed: number;
 
   constructor(id: string, userName: string, location: PlayerLocation) {
     super();
     this._id = id;
     this._userName = userName;
     this._location = location;
-    // this.resetSpeed();
+    this._movementSpeed = DEFAULT_SPEED;
   }
 
   set location(newLocation: PlayerLocation) {
@@ -51,14 +51,21 @@ export default class PlayerController extends (EventEmitter as new () => TypedEm
     return this._id;
   }
 
-  // set equippedPet(newPet: PetController | undefined) {
-  //   this.emit('equippedPetChanged', { toBeUnequipped: this._equippedPet, toBeEquipped: newPet });
-  //   this._equippedPet = newPet;
-  // }
+  set movementSpeed(newSpeed: number) {
+    this._movementSpeed = newSpeed;
+  }
 
-  // get equippedPet(): PetController | undefined {
-  //   return this._equippedPet;
-  // }
+  get movementSpeed(): number {
+    return this._movementSpeed;
+  }
+
+  multiplySpeedBy(factor: number) {
+    this.movementSpeed = DEFAULT_SPEED * factor;
+  }
+
+  resetSpeed() {
+    this.movementSpeed = DEFAULT_SPEED;
+  }
 
   toPlayerModel(): PlayerModel {
     return { id: this.id, userName: this.userName, location: this.location };
@@ -74,19 +81,19 @@ export default class PlayerController extends (EventEmitter as new () => TypedEm
         sprite.anims.play(`misa-${this.location.rotation}-walk`, true);
         switch (this.location.rotation) {
           case 'front':
-            sprite.body.setVelocity(0, DEFAULT_SPEED);
+            sprite.body.setVelocity(0, this.movementSpeed);
             break;
           case 'right':
-            sprite.body.setVelocity(DEFAULT_SPEED, 0);
+            sprite.body.setVelocity(this.movementSpeed, 0);
             break;
           case 'back':
-            sprite.body.setVelocity(0, -DEFAULT_SPEED);
+            sprite.body.setVelocity(0, -this.movementSpeed);
             break;
           case 'left':
-            sprite.body.setVelocity(-DEFAULT_SPEED, 0);
+            sprite.body.setVelocity(-this.movementSpeed, 0);
             break;
         }
-        sprite.body.velocity.normalize().scale(175);
+        sprite.body.velocity.normalize().scale(this.movementSpeed);
       } else {
         sprite.body.setVelocity(0, 0);
         sprite.anims.stop();
