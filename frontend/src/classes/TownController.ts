@@ -16,7 +16,7 @@ import {
   ChatMessage,
   CoveyTownSocket,
   CurrencyMap,
-  EquippedPetUpdate,
+  EquippedPet,
   GameState,
   Interactable as InteractableAreaModel,
   InteractableCommand,
@@ -49,6 +49,7 @@ import ViewingAreaController from './interactable/ViewingAreaController';
 import PlayerController from './PlayerController';
 import PetShop from '../components/Town/interactables/PetShop/PetShop';
 import InventoryAreaController from './interactable/InventoryAreaController';
+import PetController from './PetController';
 
 const CALCULATE_NEARBY_PLAYERS_DELAY_MS = 300;
 const SOCKET_COMMAND_TIMEOUT_MS = 5000;
@@ -140,10 +141,10 @@ export type TownEvents = {
   insufficientCurrency: () => void;
 
   /**
-   * Event handler for the 'equippedPetChanged' event.
-   * @param update the pet to be unequipped and the pet to be equipped.
+   * Event handler for the 'equippedPetsChanged' event.
+   * @param update the new list of equipped pets.
    */
-  equippedPetChanged: (update: EquippedPetUpdate) => void;
+  equippedPetsChanged: (newPets: PetController[]) => void;
 };
 
 /**
@@ -181,6 +182,12 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
    * with a new one; clients should take note not to retain stale references.
    */
   private _playersInternal: PlayerController[] = [];
+
+   /**
+   * The current list of equipped pets in the town. Adding or removing pets might replace the array
+   * with a new one; clients should take note not to retain stale references.
+   */
+  private _petsInternal: PetController[] = [];
 
   /**
    * The current list of interactable areas in the town. Adding or removing interactable areas might replace the array.
@@ -368,7 +375,16 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
   public getPlayer(id: PlayerID) {
     const ret = this._playersInternal.find(eachPlayer => eachPlayer.id === id);
     assert(ret);
-    return ret;
+  return ret;
+  }
+
+  private set _pets(newPets: PetController[]) {
+    this.emit('equippedPetsChanged', newPets);
+    this._petsInternal = newPets;
+  }
+
+  public get pets(): PetController[] {
+    return this._petsInternal;
   }
 
   public get conversationAreas(): ConversationAreaController[] {
@@ -574,14 +590,6 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
     this._socket.on('insufficientCurrency', () => {
       this.emit('insufficientCurrency');
     });
-
-    this._socket.on('insufficientCurrency', () => {
-      this.emit('insufficientCurrency');
-    });
-
-    this._socket.on('equippedPetChanged', (update: EquippedPetUpdate) => {
-      this.emit('equippedPetChanged', update);
-    });
   }
 
   /**
@@ -610,6 +618,16 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
     this._socket.emit('chatMessage', message);
   }
 
+  public equipPet(toBeEquipped: EquippedPet) {
+    const newPets = [... this.pets.filter(pet => pet.playerID !== this.ourPlayer.id)];
+    newPets.push(PetController.fromPetModel(toBeEquipped));
+    this._pets = newPets;
+  }
+  
+  public unequipPet() {
+    this._pets = this.pets.filter(pet => pet.playerID !== this.ourPlayer.id);
+  }
+  
   /**
    * Sends an InteractableArea command to the townService. Returns a promise that resolves
    * when the command is acknowledged by the server.

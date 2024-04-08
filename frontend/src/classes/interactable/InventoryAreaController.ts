@@ -2,15 +2,15 @@ import InteractableAreaController, {
   BaseInteractableEventMap,
   INVENTORY_AREA_TYPE,
 } from './InteractableAreaController';
-import { InventoryArea as InventoryAreaModel } from '../../types/CoveyTownSocket';
+import { EquippedPet, InventoryArea as InventoryAreaModel } from '../../types/CoveyTownSocket';
 import { Pet } from '../../../../townService/src/lib/Pet';
 import TownController from '../TownController';
-import PetController from '../PetController';
 import { findPetImgId } from '../../../../townService/src/town/Database';
-import PlayerController from '../PlayerController';
 
 export type InventoryAreaEvents = BaseInteractableEventMap & {
   petChange: (newPets: Pet[] | undefined) => void;
+  petEquipped: (toBeEquipped: EquippedPet) => void;
+  petUnequipped: (toBeUnequipped: EquippedPet) => void;
 };
 
 /**
@@ -37,17 +37,17 @@ export default class InventoryAreaController extends InteractableAreaController<
    * @param type the type of the pet to equip
    */
   public async equip(type: string) {
-    // TODO: update pets field
     const playerController = this._townController.ourPlayer;
     const playerID = playerController.id;
     const playerLoc = playerController.location;
     const imgID = await findPetImgId(type);
-    playerController.equippedPet = PetController.fromPetModel({
-      type,
-      playerID,
-      location: { x: playerLoc.x, y: playerLoc.y, rotation: playerLoc.rotation },
-      imgID,
-    });
+    const toBeEquipped: EquippedPet = {
+      type, 
+      playerID, 
+      location: { x: playerLoc.x, y: playerLoc.y, rotation: playerLoc.rotation }, 
+      imgID
+    };
+    this._townController.equipPet(toBeEquipped);
     await this._townController.sendInteractableCommand(this.id, {
       type: 'EquipPet',
       petType: type,
@@ -61,8 +61,7 @@ export default class InventoryAreaController extends InteractableAreaController<
    * @param type the type of the pet to unequip
    */
   public async unequip(type: string) {
-    // TODO: update pets field
-    this._townController.ourPlayer.equippedPet = undefined;
+    this._townController.unequipPet();
     await this._townController.sendInteractableCommand(this.id, {
       type: 'UnequipPet',
       petType: type,

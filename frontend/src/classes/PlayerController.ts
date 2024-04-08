@@ -1,13 +1,12 @@
 import { EventEmitter } from 'events';
 import TypedEmitter from 'typed-emitter';
-import { EquippedPetUpdate, Player as PlayerModel, PlayerLocation } from '../types/CoveyTownSocket';
+import { Player as PlayerModel, PlayerLocation } from '../types/CoveyTownSocket';
 import PetController from './PetController';
 
 export const DEFAULT_SPEED = 175;
 
 export type PlayerEvents = {
   movement: (newLocation: PlayerLocation) => void;
-  equippedPetChanged: (update: EquippedPetUpdate) => void;
 };
 
 export type PlayerGameObjects = {
@@ -23,8 +22,6 @@ export default class PlayerController extends (EventEmitter as new () => TypedEm
   private readonly _userName: string;
 
   public gameObjects?: PlayerGameObjects;
-
-  private _equippedPet?: PetController;
 
   // private _movementSpeed: number;
 
@@ -54,14 +51,14 @@ export default class PlayerController extends (EventEmitter as new () => TypedEm
     return this._id;
   }
 
-  set equippedPet(newPet: PetController | undefined) {
-    this.emit('equippedPetChanged', { toBeUnequipped: this._equippedPet, toBeEquipped: newPet });
-    this._equippedPet = newPet;
-  }
+  // set equippedPet(newPet: PetController | undefined) {
+  //   this.emit('equippedPetChanged', { toBeUnequipped: this._equippedPet, toBeEquipped: newPet });
+  //   this._equippedPet = newPet;
+  // }
 
-  get equippedPet(): PetController | undefined {
-    return this._equippedPet;
-  }
+  // get equippedPet(): PetController | undefined {
+  //   return this._equippedPet;
+  // }
 
   toPlayerModel(): PlayerModel {
     return { id: this.id, userName: this.userName, location: this.location };
