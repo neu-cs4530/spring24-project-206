@@ -979,19 +979,6 @@ export function useInventoryAreaController(interactableAreaID: string): Inventor
     throw new Error(`Requested inventory area ${interactableAreaID} does not exist`);
   }
   return inventoryAreaController as InventoryAreaController;
-  // const [inventoryAreas, setInventoryAreas] = useState<InventoryAreaController[]>(
-  //   townController.inventoryAreas.filter(eachArea => !eachArea.isEmpty()),
-  // );
-  //
-  // useEffect(() => {
-  //   const updater = (update: Pet[]) => {
-  //     // dunno
-  //   };
-  //   townController.addListener('inventoryAreaChange', updater);
-  //   return () => {
-  //     townController.removeListener('inventoryAreaChange', updater);
-  //   };
-  // }, [townController, setInventoryAreas]);
 }
 
 /**
