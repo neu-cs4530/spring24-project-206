@@ -369,5 +369,4 @@ export interface ClientToServerEvents {
   interactableCommand: (
     command: InteractableCommand & InteractableCommandBase
   ) => void;
-  // petEquipment
 }
