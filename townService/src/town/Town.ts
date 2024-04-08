@@ -333,9 +333,9 @@ export default class Town {
             }
           }
           if (interactableModel.type === 'ConnectFourArea') {
-            // Narrows down the interactable object to TicTacToeGameArea type
+            // Narrows down the interactable object to ConnectFourGameArea type
             const connectFourGameArea = interactable as ConnectFourGameArea;
-            // If the TicTacToe game is over and there's a winner
+            // If the ConnectFour game is over and there's a winner
             if (connectFourGameArea.game?.state.winner) {
               const gameID = connectFourGameArea.game.id;
               // Ensure currency for this game hasn't been awarded yet
@@ -344,7 +344,7 @@ export default class Town {
                 const winnerID = connectFourGameArea.game.state.winner;
                 // Get the current currency amount for the winner
                 const winnerCurrency = this.getPlayerCurrency(winnerID);
-                // If winner's currency is undefined, set it to a default amount (1 in this case)
+                // If winner's currency is undefined, set it to a default amount (2 in this case)
                 if (winnerCurrency === undefined) {
                   // Add default currency amount for the winner
                   this.setPlayerCurrency(winnerID, 2);
@@ -357,7 +357,6 @@ export default class Town {
               }
             }
           }
-
           socket.emit('commandResponse', {
             commandID: command.commandID,
             interactableID: command.interactableID,
