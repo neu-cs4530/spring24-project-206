@@ -477,7 +477,7 @@ describe('Town', () => {
       function disconnectPlayer(playerToLeave: MockedPlayer) {
         // Call the disconnect event handler
         const disconnectHandler = getEventListener(playerToLeave.socket, 'disconnect');
-        disconnectHandler('unknown');
+        disconnectHandler('parse error');
       }
       it("Invalidates the players's session token", async () => {
         const token = player.sessionToken;
@@ -876,6 +876,19 @@ describe('Town', () => {
       expect(townEmitter.emit).toBeCalledWith('townSettingsUpdated', {
         isPubliclyListed: expected,
       });
+    });
+  });
+  describe('Currency Related Features', () => {
+    it('should set player currency correctly', () => {
+      const currency = 100;
+      town.setPlayerCurrency(player.id, currency);
+      expect(town.getPlayerCurrency(player.id)).toBe(currency);
+    });
+
+    it('should get player currency correctly', () => {
+      const currency = 100;
+      town.setPlayerCurrency(player.id, currency);
+      expect(town.getPlayerCurrency(player.id)).toBe(currency);
     });
   });
 });
