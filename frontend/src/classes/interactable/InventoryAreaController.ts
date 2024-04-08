@@ -2,9 +2,10 @@ import InteractableAreaController, {
   BaseInteractableEventMap,
   INVENTORY_AREA_TYPE,
 } from './InteractableAreaController';
-import { InventoryArea as InventoryAreaModel } from '../../types/CoveyTownSocket';
+import { EquippedPet, InventoryArea as InventoryAreaModel } from '../../types/CoveyTownSocket';
 import { Pet } from '../../../../townService/src/lib/Pet';
 import TownController from '../TownController';
+import { findPetImgId, findPetSpeed } from '../../../../townService/src/town/Database';
 
 export type InventoryAreaEvents = BaseInteractableEventMap & {
   petChange: (newPets: Pet[] | undefined) => void;
@@ -34,11 +35,24 @@ export default class InventoryAreaController extends InteractableAreaController<
    * @param type the type of the pet to equip
    */
   public async equip(type: string) {
-    // TODO: update pets field
+    const playerController = this._townController.ourPlayer;
+    const playerID = playerController.id;
+    const playerLoc = playerController.location;
+    const imgID = await findPetImgId(type);
+    const toBeEquipped: EquippedPet = {
+      type,
+      playerID,
+      location: { x: playerLoc.x, y: playerLoc.y, rotation: playerLoc.rotation },
+      imgID,
+    };
+    this._townController.equipPet(toBeEquipped);
+
+    const speedFactor = await findPetSpeed(type);
+    playerController.multiplySpeedBy(speedFactor);
     await this._townController.sendInteractableCommand(this.id, {
       type: 'EquipPet',
       petType: type,
-      playerID: this._townController.ourPlayer.id,
+      playerID,
     });
   }
 
@@ -48,7 +62,8 @@ export default class InventoryAreaController extends InteractableAreaController<
    * @param type the type of the pet to unequip
    */
   public async unequip(type: string) {
-    // TODO: update pets field
+    this._townController.unequipPet();
+    this._townController.ourPlayer.resetSpeed();
     await this._townController.sendInteractableCommand(this.id, {
       type: 'UnequipPet',
       petType: type,
@@ -63,7 +78,7 @@ export default class InventoryAreaController extends InteractableAreaController<
    */
   set pets(newPets: Pet[] | undefined) {
     if (this._pets !== newPets) {
-      this.emit('petInventoryChange', newPets);
+      this.emit('petChange', newPets);
     }
     this._pets = newPets;
   }

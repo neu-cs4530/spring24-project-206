@@ -49,10 +49,18 @@ export type TownSettingsUpdate = {
 export type Direction = "front" | "back" | "left" | "right";
 
 export type PlayerID = string;
+
 export interface Player {
   id: PlayerID;
   userName: string;
   location: PlayerLocation;
+}
+
+export interface EquippedPet {
+  type: string;
+  playerID: PlayerID;
+  location: PetLocation;
+  imgID: number;
 }
 
 export type XY = { x: number; y: number };
@@ -67,6 +75,16 @@ export interface PlayerLocation {
   moving: boolean;
   interactableID?: string;
 }
+
+export interface PetLocation {
+  /* The CENTER x coordinate of this pet's location */
+  x: number;
+  /* The CENTER y coordinate of this pet's location */
+  y: number;
+  /** @enum {string} */
+  rotation: Direction;
+}
+
 export type ChatMessage = {
   author: string;
   sid: string;
@@ -105,6 +123,7 @@ export type GameStatus =
   | "WAITING_TO_START"
   | "OVER"
   | "WAITING_FOR_PLAYERS";
+
 /**
  * Base type for the state of a game
  */
@@ -118,6 +137,7 @@ export interface GameState {
 export interface WinnableGameState extends GameState {
   winner?: PlayerID;
 }
+
 /**
  * Base type for a move in a game. Implementers should also extend MoveType
  * @see MoveType
@@ -256,21 +276,26 @@ export type InteractableCommand =
   | AdoptCommand
   | EquipCommand
   | UnequipCommand;
+
 export interface ViewingAreaUpdateCommand {
   type: "ViewingAreaUpdate";
   update: ViewingArea;
 }
+
 export interface JoinGameCommand {
   type: "JoinGame";
 }
+
 export interface LeaveGameCommand {
   type: "LeaveGame";
   gameID: GameInstanceID;
 }
+
 export interface StartGameCommand {
   type: "StartGame";
   gameID: GameInstanceID;
 }
+
 export interface GameMoveCommand<MoveType> {
   type: "GameMove";
   gameID: GameInstanceID;
@@ -332,10 +357,9 @@ export interface ServerToClientEvents {
   commandResponse: (response: InteractableCommandResponse) => void;
   allTimeCurrencyChanged: (currency: CurrencyChangeResponse) => void;
   currentCurrencyChanged: (currency: CurrencyChangeResponse) => void;
-  // TODO: implement 'petCatalogChange' event
-  // TODO: add an event that signifies the pet was adopted vvv
-  // petAdopted: (playerID: playerID) => void;
   insufficientCurrency: () => void;
+  petEquipped: (toBeEquipped: EquippedPet) => void;
+  petUnequipped: (toBeUnequipped: EquippedPet) => void;
 }
 
 export interface ClientToServerEvents {
@@ -345,4 +369,5 @@ export interface ClientToServerEvents {
   interactableCommand: (
     command: InteractableCommand & InteractableCommandBase
   ) => void;
+  // petEquipment
 }

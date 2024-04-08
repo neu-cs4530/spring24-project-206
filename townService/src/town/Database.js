@@ -2,6 +2,7 @@ import axios from 'axios';
 import 'dotenv/config';
 
 axios.defaults.baseURL = process.env.AXIOS_BASE_URL;
+axios.defaults.baseURL = 'http://localhost:8081/api';
 
 export const addPet = async data => {
   const response = await axios.post(`/pets`, data);
@@ -11,14 +12,12 @@ export const addPet = async data => {
 
 export const findPetsByPlayer = async playerID => {
   const response = await axios.get(`/pets/player/${playerID}`);
-  const pets = response.data;
-  return pets;
+  return response.data;
 };
 
 export const findPetsInCatalog = async () => {
   const response = await axios.get(`/pets-catalog`);
-  const pets = response.data;
-  return pets;
+  return response.data;
 };
 
 export const findPetPrice = async type => {
@@ -29,8 +28,7 @@ export const findPetPrice = async type => {
 
 export const findAllCurrency = async () => {
   const response = await axios.get(`/leaderboard`);
-  const currencies = response.data;
-  return currencies;
+  return response.data;
 };
 
 export const findOnePlayerCurrency = async playerID => {
@@ -41,12 +39,23 @@ export const findOnePlayerCurrency = async playerID => {
 
 export const updateOnePlayerCurrency = async (playerID, updatedValue) => {
   const response = await axios.put(`/leaderboard/player/${playerID}`, updatedValue);
-  const oldPlayer = response.data;
-  return oldPlayer;
+  return response.data;
 };
 
 export const addPlayerCurrency = async leaderboardEntry => {
   const response = await axios.post(`/leaderboard`, leaderboardEntry);
-  const player = response.data;
-  return player;
+  return response.data;
+};
+
+export const findPetImgId = async type => {
+  const response = await axios.get(`/pets-catalog/type/${type}`);
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  const { img_id } = response.data;
+  return img_id;
+};
+
+export const findPetSpeed = async type => {
+  const response = await axios.get(`/pets-catalog/type/${type}`);
+  const { speed } = response.data;
+  return speed;
 };

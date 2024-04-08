@@ -191,7 +191,7 @@ function InventoryArea({
     };
 
     getCatalog();
-  }, []);
+  }, [playerID]);
 
   useEffect(() => {
     // get the player's pets
@@ -205,7 +205,7 @@ function InventoryArea({
     };
 
     getPets();
-  }, [playerID]);
+  }, [playerID, pets]);
 
   // Initializes the currency variable
   const [currency, setCurrency] = useState(0);

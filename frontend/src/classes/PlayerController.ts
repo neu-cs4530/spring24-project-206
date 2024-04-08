@@ -1,7 +1,8 @@
 import { EventEmitter } from 'events';
 import TypedEmitter from 'typed-emitter';
 import { Player as PlayerModel, PlayerLocation } from '../types/CoveyTownSocket';
-export const MOVEMENT_SPEED = 175;
+
+export const DEFAULT_SPEED = 175;
 
 export type PlayerEvents = {
   movement: (newLocation: PlayerLocation) => void;
@@ -21,11 +22,14 @@ export default class PlayerController extends (EventEmitter as new () => TypedEm
 
   public gameObjects?: PlayerGameObjects;
 
+  private _movementSpeed: number;
+
   constructor(id: string, userName: string, location: PlayerLocation) {
     super();
     this._id = id;
     this._userName = userName;
     this._location = location;
+    this._movementSpeed = DEFAULT_SPEED;
   }
 
   set location(newLocation: PlayerLocation) {
@@ -46,6 +50,22 @@ export default class PlayerController extends (EventEmitter as new () => TypedEm
     return this._id;
   }
 
+  set movementSpeed(newSpeed: number) {
+    this._movementSpeed = newSpeed;
+  }
+
+  get movementSpeed(): number {
+    return this._movementSpeed;
+  }
+
+  multiplySpeedBy(factor: number) {
+    this.movementSpeed = DEFAULT_SPEED * factor;
+  }
+
+  resetSpeed() {
+    this.movementSpeed = DEFAULT_SPEED;
+  }
+
   toPlayerModel(): PlayerModel {
     return { id: this.id, userName: this.userName, location: this.location };
   }
@@ -60,19 +80,19 @@ export default class PlayerController extends (EventEmitter as new () => TypedEm
         sprite.anims.play(`misa-${this.location.rotation}-walk`, true);
         switch (this.location.rotation) {
           case 'front':
-            sprite.body.setVelocity(0, MOVEMENT_SPEED);
+            sprite.body.setVelocity(0, this.movementSpeed);
             break;
           case 'right':
-            sprite.body.setVelocity(MOVEMENT_SPEED, 0);
+            sprite.body.setVelocity(this.movementSpeed, 0);
             break;
           case 'back':
-            sprite.body.setVelocity(0, -MOVEMENT_SPEED);
+            sprite.body.setVelocity(0, -this.movementSpeed);
             break;
           case 'left':
-            sprite.body.setVelocity(-MOVEMENT_SPEED, 0);
+            sprite.body.setVelocity(-this.movementSpeed, 0);
             break;
         }
-        sprite.body.velocity.normalize().scale(175);
+        sprite.body.velocity.normalize().scale(this.movementSpeed);
       } else {
         sprite.body.setVelocity(0, 0);
         sprite.anims.stop();

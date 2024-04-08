@@ -16,6 +16,7 @@ import {
   ChatMessage,
   CoveyTownSocket,
   CurrencyMap,
+  EquippedPet,
   GameState,
   Interactable as InteractableAreaModel,
   InteractableCommand,
@@ -48,6 +49,7 @@ import ViewingAreaController from './interactable/ViewingAreaController';
 import PlayerController from './PlayerController';
 import PetShop from '../components/Town/interactables/PetShop/PetShop';
 import InventoryAreaController from './interactable/InventoryAreaController';
+import PetController from './PetController';
 
 const CALCULATE_NEARBY_PLAYERS_DELAY_MS = 300;
 const SOCKET_COMMAND_TIMEOUT_MS = 5000;
@@ -137,6 +139,12 @@ export type TownEvents = {
    * Event indicating the unsuccessful purchase of a pet.
    */
   insufficientCurrency: () => void;
+
+  /**
+   * Event handler for the 'equippedPetsChanged' event.
+   * @param update the new list of equipped pets.
+   */
+  equippedPetsChanged: (newPets: PetController[]) => void;
 };
 
 /**
@@ -174,6 +182,12 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
    * with a new one; clients should take note not to retain stale references.
    */
   private _playersInternal: PlayerController[] = [];
+
+  /**
+   * The current list of equipped pets in the town. Adding or removing pets might replace the array
+   * with a new one; clients should take note not to retain stale references.
+   */
+  private _petsInternal: PetController[] = [];
 
   /**
    * The current list of interactable areas in the town. Adding or removing interactable areas might replace the array.
@@ -364,6 +378,15 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
     return ret;
   }
 
+  private set _pets(newPets: PetController[]) {
+    this.emit('equippedPetsChanged', newPets);
+    this._petsInternal = newPets;
+  }
+
+  public get pets(): PetController[] {
+    return this._petsInternal;
+  }
+
   public get conversationAreas(): ConversationAreaController[] {
     const ret = this._interactableControllers.filter(
       eachInteractable => eachInteractable instanceof ConversationAreaController,
@@ -486,6 +509,7 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
      */
     this._socket.on('playerMoved', movedPlayer => {
       const playerToUpdate = this.players.find(eachPlayer => eachPlayer.id === movedPlayer.id);
+      // TODO: move the pet
       if (playerToUpdate) {
         if (playerToUpdate === this._ourPlayer) {
           /*
@@ -592,6 +616,16 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
    */
   public emitChatMessage(message: ChatMessage) {
     this._socket.emit('chatMessage', message);
+  }
+
+  public equipPet(toBeEquipped: EquippedPet) {
+    const newPets = [...this.pets.filter(pet => pet.playerID !== this.ourPlayer.id)];
+    newPets.push(PetController.fromPetModel(toBeEquipped));
+    this._pets = newPets;
+  }
+
+  public unequipPet() {
+    this._pets = this.pets.filter(pet => pet.playerID !== this.ourPlayer.id);
   }
 
   /**
