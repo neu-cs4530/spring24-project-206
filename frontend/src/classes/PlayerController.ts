@@ -3,7 +3,7 @@ import TypedEmitter from 'typed-emitter';
 import { EquippedPetUpdate, Player as PlayerModel, PlayerLocation } from '../types/CoveyTownSocket';
 import PetController from './PetController';
 
-export const MOVEMENT_SPEED = 175;
+export const DEFAULT_SPEED = 175;
 
 export type PlayerEvents = {
   movement: (newLocation: PlayerLocation) => void;
@@ -26,11 +26,14 @@ export default class PlayerController extends (EventEmitter as new () => TypedEm
 
   private _equippedPet?: PetController;
 
+  // private _movementSpeed: number;
+
   constructor(id: string, userName: string, location: PlayerLocation) {
     super();
     this._id = id;
     this._userName = userName;
     this._location = location;
+    // this.resetSpeed();
   }
 
   set location(newLocation: PlayerLocation) {
@@ -74,16 +77,16 @@ export default class PlayerController extends (EventEmitter as new () => TypedEm
         sprite.anims.play(`misa-${this.location.rotation}-walk`, true);
         switch (this.location.rotation) {
           case 'front':
-            sprite.body.setVelocity(0, MOVEMENT_SPEED);
+            sprite.body.setVelocity(0, DEFAULT_SPEED);
             break;
           case 'right':
-            sprite.body.setVelocity(MOVEMENT_SPEED, 0);
+            sprite.body.setVelocity(DEFAULT_SPEED, 0);
             break;
           case 'back':
-            sprite.body.setVelocity(0, -MOVEMENT_SPEED);
+            sprite.body.setVelocity(0, -DEFAULT_SPEED);
             break;
           case 'left':
-            sprite.body.setVelocity(-MOVEMENT_SPEED, 0);
+            sprite.body.setVelocity(-DEFAULT_SPEED, 0);
             break;
         }
         sprite.body.velocity.normalize().scale(175);
