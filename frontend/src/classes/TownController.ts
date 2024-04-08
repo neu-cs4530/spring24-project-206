@@ -50,7 +50,6 @@ import PlayerController from './PlayerController';
 import PetShop from '../components/Town/interactables/PetShop/PetShop';
 import InventoryAreaController from './interactable/InventoryAreaController';
 import PetController from './PetController';
-import { findPetSpeed } from '../../../townService/src/town/Database';
 
 const CALCULATE_NEARBY_PLAYERS_DELAY_MS = 300;
 const SOCKET_COMMAND_TIMEOUT_MS = 5000;
@@ -184,7 +183,7 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
    */
   private _playersInternal: PlayerController[] = [];
 
-   /**
+  /**
    * The current list of equipped pets in the town. Adding or removing pets might replace the array
    * with a new one; clients should take note not to retain stale references.
    */
@@ -376,7 +375,7 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
   public getPlayer(id: PlayerID) {
     const ret = this._playersInternal.find(eachPlayer => eachPlayer.id === id);
     assert(ret);
-  return ret;
+    return ret;
   }
 
   private set _pets(newPets: PetController[]) {
@@ -619,16 +618,25 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
     this._socket.emit('chatMessage', message);
   }
 
+  /**
+   * Adds the given pet to the list of equipped pets and removes the previously equipped pet if applicable.
+   * A 'equippedPetsChanged' event is emitted.
+   * @param toBeEquipped the pet to be added
+   */
   public equipPet(toBeEquipped: EquippedPet) {
-    const newPets = [... this.pets.filter(pet => pet.playerID !== this.ourPlayer.id)];
+    const newPets = [...this.pets.filter(pet => pet.playerID !== this.ourPlayer.id)];
     newPets.push(PetController.fromPetModel(toBeEquipped));
     this._pets = newPets;
   }
-  
+
+  /**
+   * Removes the equipped pet of our player.
+   * A 'equippedPetsChanged' event is emitted.
+   */
   public unequipPet() {
     this._pets = this.pets.filter(pet => pet.playerID !== this.ourPlayer.id);
   }
-  
+
   /**
    * Sends an InteractableArea command to the townService. Returns a promise that resolves
    * when the command is acknowledged by the server.

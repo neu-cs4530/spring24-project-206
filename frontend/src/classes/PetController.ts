@@ -16,7 +16,11 @@ export type PetGameObjects = {
   locationManagedByGameScene: boolean;
 };
 
+/**
+ * This class is responsible for managing the state of an EquippedPet,
+ */
 export default class PetController extends (EventEmitter as new () => TypedEmitter<PetEvents>) {
+  // Stores information about the pet's coordinates and direction
   private _location: PetLocation;
 
   private readonly _type: string;

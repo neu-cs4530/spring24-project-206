@@ -40,15 +40,18 @@ export default class InventoryAreaController extends InteractableAreaController<
     const playerLoc = playerController.location;
     const imgID = await findPetImgId(type);
     const toBeEquipped: EquippedPet = {
-      type, 
-      playerID, 
-      location: { x: playerLoc.x, y: playerLoc.y, rotation: playerLoc.rotation }, 
-      imgID
+      type,
+      playerID,
+      location: { x: playerLoc.x, y: playerLoc.y, rotation: playerLoc.rotation },
+      imgID,
     };
+    // updates the list of equipped pets within the TownController
     this._townController.equipPet(toBeEquipped);
 
+    // set player speed based on the pet
     const speedFactor = await findPetSpeed(type);
     playerController.multiplySpeedBy(speedFactor);
+
     await this._townController.sendInteractableCommand(this.id, {
       type: 'EquipPet',
       petType: type,
@@ -62,7 +65,9 @@ export default class InventoryAreaController extends InteractableAreaController<
    * @param type the type of the pet to unequip
    */
   public async unequip(type: string) {
+    // updates the list of equipped pets within the TownController
     this._townController.unequipPet();
+    // resets the player's speed to default now that pet is unequipped
     this._townController.ourPlayer.resetSpeed();
     await this._townController.sendInteractableCommand(this.id, {
       type: 'UnequipPet',
