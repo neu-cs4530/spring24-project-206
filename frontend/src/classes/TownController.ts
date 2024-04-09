@@ -530,7 +530,6 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
      */
     this._socket.on('playerMoved', movedPlayer => {
       const playerToUpdate = this.players.find(eachPlayer => eachPlayer.id === movedPlayer.id);
-      // TODO: move the pet
       if (playerToUpdate) {
         if (playerToUpdate === this._ourPlayer) {
           /*
@@ -557,9 +556,10 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
            * If we are told that WE moved, we shouldn't update our x,y because it's probably lagging behind
            * real time. However: we SHOULD update our interactable ID, because its value is managed by the server
            */
+          console.log(`TownController: socket.on petMoved, ${petToUpdate.type}`);
+          console.log(movedPet.location);
           petToUpdate.location = movedPet.location;
         }
-        this.emit('petMoved', petToUpdate);
       }
     });
     /**
@@ -666,11 +666,14 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
    * @param newLocation the desired destination
    */
   public emitPetMovement(pet: PetController, newLocation: PetLocation) {
-    this._socket.emit('petMovement', newLocation);
-    // const ourPlayer = this._ourPlayer;
-    // assert(ourPlayer);
+    this._socket.emit('petMovement', {
+      type: pet.type,
+      playerID: pet.playerID,
+      location: newLocation,
+      imgID: pet.imgID,
+    });
     pet.location = newLocation;
-    this.emit('petMoved', pet);
+    // this.emit('petMoved', pet);
   }
 
   /**

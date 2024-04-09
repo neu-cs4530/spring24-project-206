@@ -1,6 +1,7 @@
 import { ITiledMap, ITiledMapObjectLayer } from '@jonbell/tiled-map-type-guard';
 import { nanoid } from 'nanoid';
 import { BroadcastOperator } from 'socket.io';
+import assert from 'assert';
 import { updateOnePlayerCurrency } from '../leaderboard/leaderboard-dao';
 import InvalidParametersError from '../lib/InvalidParametersError';
 import IVideoClient from '../lib/IVideoClient';
@@ -238,14 +239,15 @@ export default class Town {
    * Adds a player to this Covey Town, provisioning the necessary credentials for the
    * player, and returning them
    *
-   * @param newPlayer The new player to add to the town
+   * @param userName username of the new player
+   * @param socket
    */
   async addPlayer(userName: string, socket: CoveyTownSocket): Promise<Player> {
     const newPlayer = new Player(userName, socket.to(this._townID));
     this._players.push(newPlayer);
     this._allPlayers.push(newPlayer);
     try {
-      await addPlayerCurrency({ playerID: newPlayer.id, currency: 0 });
+      await addPlayerCurrency({ playerID: newPlayer.id, currency: 800 });
     } catch (error) {
       throw new Error(`Could not add new player currency to database: ${(error as Error).message}`);
     }
@@ -292,9 +294,16 @@ export default class Town {
 
     // Register an event listener for the client socket: if the client updates their
     // location, inform the CoveyTownController
-    socket.on('petMovement', (movementData: PetLocation) => {
+    socket.on('petMovement', (pet: EquippedPet) => {
       try {
-        this._updatePetLocation(newPlayer, movementData);
+        const petsToUpdate = this.pets.filter(
+          p => p.playerID === pet.playerID && p.type === pet.type,
+        );
+        if (petsToUpdate.length === 1) {
+          this._updatePetLocation(petsToUpdate[0], pet.location);
+        } else {
+          throw new Error('Duplicates in local pets list in Town.');
+        }
       } catch (err) {
         logError(err);
       }
@@ -443,6 +452,7 @@ export default class Town {
       this._removePlayerFromInteractable(player);
     }
     this._players = this._players.filter(p => p.id !== player.id);
+    this._pets = this._pets.filter(pet => pet.playerID !== player.id);
     this._broadcastEmitter.emit('playerDisconnect', player.toPlayerModel());
   }
 
@@ -487,6 +497,8 @@ export default class Town {
    */
   private _updatePetLocation(pet: EquippedPet, location: PetLocation): void {
     pet.location = location;
+    console.log(`Town, _updatePetLocation for ${pet.type}`);
+    console.log(location);
     this._broadcastEmitter.emit('petMoved', pet);
   }
 

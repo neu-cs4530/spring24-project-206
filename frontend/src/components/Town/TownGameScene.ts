@@ -2,7 +2,7 @@ import assert from 'assert';
 import Phaser from 'phaser';
 import PlayerController from '../../classes/PlayerController';
 import TownController from '../../classes/TownController';
-import {PetLocation, PlayerLocation} from '../../types/CoveyTownSocket';
+import { PetLocation, PlayerLocation } from '../../types/CoveyTownSocket';
 import { Callback } from '../VideoCall/VideoFrontend/types';
 import Interactable from './Interactable';
 import ConversationArea from './interactables/ConversationArea';
@@ -11,7 +11,7 @@ import Inventory from './interactables/PetShop/Inventory';
 import PetShop from './interactables/PetShop/PetShop';
 import Transporter from './interactables/Transporter';
 import ViewingArea from './interactables/ViewingArea';
-import PetController from '../../classes/PetController';
+import PetController, { PET_LABEL_OFFSET } from '../../classes/PetController';
 
 // prefix of pet sprite keys
 const PET_SPRITE_PREFIX = 'Pet_Sprite_';
@@ -217,6 +217,9 @@ export default class TownGameScene extends Phaser.Scene {
 
         const equippedPets = this._pets.filter(pet => pet.playerID === disconnectedPlayer.id);
         equippedPets.forEach(equippedPet => this.deletePetSprite(equippedPet));
+        console.log('disconnected player pets in updatePlayers')
+        console.log(equippedPets);
+        this._pets = this._pets.filter(pet => pet.playerID !== disconnectedPlayer.id);
       }
     });
     // Remove disconnected players from list
@@ -224,12 +227,16 @@ export default class TownGameScene extends Phaser.Scene {
   }
 
   updatePets(pets: PetController[]) {
+    console.log('TownGameScene: list of pets');
+    console.log(pets);
     pets.forEach(pet => this.createPetSprite(pet));
 
     // Remove unequipped pets from board
     const unequippedPets = this._pets.filter(
       pet => !pets.find(p => p.playerID === pet.playerID && p.type === pet.type),
     );
+    console.log('unequippedPets in updatePets')
+    console.log(unequippedPets);
 
     unequippedPets.forEach(unequippedPet => this.deletePetSprite(unequippedPet));
     this._pets = pets;
@@ -360,24 +367,31 @@ export default class TownGameScene extends Phaser.Scene {
           }
         });
         this.coveyTownController.emitMovement(this._lastLocation);
+
+        this.ourPets().forEach(pet => {
+          const ourLocation = this.coveyTownController.ourPlayer.location;
+          this.movePetTo(pet, {
+            x: ourLocation.x,
+            y: ourLocation.y,
+            rotation: ourLocation.rotation,
+          });
+        });
       }
 
       //Update the location for the labels of all of the other players
       for (const player of this._players) {
         if (player.gameObjects?.label && player.gameObjects?.sprite.body) {
           player.gameObjects.label.setX(player.gameObjects.sprite.body.x);
-          player.gameObjects.label.setY(player.gameObjects.sprite.body.y - 20);
+          player.gameObjects.label.setY(player.gameObjects.sprite.body.y - PET_LABEL_OFFSET);
         }
       }
-
-      const ourPets = this._pets.filter(
-        pet => pet.playerID === this.coveyTownController.ourPlayer.id,
-      );
-      ourPets.forEach(pet => {
-        const ourLocation = this.coveyTownController.ourPlayer.location;
-        this.movePetTo(pet, { x: ourLocation.x, y: ourLocation.y, rotation: ourLocation.rotation });
-      });
     }
+  }
+
+  ourPets(): PetController[] {
+    return this._pets.filter(
+      pet => pet.playerID === this.coveyTownController.ourPlayer.id,
+    );
   }
 
   movePetTo(pet: PetController, destination: PetLocation) {
@@ -391,7 +405,13 @@ export default class TownGameScene extends Phaser.Scene {
     if (destination.y !== undefined) {
       gameObjects.sprite.y = destination.y;
     }
+
+    gameObjects.label.setX(gameObjects.sprite.body.x);
+    gameObjects.label.setY(gameObjects.sprite.body.y - 20);
+
     this.coveyTownController.emitPetMovement(pet, destination);
+    console.log(`emitPetMovement in movePetTo for ${pet.type}`);
+    console.log(destination);
   }
 
   private _map?: Phaser.Tilemaps.Tilemap;
@@ -652,7 +672,7 @@ export default class TownGameScene extends Phaser.Scene {
         .sprite(pet.location.x, pet.location.y, imgKey)
         .setSize(30, 40)
         .setOffset(0, 24);
-      const label = this.add.text(pet.location.x, pet.location.y - 20, pet.type, {
+      const label = this.add.text(pet.location.x, pet.location.y - PET_LABEL_OFFSET, pet.type, {
         font: '10px monospace',
         color: '#000000',
         // padding: {x: 20, y: 10},

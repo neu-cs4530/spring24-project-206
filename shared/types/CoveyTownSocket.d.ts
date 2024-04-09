@@ -367,7 +367,7 @@ export interface ServerToClientEvents {
 export interface ClientToServerEvents {
   chatMessage: (message: ChatMessage) => void;
   playerMovement: (movementData: PlayerLocation) => void;
-  petMovement: (movementData: PetLocation) => void;
+  petMovement: (movementData: EquippedPet) => void;
   interactableUpdate: (update: Interactable) => void;
   interactableCommand: (
     command: InteractableCommand & InteractableCommandBase
