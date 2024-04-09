@@ -199,7 +199,7 @@ function PetShopArea({
     };
     // Immediately invoke the async function
     getCatalog();
-  }, [playerID]);
+  }, [playerID, petsCatalog]);
 
   useEffect(() => {
     const getPets = async () => {
