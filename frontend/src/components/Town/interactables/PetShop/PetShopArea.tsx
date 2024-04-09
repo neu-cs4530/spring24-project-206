@@ -227,7 +227,7 @@ function PetShopArea({
     };
     // Immediately invokes the async function
     getTheCurrency();
-  }, [playerID, currency]);
+  }, [playerID, currency, pets]);
 
   const petsPerPage = 6; // Number of pets to display per page
   // Calculate the index range for the current page
