@@ -194,7 +194,7 @@ function InventoryArea({
   }, [playerID]);
 
   useEffect(() => {
-    // get the player's pets
+    // Get the player's pets
     const getPets = async () => {
       try {
         const playerPets = await findPetsByPlayer(playerID);

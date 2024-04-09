@@ -14,11 +14,13 @@ import { createPet } from '../pets/pets-dao';
 import { findOnePlayerCurrency, findPetPrice } from './Database';
 import { updateOnePlayerCurrency } from '../leaderboard/leaderboard-dao';
 
+// Define the PetShopArea class, which extends InteractableArea
 export default class PetShopArea extends InteractableArea {
-  public pets?: Pet[];
+  public pets?: Pet[]; // Array of pets available in the pet shop area
 
-  private _emitter: TownEmitter;
+  private _emitter: TownEmitter; // Event emitter for town-wide events
 
+  // Constructor for creating a PetShopArea instance
   public constructor(
     { pets, id }: Omit<PetShopAreaModel, 'type'>,
     coordinates: BoundingBox,
@@ -29,15 +31,17 @@ export default class PetShopArea extends InteractableArea {
     this.pets = pets;
   }
 
+  // Method to convert the PetShopArea instance to a model
   public toModel(): PetShopAreaModel {
     return {
       id: this.id,
-      occupants: this.occupants.map(player => player.id),
-      pets: this.pets,
+      occupants: this.occupants.map(player => player.id), // IDs of players occupying the area
+      pets: this.pets, // Array of pets available in the pet shop area
       type: 'PetShopArea',
     };
   }
 
+  // Static method to create a PetShopArea instance from a Tiled map object
   public static fromMapObject(
     mapObject: ITiledMapObject,
     broadcastEmitter: TownEmitter,
@@ -50,6 +54,7 @@ export default class PetShopArea extends InteractableArea {
     return new PetShopArea({ id: name, occupants: [] }, rect, broadcastEmitter);
   }
 
+  // Method to handle commands sent to the pet shop area
   public handleCommand<CommandType extends InteractableCommand>(
     command: CommandType,
     player: Player,
@@ -61,10 +66,8 @@ export default class PetShopArea extends InteractableArea {
     return undefined as InteractableCommandReturnType<CommandType>;
   }
 
-  // back end is throwing the error, the front end should catch it and then throw it again
-  // relay the error message from the front end to the back end - look at the control flow
   /**
-   * Awaits the update counter method from the backend
+   * Awaits the update counter method from the backend. Sets the new popularity for the pet
    * @param type The type of the pet
    */
   private async _incrementPopularity(type: string) {

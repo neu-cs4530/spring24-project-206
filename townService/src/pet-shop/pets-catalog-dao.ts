@@ -1,9 +1,9 @@
 import petsCatalogModel from './pets-catalog-model';
 
-// get all pets
+// Get all pets
 export const findAllPets = () => petsCatalogModel.find();
 
-// find the pet by its type
+// Find the pet by its type
 export const findPetByType = (type: string) => petsCatalogModel.findOne({ type });
 
 // Find the pet catalog entry with the given type and update its counter by 1

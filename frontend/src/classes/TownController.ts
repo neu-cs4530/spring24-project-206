@@ -367,6 +367,7 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
     return this._playersInternal;
   }
 
+  // Emit event indicating that players in the town have changed, passing the new array of players
   private set _players(newPlayers: PlayerController[]) {
     this.emit('playersChanged', newPlayers);
     this._playersInternal = newPlayers;
@@ -378,11 +379,13 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
     return ret;
   }
 
+  // Emit event indicating that equipped pets in the town changed, passing the new array of pets
   private set _pets(newPets: PetController[]) {
     this.emit('equippedPetsChanged', newPets);
     this._petsInternal = newPets;
   }
 
+  // Getter for retrieving the array of pets
   public get pets(): PetController[] {
     return this._petsInternal;
   }
@@ -412,6 +415,7 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
     return ret as GameAreaController<GameState, GameEventTypes>[];
   }
 
+  // Getter for retrieving an array of pet shop areas in the town
   public get petShopArea(): PetShopController[] {
     const ret = this._interactableControllers.filter(
       eachInteractable => eachInteractable instanceof PetShopController,
@@ -419,6 +423,7 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
     return ret as PetShopController[];
   }
 
+  // Getter for retrieving an array of inventory areas in the town
   public get inventoryArea(): InventoryAreaController[] {
     const ret = this._interactableControllers.filter(
       eachInteractable => eachInteractable instanceof InventoryAreaController,
@@ -618,12 +623,14 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
     this._socket.emit('chatMessage', message);
   }
 
+  // Equips the pet for the given player
   public equipPet(toBeEquipped: EquippedPet) {
     const newPets = [...this.pets.filter(pet => pet.playerID !== this.ourPlayer.id)];
     newPets.push(PetController.fromPetModel(toBeEquipped));
     this._pets = newPets;
   }
 
+  // Unequips the pet for the given player
   public unequipPet() {
     this._pets = this.pets.filter(pet => pet.playerID !== this.ourPlayer.id);
   }
