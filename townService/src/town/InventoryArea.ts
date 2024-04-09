@@ -52,7 +52,7 @@ export default class InventoryArea extends InteractableArea {
     }
     if (command.type === 'UnequipPet') {
       unequipPet(player.id, command.petType);
-      this._emitter.emit('petUnequipped', command.petType, command.playerID);
+      this._emitter.emit('petUnequipped', { type: command.petType, playerID: command.playerID });
     }
     return undefined as InteractableCommandReturnType<CommandType>;
   }

@@ -360,7 +360,7 @@ export interface ServerToClientEvents {
   currentCurrencyChanged: (currency: CurrencyChangeResponse) => void;
   insufficientCurrency: () => void;
   petEquipped: (toBeEquipped: EquippedPet) => void;
-  petUnequipped: (type: string, playerID: PlayerID) => void;
+  petUnequipped: (toBeUnequipped: Partial<EquippedPet>) => void;
 }
 
 export interface ClientToServerEvents {
@@ -371,5 +371,5 @@ export interface ClientToServerEvents {
     command: InteractableCommand & InteractableCommandBase
   ) => void;
   petEquipment: (toBeEquipped: EquippedPet) => void;
-  petUnequipment: (type: string, playerID: PlayerID) => void;
+  petUnequipment: (toBeUnequipped: Partial<EquippedPet>) => void;
 }

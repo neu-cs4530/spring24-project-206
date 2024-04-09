@@ -157,7 +157,7 @@ export type TownEvents = {
    * @param type the type of the unequipped pet
    * @param playerID the player the unequipped pet belongs to
    */
-  petUnequipped: (type: string, playerID: PlayerID) => void;
+  petUnequipped: (toBeUnequipped: Partial<EquippedPet>) => void;
 };
 
 /**
@@ -609,8 +609,10 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
       this.equipPet(toBeEquipped);
     });
 
-    this._socket.on('petUnequipped', (type, playerID) => {
-      this.unequipPet(type, playerID);
+    this._socket.on('petUnequipped', ({ type, playerID }) => {
+      if (type && playerID) {
+        this.unequipPet(type, playerID);
+      }
     });
   }
 
@@ -657,7 +659,7 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
   public unequipPet(type: string, playerID: PlayerID) {
     this._pets = this.pets.filter(pet => pet.playerID !== playerID && pet.type !== type);
 
-    this._socket.emit('petUnequipment', type, playerID);
+    this._socket.emit('petUnequipment', { type, playerID });
   }
 
   /**
