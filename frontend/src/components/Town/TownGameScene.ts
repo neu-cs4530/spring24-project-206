@@ -11,7 +11,12 @@ import Inventory from './interactables/PetShop/Inventory';
 import PetShop from './interactables/PetShop/PetShop';
 import Transporter from './interactables/Transporter';
 import ViewingArea from './interactables/ViewingArea';
-import PetController, { PET_LABEL_OFFSET } from '../../classes/PetController';
+import PetController, {
+  PET_BASELINE_OFFSET,
+  PET_LABEL_X_OFFSET,
+  PET_LABEL_Y_OFFSET,
+  PET_OFFSET
+} from '../../classes/PetController';
 
 // prefix of pet sprite keys
 const PET_SPRITE_PREFIX = 'Pet_Sprite_';
@@ -217,7 +222,7 @@ export default class TownGameScene extends Phaser.Scene {
 
         const equippedPets = this._pets.filter(pet => pet.playerID === disconnectedPlayer.id);
         equippedPets.forEach(equippedPet => this.deletePetSprite(equippedPet));
-        console.log('disconnected player pets in updatePlayers')
+        console.log('disconnected player pets in updatePlayers');
         console.log(equippedPets);
         this._pets = this._pets.filter(pet => pet.playerID !== disconnectedPlayer.id);
       }
@@ -235,7 +240,7 @@ export default class TownGameScene extends Phaser.Scene {
     const unequippedPets = this._pets.filter(
       pet => !pets.find(p => p.playerID === pet.playerID && p.type === pet.type),
     );
-    console.log('unequippedPets in updatePets')
+    console.log('unequippedPets in updatePets');
     console.log(unequippedPets);
 
     unequippedPets.forEach(unequippedPet => this.deletePetSprite(unequippedPet));
@@ -369,11 +374,27 @@ export default class TownGameScene extends Phaser.Scene {
         this.coveyTownController.emitMovement(this._lastLocation);
 
         this.ourPets().forEach(pet => {
-          const ourLocation = this.coveyTownController.ourPlayer.location;
+          const newLocation = this.coveyTownController.ourPlayer.location;
+          switch (newLocation.rotation) {
+            case 'left':
+              newLocation.x += PET_OFFSET;
+              break;
+            case 'right':
+              newLocation.x -= PET_OFFSET;
+              break;
+            case 'front':
+              newLocation.y -= PET_OFFSET;
+              break;
+            case 'back':
+              newLocation.y += PET_OFFSET;
+              break;
+            default:
+              break;
+          }
           this.movePetTo(pet, {
-            x: ourLocation.x,
-            y: ourLocation.y,
-            rotation: ourLocation.rotation,
+            x: newLocation.x,
+            y: newLocation.y + PET_BASELINE_OFFSET,
+            rotation: newLocation.rotation,
           });
         });
       }
@@ -382,16 +403,14 @@ export default class TownGameScene extends Phaser.Scene {
       for (const player of this._players) {
         if (player.gameObjects?.label && player.gameObjects?.sprite.body) {
           player.gameObjects.label.setX(player.gameObjects.sprite.body.x);
-          player.gameObjects.label.setY(player.gameObjects.sprite.body.y - PET_LABEL_OFFSET);
+          player.gameObjects.label.setY(player.gameObjects.sprite.body.y - 20);
         }
       }
     }
   }
 
   ourPets(): PetController[] {
-    return this._pets.filter(
-      pet => pet.playerID === this.coveyTownController.ourPlayer.id,
-    );
+    return this._pets.filter(pet => pet.playerID === this.coveyTownController.ourPlayer.id);
   }
 
   movePetTo(pet: PetController, destination: PetLocation) {
@@ -406,8 +425,8 @@ export default class TownGameScene extends Phaser.Scene {
       gameObjects.sprite.y = destination.y;
     }
 
-    gameObjects.label.setX(gameObjects.sprite.body.x);
-    gameObjects.label.setY(gameObjects.sprite.body.y - 20);
+    gameObjects.label.setX(destination.x - PET_LABEL_X_OFFSET);
+    gameObjects.label.setY(destination.x - PET_LABEL_Y_OFFSET);
 
     this.coveyTownController.emitPetMovement(pet, destination);
     console.log(`emitPetMovement in movePetTo for ${pet.type}`);
@@ -672,12 +691,17 @@ export default class TownGameScene extends Phaser.Scene {
         .sprite(pet.location.x, pet.location.y, imgKey)
         .setSize(30, 40)
         .setOffset(0, 24);
-      const label = this.add.text(pet.location.x, pet.location.y - PET_LABEL_OFFSET, pet.type, {
-        font: '10px monospace',
-        color: '#000000',
-        // padding: {x: 20, y: 10},
-        backgroundColor: '#ffffff',
-      });
+      const label = this.add.text(
+        pet.location.x - PET_LABEL_X_OFFSET,
+        pet.location.y - PET_LABEL_Y_OFFSET,
+        pet.type,
+        {
+          font: '10px monospace',
+          color: '#000000',
+          // padding: {x: 20, y: 10},
+          backgroundColor: '#ffffff',
+        },
+      );
       pet.gameObjects = {
         sprite,
         label,

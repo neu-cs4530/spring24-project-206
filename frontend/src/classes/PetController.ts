@@ -6,7 +6,13 @@ import {
   PlayerID,
 } from '../../../shared/types/CoveyTownSocket';
 
-export const PET_LABEL_OFFSET = 30;
+export const PET_LABEL_X_OFFSET = 20;
+
+export const PET_LABEL_Y_OFFSET = 30;
+
+export const PET_OFFSET = 35;
+
+export const PET_BASELINE_OFFSET = 15;
 
 export type PetEvents = {
   petMovement: (newLocation: PetLocation) => void;
@@ -71,8 +77,8 @@ export default class PetController extends (EventEmitter as new () => TypedEmitt
       sprite.setX(this.location.x);
       sprite.setY(this.location.y);
 
-      label.setX(sprite.body.x);
-      label.setY(sprite.body.y - PET_LABEL_OFFSET);
+      label.setX(this.location.x - PET_LABEL_X_OFFSET);
+      label.setY(this.location.y - PET_LABEL_Y_OFFSET);
     }
   }
 

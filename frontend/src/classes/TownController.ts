@@ -673,7 +673,6 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
       imgID: pet.imgID,
     });
     pet.location = newLocation;
-    // this.emit('petMoved', pet);
   }
 
   /**
