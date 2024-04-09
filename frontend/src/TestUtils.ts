@@ -163,14 +163,7 @@ export async function mockTownControllerConnection(
           location: { moving: false, x: 0, y: 0, rotation: 'back' },
         },
       ],
-      currentPets: [
-        {
-          type: 'Chicken',
-          imgID: 1,
-          playerID: ourUserID,
-          location: { x: 0, y: 0, rotation: 'back' },
-        }
-      ],
+      currentPets: [],
       friendlyName: nanoid(),
       isPubliclyListed: true,
       providerVideoToken: nanoid(),
