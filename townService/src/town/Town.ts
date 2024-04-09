@@ -33,6 +33,7 @@ import InteractableArea from './InteractableArea';
 import PetShopArea from './PetShopArea';
 import ViewingArea from './ViewingArea';
 import InventoryArea from './InventoryArea';
+import ConnectFourGameArea from './games/ConnectFourGameArea';
 
 /**
  * The Town class implements the logic for each town: managing the various events that
@@ -359,12 +360,40 @@ export default class Town {
                 // If winner's currency is undefined, set it to a default amount (1 in this case)
                 if (winnerCurrency === undefined) {
                   // Add default currency amount for the winner
-                  this.setPlayerCurrency(winnerID, 1); // TODO:
-                  this._awardCurrency(winnerID);
+                  this.setPlayerCurrency(winnerID, 1);
+                  this._awardCurrency(winnerID, 1);
                 } else {
                   // Increment currency for the winner
-                  this.setPlayerCurrency(winnerID, winnerCurrency + 1); // TODO:
-                  this._awardCurrency(winnerID);
+                  this.setPlayerCurrency(winnerID, winnerCurrency + 1);
+                  this._awardCurrency(winnerID, 1);
+                }
+                // Mark that currency has been awarded for this game
+                this._gameCurrencyAwardedMap.set(gameID, true);
+              }
+            }
+          }
+          // If the interactable type is 'ConnectFourArea'
+          if (interactableModel.type === 'ConnectFourArea') {
+            // Narrows down the interactable object to ConnectFourGameArea type
+            const connectFourGameArea = interactable as ConnectFourGameArea;
+            // If the Connect Four game is over and there's a winner
+            if (connectFourGameArea.game?.state.winner) {
+              const gameID = connectFourGameArea.game.id;
+              // Ensure currency for this game hasn't been awarded yet
+              if (!this._gameCurrencyAwardedMap.has(gameID)) {
+                // Gets the winning player's ID
+                const winnerID = connectFourGameArea.game.state.winner;
+                // Get the current currency amount for the winner
+                const winnerCurrency = this.getPlayerCurrency(winnerID);
+                // If winner's currency is undefined, set it to a default amount (1 in this case)
+                if (winnerCurrency === undefined) {
+                  // Add default currency amount for the winner
+                  this.setPlayerCurrency(winnerID, 2);
+                  this._awardCurrency(winnerID, 2);
+                } else {
+                  // Increment currency for the winner
+                  this.setPlayerCurrency(winnerID, winnerCurrency + 2);
+                  this._awardCurrency(winnerID, 2);
                 }
                 // Mark that currency has been awarded for this game
                 this._gameCurrencyAwardedMap.set(gameID, true);
@@ -408,14 +437,15 @@ export default class Town {
   }
 
   /**
+   * Updates the database with the currency upon a Tic Tac Toe or Connect Four
    *
    * @param winner the ID of the winning player
    * @param currency the updated currency of the winner
    */
-  private async _awardCurrency(winner: PlayerID) {
+  private async _awardCurrency(winner: PlayerID, addedCurrency: number) {
     try {
       const currency = await findOnePlayerCurrency(winner);
-      await updateOnePlayerCurrency(winner, currency + 1);
+      await updateOnePlayerCurrency(winner, currency + addedCurrency);
     } catch (error) {
       throw new Error(
         `Could not update database with the awarded currency: ${(error as Error).message}`,
