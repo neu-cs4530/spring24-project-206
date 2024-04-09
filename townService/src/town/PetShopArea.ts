@@ -98,8 +98,8 @@ export default class PetShopArea extends InteractableArea {
     const currency = (await getOnePlayerCurrencyFromDao(playerID))?.currency;
     const petPrice = (await findPetPriceFromDao(petType))?.price;
 
-    if (!currency || !petPrice) {
-      throw new Error('Currency or pet price is null');
+    if (currency === undefined || petPrice === undefined) {
+      throw new Error('Currency or pet price is undefined');
     }
 
     if (currency < petPrice) {
