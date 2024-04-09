@@ -97,6 +97,7 @@ describe('InventoryArea', () => {
       );
       expect(val.boundingBox).toEqual({ x, y, width, height });
       expect(val.id).toEqual(name);
+      expect(val.pets).toBeUndefined();
       expect(val.occupantsByID).toEqual([]);
     });
   });
