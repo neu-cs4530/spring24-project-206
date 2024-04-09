@@ -145,13 +145,13 @@ export type TownEvents = {
    * @param update the new list of equipped pets.
    */
   equippedPetsChanged: (newPets: PetController[]) => void;
-  
+
   /**
    * Event handler for the 'petEquipped' event.
    * @param toBeEquipped the pet to be equipped
    */
   petEquipped: (toBeEquipped: EquippedPet) => void;
-  
+
   /**
    * Event handler for the 'petUnequipped' event.
    * @param type the type of the unequipped pet
@@ -604,11 +604,11 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
     this._socket.on('insufficientCurrency', () => {
       this.emit('insufficientCurrency');
     });
-    
+
     this._socket.on('petEquipped', toBeEquipped => {
       this.equipPet(toBeEquipped);
     });
-    
+
     this._socket.on('petUnequipped', (type, playerID) => {
       this.unequipPet(type, playerID);
     });
