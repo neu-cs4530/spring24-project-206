@@ -1,11 +1,11 @@
-import * as petsCatalogDao from './pets-catalog-dao';
+import * as petsCatalogDao from './pet-catalog-dao';
 
 /**
- * Find all pets
+ * Find all pets in the pets catalog
  */
 const findAllPets = async (req, res) => {
   try {
-    const pets = await petsCatalogDao.findAllPets();
+    const pets = await petsCatalogDao.findAllPetsFromDao();
     res.json(pets);
   } catch (error) {
     res.status(500).json({ error: 'Error fetching the pets in the catalog' });
@@ -13,12 +13,12 @@ const findAllPets = async (req, res) => {
 };
 
 /*
- * Search by pet type
+ * Search by pet type in the pets catalog
  */
 const findPetByType = async (req, res) => {
   try {
     const { type } = req.params;
-    const pet = await petsCatalogDao.findPetByType(type);
+    const pet = await petsCatalogDao.findPetByTypeFromDao(type);
     res.json(pet);
   } catch (error) {
     res.status(500).json({ error: 'Error fetching the pets of that type' });
@@ -26,12 +26,12 @@ const findPetByType = async (req, res) => {
 };
 
 /**
- * increment pet popularity
+ * Increment pet popularity in the pets catalog
  */
 export const incrementCounter = async (req, res) => {
   try {
     const { type } = req.params;
-    const updatedCounter = await petsCatalogDao.updateCounterForPet(type);
+    const updatedCounter = await petsCatalogDao.updateCounterForPetInDao(type);
     res.json(updatedCounter);
   } catch (error) {
     res.status(500).json({ error: "Error incrementing the pet's popularity" });
@@ -39,12 +39,12 @@ export const incrementCounter = async (req, res) => {
 };
 
 /**
- * find the pet's price
+ * Find the pet's price from the pets catalog
  */
 export const findPetPrice = async (req, res) => {
   try {
     const { type } = req.params;
-    const price = await petsCatalogDao.findPetPrice(type);
+    const price = await petsCatalogDao.findPetPriceFromDao(type);
     res.json(price);
   } catch (error) {
     res.status(500).json({ error: "Error incrementing the pet's popularity" });

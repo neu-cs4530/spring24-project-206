@@ -1,18 +1,16 @@
 import { Pet } from '../lib/Pet';
 import petsModel from './pets-model';
 
-export const findAllPets = () => petsModel.find();
+export const findAllPetsFromDao = () => petsModel.find();
 
-export const findPetByType = (type: string) => petsModel.findOne({ type });
+export const createPetFromDao = (pet: Pet) => petsModel.create(pet);
 
-export const createPet = (pet: Pet) => petsModel.create(pet);
+export const findPetsByPlayerFromDao = (playerID: string) => petsModel.find({ playerID });
 
-export const findPetsByPlayer = (playerID: string) => petsModel.find({ playerID });
-
-export const findPetsByPlayerAndType = (playerID: string, type: string) =>
+export const findPetsByPlayerAndTypeFromDao = (playerID: string, type: string) =>
   petsModel.find({ playerID, type });
 
-export const unequipPet = async (playerID: string, type: string) => {
+export const unequipPetInDao = async (playerID: string, type: string) => {
   const updatedPet = await petsModel.findOneAndUpdate(
     { playerID, type }, // Only update if `playerID` and `type` both match
     { equipped: false }, // Set "equipped" to false`
@@ -21,9 +19,9 @@ export const unequipPet = async (playerID: string, type: string) => {
   return updatedPet;
 };
 
-export const equipPet = async (playerID: string, type: string) => {
-  const pets = await findPetsByPlayer(playerID); // list of pets already owned by this player
-  pets.forEach(pet => unequipPet(playerID, pet.type));
+export const equipPetInDao = async (playerID: string, type: string) => {
+  const pets = await findPetsByPlayerFromDao(playerID); // list of pets already owned by this player
+  pets.forEach(pet => unequipPetInDao(playerID, pet.type));
   const updatedPet = await petsModel.findOneAndUpdate(
     { playerID, type }, // Only update if `playerID` and `type` both match
     { equipped: true }, // Set "equipped" to true

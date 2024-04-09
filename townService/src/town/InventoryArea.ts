@@ -8,13 +8,13 @@ import {
   TownEmitter,
 } from '../types/CoveyTownSocket';
 import InteractableArea from './InteractableArea';
-import { equipPet, unequipPet } from '../pets/pets-dao';
+import { equipPetInDao, unequipPetInDao } from '../pets/pets-dao';
 
 export default class InventoryArea extends InteractableArea {
   private _emitter: TownEmitter;
 
   public constructor(
-    { pets, id }: Omit<InventoryAreaModel, 'type'>,
+    { id }: Omit<InventoryAreaModel, 'type'>,
     coordinates: BoundingBox,
     townEmitter: TownEmitter,
   ) {
@@ -47,11 +47,11 @@ export default class InventoryArea extends InteractableArea {
     player: Player,
   ): InteractableCommandReturnType<CommandType> {
     if (command.type === 'EquipPet') {
-      equipPet(player.id, command.toBeEquipped.type);
+      equipPetInDao(player.id, command.toBeEquipped.type);
       this._emitter.emit('petEquipped', command.toBeEquipped);
     }
     if (command.type === 'UnequipPet') {
-      unequipPet(player.id, command.petType);
+      unequipPetInDao(player.id, command.petType);
       this._emitter.emit('petUnequipped', { type: command.petType, playerID: command.playerID });
     }
     return undefined as InteractableCommandReturnType<CommandType>;

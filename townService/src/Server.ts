@@ -15,7 +15,7 @@ import { ClientToServerEvents, ServerToClientEvents } from './types/CoveyTownSoc
 import { TownsController } from './town/TownsController';
 import { logError } from './Utils';
 import petsController from './pets/pets-controller';
-import petsCatalogController from './pet-shop/pet-shop-controller';
+import petsCatalogController from './pet-catalog/pet-catalog-controller';
 import leaderboardController from './leaderboard/leaderboard-controller';
 
 // Create the server instances

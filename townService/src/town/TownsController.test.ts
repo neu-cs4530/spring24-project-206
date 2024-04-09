@@ -15,9 +15,9 @@ import {
 } from '../TestUtils';
 import { TownsController } from './TownsController';
 
-// Mock the addPlayerCurrency function
-jest.mock('./Database', () => ({
-  addPlayerCurrency: jest.fn().mockResolvedValue({}),
+// Mock the addPlayerCurrencyToDao function
+jest.mock('../leaderboard/leaderboard-dao.ts', () => ({
+  addPlayerCurrencyToDao: jest.fn().mockResolvedValue({}),
 }));
 
 type TestTownData = {
