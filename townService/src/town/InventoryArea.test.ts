@@ -1,9 +1,8 @@
 import { mock, mockClear } from 'jest-mock-extended';
 import { nanoid } from 'nanoid';
-import { Pet } from '../lib/Pet';
 import Player from '../lib/Player';
-import { defaultLocation, getLastEmittedEvent } from '../TestUtils';
-import { InventoryArea as InventoryAreaModel, TownEmitter } from '../types/CoveyTownSocket';
+import { getLastEmittedEvent } from '../TestUtils';
+import { TownEmitter } from '../types/CoveyTownSocket';
 import InventoryArea from './InventoryArea';
 
 describe('InventoryArea', () => {
@@ -12,20 +11,12 @@ describe('InventoryArea', () => {
   const townEmitter = mock<TownEmitter>();
   const id = nanoid();
   let newPlayer: Player;
-  const pets: Pet[] = [
-    { type: 'Cat', playerID: nanoid(), equipped: false },
-    { type: 'Dog', playerID: nanoid(), equipped: true },
-  ];
-  let interactableUpdateSpy: jest.SpyInstance;
 
   beforeEach(() => {
     mockClear(townEmitter);
     testArea = new InventoryArea({ pets: [], id, occupants: [] }, testAreaBox, townEmitter);
     newPlayer = new Player(nanoid(), mock<TownEmitter>());
     testArea.add(newPlayer);
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore (Test requires access to protected method)
-    interactableUpdateSpy = jest.spyOn(testArea, '_emitAreaChanged');
   });
 
   describe('add', () => {
