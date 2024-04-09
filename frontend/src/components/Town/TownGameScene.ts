@@ -52,7 +52,7 @@ export default class TownGameScene extends Phaser.Scene {
 
   private _pets: PetController[] = [];
 
-  private _emotions: PetEmote[] = [];
+  private _emotes: PetEmote[] = [];
 
   private _interactables: Interactable[] = [];
 
@@ -262,44 +262,69 @@ export default class TownGameScene extends Phaser.Scene {
     this._pets = pets;
   }
 
-  updateEmotions(emotions: PetEmote[]) {
-    // remove old emotions
-    const oldEmotions = this._emotions.filter(
-      emotion =>
-        !emotions.find(e => e.playerID === emotion.playerID && e.emotion === emotion.emotion),
-    );
-    console.log('old emotions');
-    console.log(oldEmotions);
-    oldEmotions.forEach(emote => this.deletePetEmotion(emote));
-
-    for (const emotion of emotions) {
-      if (!oldEmotions.includes(emotion)) {
-        const emotingPets = this._pets.filter(pet => pet.playerID === emotion.playerID);
-        emotingPets.forEach(emotingPet => this.addPetEmotion(emotion, emotingPet, emotion.emotion));
+  updateEmote(emote: PetEmote) {
+    // if the player doesn't have a sprite, add it
+    const emotingPet = this._pets.find(pet => pet.playerID === emote.playerID);
+    if (emotingPet) {
+      console.log(
+        `emoting pet is ${
+          emote.playerID === this.coveyTownController.ourPlayer.id ? '' : 'not'
+        } our player`,
+      );
+      if (emote.emotion) {
+        console.log(`creating ${emote.emotion} emote for ${emote.playerID}`);
+        this.addEmote(emote, emotingPet);
+        this._emotes.push(emotingPet);
+      } else {
+        console.log(`deleting emote for ${emote.playerID}`);
+        const toBeDeleted = this._emotes.filter(e => e.playerID === emote.playerID);
+        toBeDeleted.forEach(e => this.deleteEmote(e));
+        emotingPet.emote = undefined;
+        this._emotes.filter(e => e.playerID !== emote.playerID);
       }
     }
-    this._emotions = emotions;
+
+    // if the emote has a sprite, don't add it
+
+    // if the emote has an undefined emotion, remove the emote sprite
+    // // remove old emotions
+    // const oldEmotions = this._emotions.filter(
+    //   emotion =>
+    //     !emotions.find(e => e.playerID === emotion.playerID && e.emotion === emotion.emotion),
+    // );
+    // console.log('old emotions');
+    // console.log(oldEmotions);
+    // oldEmotions.forEach(emote => this.deletePetEmotion(emote));
+
+    // for (const emotion of emotions) {
+    //   if (!oldEmotions.includes(emotion)) {
+    //     const emotingPets = this._pets.filter(pet => pet.playerID === emotion.playerID);
+    //     emotingPets.forEach(emotingPet => this.addPetEmotion(emotion, emotingPet, emotion.emotion));
+    //   }
+    // }
+    // this._emotions = emotions;
   }
 
-  addPetEmotion(emote: PetEmote, emotingPet: PetController, emotion: string) {
+  addEmote(emote: PetEmote, emotingPet: PetController) {
     if (!emote.gameObjects) {
-      emotingPet._animation = emotion;
-      const imgKey = PET_ANIMATION_PREFIX + emotingPet._animation;
-      const sprite = this.physics.add
-        .sprite(emotingPet.location.x - 10, emotingPet.location.y - 23, imgKey)
-        .setSize(30, 40)
-        .setOffset(0, 24);
-      this._collidingLayers.forEach(layer => this.physics.add.collider(sprite, layer));
-      emote.gameObjects = {
-        sprite,
-        locationManagedByGameScene: false,
-      };
+      if (this._pets.includes(emotingPet)) {
+        emotingPet._emote = emote.emotion;
+        const imgKey = PET_ANIMATION_PREFIX + emotingPet._emote;
+        const sprite = this.physics.add
+          .sprite(emotingPet.location.x - 10, emotingPet.location.y - 23, imgKey)
+          .setSize(30, 40)
+          .setOffset(0, 24);
+        this._collidingLayers.forEach(layer => this.physics.add.collider(sprite, layer));
+        emote.gameObjects = {
+          sprite,
+          locationManagedByGameScene: false,
+        };
+      }
     }
   }
 
-  deletePetEmotion(emote: PetEmote) {
+  deleteEmote(emote: PetEmote) {
     if (emote.gameObjects) {
-      console.log(`deleting ${emote.emotion} pet emotes`);
       const { sprite } = emote.gameObjects;
       if (sprite) {
         sprite.destroy();
@@ -667,7 +692,7 @@ export default class TownGameScene extends Phaser.Scene {
     this._onGameReadyListeners = [];
     this.coveyTownController.addListener('playersChanged', players => this.updatePlayers(players));
     this.coveyTownController.addListener('equippedPetsChanged', pets => this.updatePets(pets));
-    this.coveyTownController.addListener('petEmotion', emotions => this.updateEmotions(emotions));
+    this.coveyTownController.addListener('petEmotion', emote => this.updateEmote(emote));
   }
 
   createPlayerSprites(player: PlayerController) {
@@ -723,6 +748,14 @@ export default class TownGameScene extends Phaser.Scene {
       if (sprite && label) {
         sprite.destroy();
         label.destroy();
+      }
+
+      // also delete all its associated emotes
+      const emotesToDelete = this._emotes.filter(emote => emote.playerID === pet.playerID);
+      console.log(`emotes to delete = `);
+      console.log(emotesToDelete);
+      if (emotesToDelete.length > 0) {
+        emotesToDelete.forEach(e => this.deleteEmote(e));
       }
     }
   }

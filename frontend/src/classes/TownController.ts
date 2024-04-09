@@ -99,7 +99,7 @@ export type TownEvents = {
    * An event that indicates that a pet has a new emotion. This event is dispatched after updating the pet's emotion -
    * the new emotion can be found on the PetEmote.
    */
-  petEmotion: (petEmotes: PetEmote[]) => void;
+  petEmotion: (petEmote: PetEmote) => void;
 
   /**
    * An event that indicates that the set of active interactable areas has changed. This event is dispatched
@@ -544,6 +544,11 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
         this.emit('playerMoved', playerToUpdate);
       }
     });
+
+    this._socket.on('petEmoted', emote => {
+      this.emit('petEmotion', emote);
+    });
+
     /**
      * When an interactable's state changes, push that update into the relevant controller
      *
@@ -641,26 +646,18 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
     // check for nearby players, for all the nearby players - assign a new emotion to the current pet controller
     const nearbyPlayers = this.nearbyPlayers();
     if (nearbyPlayers.length > 1) {
-      const animation = this._randomAnimation();
       const emotions: PetEmote[] = [];
-      console.log(`emitting ${animation} emotion to ${nearbyPlayers.length} players`);
       for (const nearbyPlayer of nearbyPlayers) {
-        emotions.push({ playerID: nearbyPlayer.id, emotion: animation });
+        const emotion = {
+          playerID: nearbyPlayer.id,
+          emotion: nearbyPlayer.emote,
+        };
+        emotions.push(emotion);
+        this.emit('petEmotion', emotion);
       }
-      this.emit('petEmotion', emotions);
     }
     // only check for whether or not there is nearby player, and if there is, emit the change emote event
     // if not, emit the change emote event to undefined
-  }
-
-  private _randomAnimation() {
-    const animations = ['alert', 'disgust', 'happy', 'love', 'sad'];
-    const minCeiled = Math.ceil(0);
-    const maxFloored = Math.floor(5);
-    // The maximum is exclusive and the minimum is inclusive
-    const randomIndex = Math.floor(Math.random() * (maxFloored - minCeiled) + minCeiled);
-
-    return animations.slice(randomIndex)[0];
   }
 
   /**
@@ -690,6 +687,7 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
     this._pets = this.pets.filter(pet => pet.playerID !== playerID && pet.type !== type);
 
     this._socket.emit('petUnequipment', { type, playerID });
+    this.emit('petEmotion', { playerID });
   }
 
   /**

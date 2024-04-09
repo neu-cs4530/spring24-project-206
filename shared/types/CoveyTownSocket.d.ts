@@ -56,6 +56,7 @@ export interface Player {
   id: PlayerID;
   userName: string;
   location: PlayerLocation;
+  emote?: string;
 }
 
 export interface EquippedPet {
@@ -63,6 +64,11 @@ export interface EquippedPet {
   playerID: PlayerID;
   location: PetLocation;
   imgID: number;
+}
+
+export interface ActiveEmote {
+  emote?: string;
+  playerID: PlayerID;
 }
 
 export type XY = { x: number; y: number };
@@ -348,6 +354,7 @@ export type InteractableCommandResponse<MessageType> = {
 
 export interface ServerToClientEvents {
   playerMoved: (movedPlayer: Player) => void;
+  petEmoted: (emote: ActiveEmote) => void;
   playerDisconnect: (disconnectedPlayer: Player) => void;
   playerJoined: (newPlayer: Player) => void;
   initialize: (initialData: TownJoinResponse) => void;

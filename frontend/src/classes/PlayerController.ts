@@ -24,12 +24,15 @@ export default class PlayerController extends (EventEmitter as new () => TypedEm
 
   private _movementSpeed: number;
 
-  constructor(id: string, userName: string, location: PlayerLocation) {
+  private _emote: string | undefined;
+
+  constructor(id: string, userName: string, location: PlayerLocation, emote?: string) {
     super();
     this._id = id;
     this._userName = userName;
     this._location = location;
     this._movementSpeed = DEFAULT_SPEED;
+    this._emote = emote;
   }
 
   set location(newLocation: PlayerLocation) {
@@ -50,6 +53,10 @@ export default class PlayerController extends (EventEmitter as new () => TypedEm
     return this._id;
   }
 
+  get emote(): string | undefined {
+    return this._emote;
+  }
+
   set movementSpeed(newSpeed: number) {
     this._movementSpeed = newSpeed;
   }
@@ -67,7 +74,7 @@ export default class PlayerController extends (EventEmitter as new () => TypedEm
   }
 
   toPlayerModel(): PlayerModel {
-    return { id: this.id, userName: this.userName, location: this.location };
+    return { id: this.id, userName: this.userName, location: this.location, emote: this.emote };
   }
 
   private _updateGameComponentLocation() {
@@ -104,6 +111,11 @@ export default class PlayerController extends (EventEmitter as new () => TypedEm
   }
 
   static fromPlayerModel(modelPlayer: PlayerModel): PlayerController {
-    return new PlayerController(modelPlayer.id, modelPlayer.userName, modelPlayer.location);
+    return new PlayerController(
+      modelPlayer.id,
+      modelPlayer.userName,
+      modelPlayer.location,
+      modelPlayer.emote,
+    );
   }
 }

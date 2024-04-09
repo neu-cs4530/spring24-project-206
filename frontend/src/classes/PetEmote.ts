@@ -8,6 +8,6 @@ export type EmotionGameObjects = {
 
 export type PetEmote = {
   playerID: PlayerID;
-  emotion: string;
+  emotion?: string;
   gameObjects?: EmotionGameObjects;
 };
