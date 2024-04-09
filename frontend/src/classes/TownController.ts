@@ -50,6 +50,7 @@ import PlayerController from './PlayerController';
 import PetShop from '../components/Town/interactables/PetShop/PetShop';
 import InventoryAreaController from './interactable/InventoryAreaController';
 import PetController from './PetController';
+import { PetEmote } from './PetEmote';
 
 const CALCULATE_NEARBY_PLAYERS_DELAY_MS = 300;
 const SOCKET_COMMAND_TIMEOUT_MS = 5000;
@@ -93,6 +94,12 @@ export type TownEvents = {
    * the new location can be found on the PlayerController.
    */
   playerMoved: (movedPlayer: PlayerController) => void;
+
+  /**
+   * An event that indicates that a pet has a new emotion. This event is dispatched after updating the pet's emotion -
+   * the new emotion can be found on the PetEmote.
+   */
+  petEmotion: (petEmotes: PetEmote[]) => void;
 
   /**
    * An event that indicates that the set of active interactable areas has changed. This event is dispatched
@@ -631,6 +638,29 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
     assert(ourPlayer);
     ourPlayer.location = newLocation;
     this.emit('playerMoved', ourPlayer);
+    // check for nearby players, for all the nearby players - assign a new emotion to the current pet controller
+    const nearbyPlayers = this.nearbyPlayers();
+    if (nearbyPlayers.length > 1) {
+      const animation = this._randomAnimation();
+      const emotions: PetEmote[] = [];
+      console.log(`emitting ${animation} emotion to ${nearbyPlayers.length} players`);
+      for (const nearbyPlayer of nearbyPlayers) {
+        emotions.push({ playerID: nearbyPlayer.id, emotion: animation });
+      }
+      this.emit('petEmotion', emotions);
+    }
+    // only check for whether or not there is nearby player, and if there is, emit the change emote event
+    // if not, emit the change emote event to undefined
+  }
+
+  private _randomAnimation() {
+    const animations = ['alert', 'disgust', 'happy', 'love', 'sad'];
+    const minCeiled = Math.ceil(0);
+    const maxFloored = Math.floor(5);
+    // The maximum is exclusive and the minimum is inclusive
+    const randomIndex = Math.floor(Math.random() * (maxFloored - minCeiled) + minCeiled);
+
+    return animations.slice(randomIndex)[0];
   }
 
   /**
