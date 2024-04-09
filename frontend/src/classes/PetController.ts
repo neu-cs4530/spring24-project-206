@@ -10,7 +10,7 @@ export const PET_LABEL_X_OFFSET = 20;
 
 export const PET_LABEL_Y_OFFSET = 30;
 
-export const PET_OFFSET = 35;
+export const PET_OFFSET = 40;
 
 export const PET_BASELINE_OFFSET = 15;
 
@@ -76,6 +76,14 @@ export default class PetController extends (EventEmitter as new () => TypedEmitt
       const { sprite, label } = this.gameObjects;
       sprite.setX(this.location.x);
       sprite.setY(this.location.y);
+      switch (this.location.rotation) {
+        case 'left':
+          sprite.flipX = true;
+          break;
+        default:
+          sprite.flipX = false;
+          break;
+      }
 
       label.setX(this.location.x - PET_LABEL_X_OFFSET);
       label.setY(this.location.y - PET_LABEL_Y_OFFSET);

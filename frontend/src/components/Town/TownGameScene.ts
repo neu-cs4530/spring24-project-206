@@ -15,7 +15,7 @@ import PetController, {
   PET_BASELINE_OFFSET,
   PET_LABEL_X_OFFSET,
   PET_LABEL_Y_OFFSET,
-  PET_OFFSET
+  PET_OFFSET,
 } from '../../classes/PetController';
 
 // prefix of pet sprite keys
@@ -427,6 +427,15 @@ export default class TownGameScene extends Phaser.Scene {
 
     gameObjects.label.setX(destination.x - PET_LABEL_X_OFFSET);
     gameObjects.label.setY(destination.x - PET_LABEL_Y_OFFSET);
+
+    switch (destination.rotation) {
+      case 'left':
+        gameObjects.sprite.flipX = true;
+        break;
+      default:
+        gameObjects.sprite.flipX = false;
+        break;
+    }
 
     this.coveyTownController.emitPetMovement(pet, destination);
     console.log(`emitPetMovement in movePetTo for ${pet.type}`);
