@@ -27,7 +27,7 @@ import {
 } from '../types/CoveyTownSocket';
 import { logError } from '../Utils';
 import ConversationArea from './ConversationArea';
-import { findOnePlayerCurrencyFromDatabase } from './Database';
+import { findOnePlayerCurrencyFromDatabase } from '../Database';
 // eslint-disable-next-line import/no-cycle
 import GameAreaFactory from './games/GameAreaFactory';
 import TicTacToeGameArea from './games/TicTacToeGameArea';

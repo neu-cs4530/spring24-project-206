@@ -2,7 +2,6 @@ import axios from 'axios';
 import 'dotenv/config';
 
 axios.defaults.baseURL = process.env.AXIOS_BASE_URL;
-axios.defaults.baseURL = 'http://localhost:8081/api';
 
 export const addPetToDatabase = async data => {
   const response = await axios.post(`/pets`, data);
