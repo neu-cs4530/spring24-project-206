@@ -301,9 +301,11 @@ export default class Town {
 
     // Register an event listener for the client socket: if the client unequips a pet,
     // inform the CoveyTownController
-    socket.on('petUnequipment', (type: string, playerID: PlayerID) => {
+    socket.on('petUnequipment', ({ type, playerID }) => {
       try {
-        this._updatePetUnequipment(type, playerID);
+        if (type && playerID) {
+          this._updatePetUnequipment(type, playerID);
+        }
       } catch (err) {
         logError(err);
       }
