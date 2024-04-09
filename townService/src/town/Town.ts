@@ -12,6 +12,7 @@ import {
   ConversationArea as ConversationAreaModel,
   CoveyTownSocket,
   CurrencyMap,
+  EquippedPet,
   Interactable,
   InteractableCommand,
   InteractableCommandBase,
@@ -59,6 +60,10 @@ export default class Town {
     return this._players;
   }
 
+  get pets(): EquippedPet[] {
+    return this._pets;
+  }
+
   get occupancy(): number {
     return this.players.length;
   }
@@ -82,6 +87,9 @@ export default class Town {
 
   /** The list of players currently in the town * */
   private _players: Player[] = [];
+
+  /** The list of pets that are equipped in the town */
+  private _pets: EquippedPet[] = [];
 
   /** The list of all players that have been in the town * */
   private _allPlayers: Player[] = [];
@@ -242,7 +250,6 @@ export default class Town {
       throw new Error(`Could not add new player currency to database: ${(error as Error).message}`);
     }
     this._connectedSockets.add(socket);
-    console.log(`new player ID = ${newPlayer.id}`);
     // Creates the leaderboards for a player who just joined
     this._emitAllTimeLeaderboard();
     this._emitCurrentLeaderboard();
@@ -288,6 +295,28 @@ export default class Town {
     socket.on('petMovement', (movementData: PetLocation) => {
       try {
         this._updatePetLocation(newPlayer, movementData);
+      } catch (err) {
+        logError(err);
+      }
+    });
+
+    // Register an event listener for the client socket: if the client equips a pet,
+    // inform the CoveyTownController
+    socket.on('petEquipment', (toBeEquipped: EquippedPet) => {
+      try {
+        this._updatePetEquipment(toBeEquipped);
+      } catch (err) {
+        logError(err);
+      }
+    });
+
+    // Register an event listener for the client socket: if the client unequips a pet,
+    // inform the CoveyTownController
+    socket.on('petUnequipment', ({ type, playerID }) => {
+      try {
+        if (type && playerID) {
+          this._updatePetUnequipment(type, playerID);
+        }
       } catch (err) {
         logError(err);
       }
@@ -459,6 +488,20 @@ export default class Town {
   private _updatePetLocation(pet: EquippedPet, location: PetLocation): void {
     pet.location = location;
     this._broadcastEmitter.emit('petMoved', pet);
+  }
+
+  private _updatePetEquipment(toBeEquipped: EquippedPet) {
+    if (
+      !this._pets.find(
+        pet => pet.playerID === toBeEquipped.playerID && pet.type === toBeEquipped.type,
+      )
+    ) {
+      this._pets.push(toBeEquipped);
+    }
+  }
+
+  private _updatePetUnequipment(type: string, playerID: PlayerID) {
+    this._pets = this._pets.filter(pet => pet.playerID !== playerID && pet.type !== type);
   }
 
   /**
