@@ -15,6 +15,7 @@ import {
   Interactable,
   InteractableCommand,
   InteractableCommandBase,
+  PetLocation,
   PlayerID,
   PlayerLocation,
   ServerToClientEvents,
@@ -282,6 +283,16 @@ export default class Town {
       }
     });
 
+    // Register an event listener for the client socket: if the client updates their
+    // location, inform the CoveyTownController
+    socket.on('petMovement', (movementData: PetLocation) => {
+      try {
+        this._updatePetLocation(newPlayer, movementData);
+      } catch (err) {
+        logError(err);
+      }
+    });
+
     // Set up a listener to process updates to interactables.
     // Currently only knows how to process updates for ViewingArea's, and
     // ignores any other updates for any other kind of interactable.
@@ -437,6 +448,17 @@ export default class Town {
     }
     player.location = location;
     this._broadcastEmitter.emit('playerMoved', player.toPlayerModel());
+  }
+
+  /**
+   * Updates the location of a pet within the town
+   *
+   * @param pet Pet to update location for
+   * @param location New location for this pet
+   */
+  private _updatePetLocation(pet: EquippedPet, location: PetLocation): void {
+    pet.location = location;
+    this._broadcastEmitter.emit('petMoved', pet);
   }
 
   /**

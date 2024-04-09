@@ -2,7 +2,7 @@ import assert from 'assert';
 import Phaser from 'phaser';
 import PlayerController from '../../classes/PlayerController';
 import TownController from '../../classes/TownController';
-import { PlayerLocation } from '../../types/CoveyTownSocket';
+import {PetLocation, PlayerLocation} from '../../types/CoveyTownSocket';
 import { Callback } from '../VideoCall/VideoFrontend/types';
 import Interactable from './Interactable';
 import ConversationArea from './interactables/ConversationArea';
@@ -369,7 +369,29 @@ export default class TownGameScene extends Phaser.Scene {
           player.gameObjects.label.setY(player.gameObjects.sprite.body.y - 20);
         }
       }
+
+      const ourPets = this._pets.filter(
+        pet => pet.playerID === this.coveyTownController.ourPlayer.id,
+      );
+      ourPets.forEach(pet => {
+        const ourLocation = this.coveyTownController.ourPlayer.location;
+        this.movePetTo(pet, { x: ourLocation.x, y: ourLocation.y, rotation: ourLocation.rotation });
+      });
     }
+  }
+
+  movePetTo(pet: PetController, destination: PetLocation) {
+    const gameObjects = pet.gameObjects;
+    if (!gameObjects) {
+      throw new Error('Unable to move pet without game objects created first');
+    }
+    if (destination.x !== undefined) {
+      gameObjects.sprite.x = destination.x;
+    }
+    if (destination.y !== undefined) {
+      gameObjects.sprite.y = destination.y;
+    }
+    this.coveyTownController.emitPetMovement(pet, destination);
   }
 
   private _map?: Phaser.Tilemaps.Tilemap;
