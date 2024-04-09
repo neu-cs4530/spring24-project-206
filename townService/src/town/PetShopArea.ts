@@ -11,7 +11,6 @@ import {
 import InteractableArea from './InteractableArea';
 import { findPetPriceFromDao, updateCounterForPetInDao } from '../pet-catalog/pet-catalog-dao';
 import { createPetFromDao } from '../pets/pets-dao';
-import { findOnePlayerCurrencyFromDatabase } from './Database';
 import {
   getOnePlayerCurrencyFromDao,
   updateOnePlayerCurrencyInDao,

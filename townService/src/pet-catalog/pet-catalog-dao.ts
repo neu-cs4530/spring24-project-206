@@ -1,4 +1,4 @@
-import petsCatalogModel from './pets-catalog-model';
+import petsCatalogModel from './pet-catalog-model';
 
 export const findAllPetsFromDao = () => petsCatalogModel.find();
 
