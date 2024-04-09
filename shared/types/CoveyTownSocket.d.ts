@@ -9,6 +9,8 @@ export type TownJoinResponse = {
   providerVideoToken: string;
   /** List of players currently in this town * */
   currentPlayers: Player[];
+  /** List of pets currently in this town * */
+  currentPets: EquippedPet[];
   /** Friendly name of this town * */
   friendlyName: string;
   /** Is this a private town? * */
@@ -44,11 +46,6 @@ export interface Interactable {
 export type TownSettingsUpdate = {
   friendlyName?: string;
   isPubliclyListed?: boolean;
-};
-
-export type EquippedPetUpdate = {
-  toBeUnequipped?: PetController;
-  toBeEquipped?: PetController;
 };
 
 export type Direction = "front" | "back" | "left" | "right";
@@ -315,8 +312,7 @@ export interface AdoptCommand {
 
 export interface EquipCommand {
   type: "EquipPet";
-  petType: string;
-  playerID: PlayerID;
+  toBeEquipped: EquippedPet;
 }
 
 export interface UnequipCommand {
@@ -362,13 +358,9 @@ export interface ServerToClientEvents {
   commandResponse: (response: InteractableCommandResponse) => void;
   allTimeCurrencyChanged: (currency: CurrencyChangeResponse) => void;
   currentCurrencyChanged: (currency: CurrencyChangeResponse) => void;
-  equippedPetChanged: (update: EquippedPetUpdate) => void;
-  // TODO: implement 'petCatalogChange' event
-  // TODO: add an event that signifies the pet was adopted
-  // petAdopted: (playerID: playerID) => void;
   insufficientCurrency: () => void;
-  // petEquipped: (update: EquippedPetUpdate) => void;
-  // clients talk to each other through the server
+  petEquipped: (toBeEquipped: EquippedPet) => void;
+  petUnequipped: (toBeUnequipped: Partial<EquippedPet>) => void;
 }
 
 export interface ClientToServerEvents {
@@ -378,4 +370,6 @@ export interface ClientToServerEvents {
   interactableCommand: (
     command: InteractableCommand & InteractableCommandBase
   ) => void;
+  petEquipment: (toBeEquipped: EquippedPet) => void;
+  petUnequipment: (toBeUnequipped: Partial<EquippedPet>) => void;
 }

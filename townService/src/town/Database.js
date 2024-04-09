@@ -53,3 +53,9 @@ export const findPetImgId = async type => {
   const { img_id } = response.data;
   return img_id;
 };
+
+export const findPetSpeed = async type => {
+  const response = await axios.get(`/pets-catalog/type/${type}`);
+  const { speed } = response.data;
+  return speed;
+};

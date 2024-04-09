@@ -2,12 +2,10 @@ import InteractableAreaController, {
   BaseInteractableEventMap,
   INVENTORY_AREA_TYPE,
 } from './InteractableAreaController';
-import { InventoryArea as InventoryAreaModel } from '../../types/CoveyTownSocket';
+import { EquippedPet, InventoryArea as InventoryAreaModel } from '../../types/CoveyTownSocket';
 import { Pet } from '../../../../townService/src/lib/Pet';
 import TownController from '../TownController';
-import PetController from '../PetController';
-import { findPetImgId } from '../../../../townService/src/town/Database';
-import PlayerController from '../PlayerController';
+import { findPetImgId, findPetSpeed } from '../../../../townService/src/town/Database';
 
 export type InventoryAreaEvents = BaseInteractableEventMap & {
   petChange: (newPets: Pet[] | undefined) => void;
@@ -37,21 +35,22 @@ export default class InventoryAreaController extends InteractableAreaController<
    * @param type the type of the pet to equip
    */
   public async equip(type: string) {
-    // TODO: update pets field
     const playerController = this._townController.ourPlayer;
     const playerID = playerController.id;
     const playerLoc = playerController.location;
     const imgID = await findPetImgId(type);
-    playerController.equippedPet = PetController.fromPetModel({
+    const toBeEquipped: EquippedPet = {
       type,
       playerID,
       location: { x: playerLoc.x, y: playerLoc.y, rotation: playerLoc.rotation },
       imgID,
-    });
+    };
+
+    const speedFactor = await findPetSpeed(type);
+    playerController.multiplySpeedBy(speedFactor);
     await this._townController.sendInteractableCommand(this.id, {
       type: 'EquipPet',
-      petType: type,
-      playerID,
+      toBeEquipped,
     });
   }
 
@@ -61,8 +60,7 @@ export default class InventoryAreaController extends InteractableAreaController<
    * @param type the type of the pet to unequip
    */
   public async unequip(type: string) {
-    // TODO: update pets field
-    this._townController.ourPlayer.equippedPet = undefined;
+    this._townController.ourPlayer.resetSpeed();
     await this._townController.sendInteractableCommand(this.id, {
       type: 'UnequipPet',
       petType: type,

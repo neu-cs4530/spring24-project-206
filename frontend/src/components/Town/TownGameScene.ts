@@ -1,6 +1,6 @@
 import assert from 'assert';
 import Phaser from 'phaser';
-import PlayerController, { MOVEMENT_SPEED } from '../../classes/PlayerController';
+import PlayerController from '../../classes/PlayerController';
 import TownController from '../../classes/TownController';
 import { PlayerLocation } from '../../types/CoveyTownSocket';
 import { Callback } from '../VideoCall/VideoFrontend/types';
@@ -106,6 +106,7 @@ export default class TownGameScene extends Phaser.Scene {
     this._resourcePathPrefix = resourcePathPrefix;
     this.coveyTownController = coveyTownController;
     this._players = this.coveyTownController.players;
+    this._pets = this.coveyTownController.pets;
   }
 
   preload() {
@@ -223,7 +224,6 @@ export default class TownGameScene extends Phaser.Scene {
     //Make sure that each player has sprites
     players.map(eachPlayer => {
       this.createPlayerSprites(eachPlayer);
-      this.createPetSprite(eachPlayer.equippedPet);
     });
 
     // Remove disconnected players from board
@@ -239,18 +239,24 @@ export default class TownGameScene extends Phaser.Scene {
           label.destroy();
         }
 
-        if (disconnectedPlayer.equippedPet && disconnectedPlayer.equippedPet.gameObjects) {
-          // eslint-disable-next-line @typescript-eslint/no-shadow
-          const { sprite, label } = disconnectedPlayer.equippedPet.gameObjects;
-          if (sprite && label) {
-            sprite.destroy();
-            label.destroy();
-          }
-        }
+        const equippedPets = this._pets.filter(pet => pet.playerID === disconnectedPlayer.id);
+        equippedPets.forEach(equippedPet => this.deletePetSprite(equippedPet));
       }
     });
     // Remove disconnected players from list
     this._players = players;
+  }
+
+  updatePets(pets: PetController[]) {
+    pets.forEach(pet => this.createPetSprite(pet));
+
+    // Remove unequipped pets from board
+    const unequippedPets = this._pets.filter(
+      pet => !pets.find(p => p.playerID === pet.playerID && p.type === pet.type),
+    );
+
+    unequippedPets.forEach(unequippedPet => this.deletePetSprite(unequippedPet));
+    this._pets = pets;
   }
 
   getNewMovementDirection() {
@@ -309,19 +315,19 @@ export default class TownGameScene extends Phaser.Scene {
       const primaryDirection = this.getNewMovementDirection();
       switch (primaryDirection) {
         case 'left':
-          body.setVelocityX(-MOVEMENT_SPEED);
+          body.setVelocityX(-this.coveyTownController.ourPlayer.movementSpeed);
           gameObjects.sprite.anims.play('misa-left-walk', true);
           break;
         case 'right':
-          body.setVelocityX(MOVEMENT_SPEED);
+          body.setVelocityX(this.coveyTownController.ourPlayer.movementSpeed);
           gameObjects.sprite.anims.play('misa-right-walk', true);
           break;
         case 'front':
-          body.setVelocityY(MOVEMENT_SPEED);
+          body.setVelocityY(this.coveyTownController.ourPlayer.movementSpeed);
           gameObjects.sprite.anims.play('misa-front-walk', true);
           break;
         case 'back':
-          body.setVelocityY(-MOVEMENT_SPEED);
+          body.setVelocityY(-this.coveyTownController.ourPlayer.movementSpeed);
           gameObjects.sprite.anims.play('misa-back-walk', true);
           break;
         default:
@@ -339,7 +345,9 @@ export default class TownGameScene extends Phaser.Scene {
       }
 
       // Normalize and scale the velocity so that player can't move faster along a diagonal
-      gameObjects.sprite.body.velocity.normalize().scale(MOVEMENT_SPEED);
+      gameObjects.sprite.body.velocity
+        .normalize()
+        .scale(this.coveyTownController.ourPlayer.movementSpeed);
 
       const isMoving = primaryDirection !== undefined;
       gameObjects.label.setX(body.x);
@@ -605,14 +613,12 @@ export default class TownGameScene extends Phaser.Scene {
 
     this._ready = true;
     this.updatePlayers(this.coveyTownController.players);
+    this.updatePets(this.coveyTownController.pets);
     // Call any listeners that are waiting for the game to be initialized
     this._onGameReadyListeners.forEach(listener => listener());
     this._onGameReadyListeners = [];
     this.coveyTownController.addListener('playersChanged', players => this.updatePlayers(players));
-    this.coveyTownController.addListener('equippedPetChanged', update => {
-      this.deletePetSprite(update.toBeUnequipped);
-      this.createPetSprite(update.toBeEquipped);
-    });
+    this.coveyTownController.addListener('equippedPetsChanged', pets => this.updatePets(pets));
   }
 
   createPlayerSprites(player: PlayerController) {
@@ -641,8 +647,8 @@ export default class TownGameScene extends Phaser.Scene {
     }
   }
 
-  createPetSprite(pet: PetController | undefined) {
-    if (pet && !pet.gameObjects) {
+  createPetSprite(pet: PetController) {
+    if (!pet.gameObjects) {
       const imgKey = PET_SPRITE_PREFIX + pet.imgID;
       const sprite = this.physics.add
         .sprite(pet.location.x, pet.location.y, imgKey)
@@ -676,8 +682,8 @@ export default class TownGameScene extends Phaser.Scene {
     }
   }
 
-  deletePetSprite(pet: PetController | undefined) {
-    if (pet && pet.gameObjects) {
+  deletePetSprite(pet: PetController) {
+    if (pet.gameObjects) {
       const { sprite, label } = pet.gameObjects;
       if (sprite && label) {
         sprite.destroy();

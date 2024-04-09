@@ -1,6 +1,5 @@
 import { ITiledMapObject } from '@jonbell/tiled-map-type-guard';
 import Player from '../lib/Player';
-import { Pet } from '../lib/Pet';
 import {
   BoundingBox,
   InteractableCommand,
@@ -12,7 +11,7 @@ import InteractableArea from './InteractableArea';
 import { equipPet, unequipPet } from '../pets/pets-dao';
 
 export default class InventoryArea extends InteractableArea {
-  public pets?: Pet[];
+  private _emitter: TownEmitter;
 
   public constructor(
     { pets, id }: Omit<InventoryAreaModel, 'type'>,
@@ -20,14 +19,13 @@ export default class InventoryArea extends InteractableArea {
     townEmitter: TownEmitter,
   ) {
     super(id, coordinates, townEmitter);
-    this.pets = pets;
+    this._emitter = townEmitter;
   }
 
   public toModel(): InventoryAreaModel {
     return {
       id: this.id,
       occupants: this.occupants.map(player => player.id),
-      pets: this.pets,
       type: 'InventoryArea',
     };
   }
@@ -49,10 +47,12 @@ export default class InventoryArea extends InteractableArea {
     player: Player,
   ): InteractableCommandReturnType<CommandType> {
     if (command.type === 'EquipPet') {
-      equipPet(player.id, command.petType);
+      equipPet(player.id, command.toBeEquipped.type);
+      this._emitter.emit('petEquipped', command.toBeEquipped);
     }
     if (command.type === 'UnequipPet') {
       unequipPet(player.id, command.petType);
+      this._emitter.emit('petUnequipped', { type: command.petType, playerID: command.playerID });
     }
     return undefined as InteractableCommandReturnType<CommandType>;
   }

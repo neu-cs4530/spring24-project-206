@@ -76,6 +76,9 @@ export default class PetController extends (EventEmitter as new () => TypedEmitt
       const { sprite, label } = this.gameObjects;
       sprite.setX(this.location.x);
       sprite.setY(this.location.y);
+
+      label.setX(sprite.body.x);
+      label.setY(sprite.body.y - 20);
     }
   }
 
