@@ -606,12 +606,10 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
     });
     
     this._socket.on('petEquipped', toBeEquipped => {
-      console.log('on pet equipped')
       this.equipPet(toBeEquipped);
     });
     
     this._socket.on('petUnequipped', (type, playerID) => {
-      console.log('on pet unequipped')
       this.unequipPet(type, playerID);
     });
   }
@@ -657,7 +655,6 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
    * Remove the current player's pet from the list of pet controllers.
    */
   public unequipPet(type: string, playerID: PlayerID) {
-    console.log(`[TOWN CONTROLLER - UNEQUIP PET] unequipping ${type}`)
     this._pets = this.pets.filter(pet => pet.playerID !== playerID && pet.type !== type);
 
     this._socket.emit('petUnequipment', type, playerID);
@@ -784,8 +781,6 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
           PlayerController.fromPlayerModel(eachPlayerModel),
         );
         this._pets = initialData.currentPets.map(eachPet => PetController.fromPetModel(eachPet));
-        console.log(`Current pets:`)
-        console.log(this._pets)
         this._interactableControllers = [];
         initialData.interactables.forEach(eachInteractable => {
           if (isConversationArea(eachInteractable)) {
