@@ -8,7 +8,6 @@ import TownController from '../TownController';
 
 export type PetShopAreaEvents = BaseInteractableEventMap & {
   petChange: (newPets: Pet[] | undefined) => void;
-  // TODO: listen to the adopted pet event
 };
 
 /**
