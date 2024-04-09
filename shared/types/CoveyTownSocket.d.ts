@@ -9,6 +9,8 @@ export type TownJoinResponse = {
   providerVideoToken: string;
   /** List of players currently in this town * */
   currentPlayers: Player[];
+  /** List of pets currently in this town * */
+  currentPets: EquippedPet[];
   /** Friendly name of this town * */
   friendlyName: string;
   /** Is this a private town? * */
@@ -310,8 +312,7 @@ export interface AdoptCommand {
 
 export interface EquipCommand {
   type: "EquipPet";
-  petType: string;
-  playerID: PlayerID;
+  toBeEquipped: EquippedPet;
 }
 
 export interface UnequipCommand {
@@ -359,7 +360,7 @@ export interface ServerToClientEvents {
   currentCurrencyChanged: (currency: CurrencyChangeResponse) => void;
   insufficientCurrency: () => void;
   petEquipped: (toBeEquipped: EquippedPet) => void;
-  petUnequipped: (toBeUnequipped: EquippedPet) => void;
+  petUnequipped: (type: string, playerID: PlayerID) => void;
 }
 
 export interface ClientToServerEvents {
@@ -369,4 +370,6 @@ export interface ClientToServerEvents {
   interactableCommand: (
     command: InteractableCommand & InteractableCommandBase
   ) => void;
+  petEquipment: (toBeEquipped: EquippedPet) => void;
+  petUnequipment: (type: string, playerID: PlayerID) => void;
 }

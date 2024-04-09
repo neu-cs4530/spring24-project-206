@@ -20,6 +20,7 @@ export const unequipPet = async (playerID: string, type: string) => {
   );
   return updatedPet;
 };
+
 export const equipPet = async (playerID: string, type: string) => {
   const pets = await findPetsByPlayer(playerID); // list of pets already owned by this player
   pets.forEach(pet => unequipPet(playerID, pet.type));
