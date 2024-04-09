@@ -30,7 +30,6 @@ import InteractableArea from './InteractableArea';
 import PetShopArea from './PetShopArea';
 import ViewingArea from './ViewingArea';
 import InventoryArea from './InventoryArea';
-import ConnectFourGameArea from './games/ConnectFourGameArea';
 
 /**
  * The Town class implements the logic for each town: managing the various events that
@@ -326,31 +325,6 @@ export default class Town {
                 } else {
                   // Increment currency for the winner
                   this.setPlayerCurrency(winnerID, winnerCurrency + 1);
-                }
-                // Mark that currency has been awarded for this game
-                this._gameCurrencyAwardedMap.set(gameID, true);
-              }
-            }
-          }
-          if (interactableModel.type === 'ConnectFourArea') {
-            // Narrows down the interactable object to ConnectFourGameArea type
-            const connectFourGameArea = interactable as ConnectFourGameArea;
-            // If the ConnectFour game is over and there's a winner
-            if (connectFourGameArea.game?.state.winner) {
-              const gameID = connectFourGameArea.game.id;
-              // Ensure currency for this game hasn't been awarded yet
-              if (!this._gameCurrencyAwardedMap.has(gameID)) {
-                // Gets the winning player's ID
-                const winnerID = connectFourGameArea.game.state.winner;
-                // Get the current currency amount for the winner
-                const winnerCurrency = this.getPlayerCurrency(winnerID);
-                // If winner's currency is undefined, set it to a default amount (2 in this case)
-                if (winnerCurrency === undefined) {
-                  // Add default currency amount for the winner
-                  this.setPlayerCurrency(winnerID, 2);
-                } else {
-                  // Increment currency for the winner
-                  this.setPlayerCurrency(winnerID, winnerCurrency + 2);
                 }
                 // Mark that currency has been awarded for this game
                 this._gameCurrencyAwardedMap.set(gameID, true);
