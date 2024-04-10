@@ -297,7 +297,7 @@ export default class TownGameScene extends Phaser.Scene {
     if (!emote.gameObjects) {
       const imgKey = PET_EMOTE_PREFIX + emote.emote;
       const sprite = this.physics.add
-        .sprite(emote.location.x - 10, emote.location.y - 23, imgKey)
+        .sprite(emote.location.x - 10, emote.location.y - 20, imgKey)
         .setSize(30, 40)
         .setOffset(0, 24);
       this._collidingLayers.forEach(layer => this.physics.add.collider(sprite, layer));
@@ -773,7 +773,6 @@ export default class TownGameScene extends Phaser.Scene {
         {
           font: '18px monospace',
           color: '#000000',
-          // padding: {x: 20, y: 10},
           backgroundColor: '#ffffff',
         },
       );
@@ -796,7 +795,9 @@ export default class TownGameScene extends Phaser.Scene {
       const sprite = this.physics.add
         .sprite(pet.location.x, pet.location.y, imgKey)
         .setSize(30, 40)
-        .setOffset(0, 24);
+        .setOffset(0, 24)
+        .setInteractive()
+        .on('pointerdown', () => this.onClickSprite(pet.playerID, pet.location));
       const label = this.add.text(
         pet.location.x - PET_LABEL_X_OFFSET,
         pet.location.y - PET_LABEL_Y_OFFSET,
@@ -804,24 +805,9 @@ export default class TownGameScene extends Phaser.Scene {
         {
           font: '10px monospace',
           color: '#000000',
-          // padding: {x: 20, y: 10},
           backgroundColor: '#ffffff',
         },
       );
-      const label = this.add.text(pet.location.x, pet.location.y - 25, pet.type, {
-        font: '10px monospace',
-        color: '#000000',
-        backgroundColor: '#ffffff',
-      });
-      sprite.setInteractive();
-      this.input.on('gameobjectdown', () => {
-        if (this.coveyTownController.ourPlayer.id === pet.playerID) {
-          const newEmote = new EmoteController(pet.playerID, pet.location);
-          this._emotes.push(newEmote);
-          this.createEmote(newEmote);
-          this.coveyTownController.emitEmoteCreation(newEmote);
-        }
-      });
       pet.gameObjects = {
         sprite,
         label,
@@ -829,6 +815,13 @@ export default class TownGameScene extends Phaser.Scene {
       };
       this._collidingLayers.forEach(layer => this.physics.add.collider(sprite, layer));
     }
+  }
+
+  onClickSprite(petPlayerID: PlayerID, location: PetLocation) {
+    const newEmote = new EmoteController(petPlayerID, location);
+    this._emotes.push(newEmote);
+    this.createEmote(newEmote);
+    this.coveyTownController.emitEmoteCreation(newEmote);
   }
 
   /**

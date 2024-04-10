@@ -256,7 +256,7 @@ export default class Town {
     this._players.push(newPlayer);
     this._allPlayers.push(newPlayer);
     try {
-      await addPlayerCurrency({ playerID: newPlayer.id, currency: 75 });
+      await addPlayerCurrency({ playerID: newPlayer.id, currency: 0 });
     } catch (error) {
       throw new Error(`Could not add new player currency to database: ${(error as Error).message}`);
     }
@@ -542,17 +542,6 @@ export default class Town {
     }
     player.location = location;
     this._broadcastEmitter.emit('playerMoved', player.toPlayerModel());
-  }
-
-  private _updateEmoteCreation(emote: ActiveEmote) {
-    this._emotes.filter(e => e.playerID !== emote.playerID);
-    this._emotes.push(emote);
-    this._broadcastEmitter.emit('emoteCreated', emote);
-  }
-
-  private _updateEmoteDestruction(emote: ActiveEmote) {
-    this._emotes = this._emotes.filter(e => e.playerID !== emote.playerID);
-    this._broadcastEmitter.emit('emoteDestroyed', emote);
   }
 
   private _updateEmoteCreation(emote: ActiveEmote) {
