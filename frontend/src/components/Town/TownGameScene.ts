@@ -2,7 +2,7 @@ import assert from 'assert';
 import Phaser from 'phaser';
 import PlayerController from '../../classes/PlayerController';
 import TownController from '../../classes/TownController';
-import { PetLocation, PlayerID, PlayerLocation } from '../../types/CoveyTownSocket';
+import { PlayerID, PlayerLocation } from '../../types/CoveyTownSocket';
 import { Callback } from '../VideoCall/VideoFrontend/types';
 import Interactable from './Interactable';
 import ConversationArea from './interactables/ConversationArea';
@@ -16,8 +16,8 @@ import { EmoteController } from '../../classes/EmoteController';
 
 // prefix of pet sprite keys
 const PET_SPRITE_PREFIX = 'Pet_Sprite_';
-// prefix of pet animations
-const PET_ANIMATION_PREFIX = 'Pet_Animation_';
+// prefix of pet emotes
+const PET_EMOTE_PREFIX = 'Pet_Emote_';
 
 // Still not sure what the right type is here... "Interactable" doesn't do it
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -204,23 +204,23 @@ export default class TownGameScene extends Phaser.Scene {
     );
     // loading emotes
     this.load.image(
-      PET_ANIMATION_PREFIX + 'alert',
+      PET_EMOTE_PREFIX + 'alert',
       this._resourcePathPrefix + '/assets/pet-shop/emotes/alert.png',
     );
     this.load.image(
-      PET_ANIMATION_PREFIX + 'disgust',
+      PET_EMOTE_PREFIX + 'disgust',
       this._resourcePathPrefix + '/assets/pet-shop/emotes/disgust.png',
     );
     this.load.image(
-      PET_ANIMATION_PREFIX + 'happy',
+      PET_EMOTE_PREFIX + 'happy',
       this._resourcePathPrefix + '/assets/pet-shop/emotes/happy.png',
     );
     this.load.image(
-      PET_ANIMATION_PREFIX + 'love',
+      PET_EMOTE_PREFIX + 'love',
       this._resourcePathPrefix + '/assets/pet-shop/emotes/love.png',
     );
     this.load.image(
-      PET_ANIMATION_PREFIX + 'sad',
+      PET_EMOTE_PREFIX + 'sad',
       this._resourcePathPrefix + '/assets/pet-shop/emotes/sad.png',
     );
   }
@@ -279,9 +279,8 @@ export default class TownGameScene extends Phaser.Scene {
   }
 
   createEmote(emote: EmoteController) {
-    console.log(`creating emote: ${emote.emote}`);
     if (!emote.gameObjects) {
-      const imgKey = PET_ANIMATION_PREFIX + emote.emote;
+      const imgKey = PET_EMOTE_PREFIX + emote.emote;
       const sprite = this.physics.add
         .sprite(emote.location.x - 10, emote.location.y - 23, imgKey)
         .setSize(30, 40)
@@ -291,8 +290,6 @@ export default class TownGameScene extends Phaser.Scene {
         sprite,
         locationManagedByGameScene: false,
       };
-
-      // this.coveyTownController.emitEmoteCreation(emote);
 
       // add the emote to a record of timers and delete the emote after 2 seconds
       this._emoteTimers[emote.playerID] = setTimeout(() => {
@@ -715,11 +712,12 @@ export default class TownGameScene extends Phaser.Scene {
       });
       sprite.setInteractive();
       this.input.on('gameobjectdown', () => {
-        const newEmote = new EmoteController(pet.playerID, pet.location);
-
-        this._emotes.push(newEmote);
-        this.createEmote(newEmote);
-        this.coveyTownController.emitEmoteCreation(newEmote);
+        if (this.coveyTownController.ourPlayer.id === pet.playerID) {
+          const newEmote = new EmoteController(pet.playerID, pet.location);
+          this._emotes.push(newEmote);
+          this.createEmote(newEmote);
+          this.coveyTownController.emitEmoteCreation(newEmote);
+        }
       });
       pet.gameObjects = {
         sprite,
