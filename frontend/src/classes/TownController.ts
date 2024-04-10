@@ -51,6 +51,7 @@ import PlayerController from './PlayerController';
 import PetShop from '../components/Town/interactables/PetShop/PetShop';
 import InventoryAreaController from './interactable/InventoryAreaController';
 import PetController from './PetController';
+import { EmoteController } from './EmoteController';
 
 const CALCULATE_NEARBY_PLAYERS_DELAY_MS = 300;
 const SOCKET_COMMAND_TIMEOUT_MS = 5000;
@@ -154,6 +155,12 @@ export type TownEvents = {
   equippedPetsChanged: (newPets: PetController[]) => void;
 
   /**
+   * An event that indicates that there are new emotes. This event is dispatched after updating the pet's emote -
+   * the new emote can be found on the list of PetEmote.
+   */
+  emotesChanged: (petEmotes: EmoteController[]) => void;
+
+  /**
    * Event handler for the 'petEquipped' event.
    * @param toBeEquipped the pet to be equipped
    */
@@ -208,6 +215,12 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
    * with a new one; clients should take note not to retain stale references.
    */
   private _petsInternal: PetController[] = [];
+
+  /**
+   * The current list of equipped pets in the town. Adding or removing pets might replace the array
+   * with a new one; clients should take note not to retain stale references.
+   */
+  private _emotesInternal: EmoteController[] = [];
 
   /**
    * The current list of interactable areas in the town. Adding or removing interactable areas might replace the array.
@@ -407,6 +420,15 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
     return this._petsInternal;
   }
 
+  private set _emotes(newEmotes: EmoteController[]) {
+    this.emit('emotesChanged', newEmotes);
+    this._emotesInternal = newEmotes;
+  }
+
+  public get emotes(): EmoteController[] {
+    return this._emotesInternal;
+  }
+
   public get conversationAreas(): ConversationAreaController[] {
     const ret = this._interactableControllers.filter(
       eachInteractable => eachInteractable instanceof ConversationAreaController,
@@ -543,6 +565,13 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
         this.emit('playerMoved', playerToUpdate);
       }
     });
+
+    this._socket.on('emoteCreated', emote => {
+      const newEmotes = this.emotes.filter(e => e.playerID !== emote.playerID);
+      newEmotes.push(EmoteController.fromActiveEmote(emote));
+      this._emotes = newEmotes;
+    });
+
     /**
      * When a pet moves, update local state and emit an event to the controller's event listeners
      */
@@ -654,6 +683,22 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
     this.emit('playerMoved', ourPlayer);
   }
 
+  public emitEmoteCreation(emote: EmoteController) {
+    this._socket.emit('emoteCreation', emote.toActiveEmote());
+
+    const newEmotes = this.emotes.filter(e => e.playerID !== emote.playerID);
+    newEmotes.push(emote);
+    this._emotes = newEmotes;
+  }
+
+  public emitEmoteDestruction(emote: EmoteController) {
+    this._socket.emit('emoteDestruction', emote.toActiveEmote());
+
+    const newEmotes = this.emotes.filter(e => e.playerID !== emote.playerID);
+    newEmotes.push(emote);
+    this._emotes = newEmotes;
+  }
+
   /**
    * Emit a movement event for the given pet, updating the state locally and
    * also notifying the townService that the given pet moved.
@@ -696,7 +741,7 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
    */
   public unequipPet(type: string, playerID: PlayerID) {
     this._pets = this.pets.filter(pet => pet.playerID !== playerID && pet.type !== type);
-
+    this._emotes = this.emotes.filter(e => e.playerID !== playerID);
     this._socket.emit('petUnequipment', { type, playerID });
   }
 

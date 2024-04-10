@@ -2,7 +2,7 @@ import assert from 'assert';
 import Phaser from 'phaser';
 import PlayerController from '../../classes/PlayerController';
 import TownController from '../../classes/TownController';
-import { PetLocation, PlayerLocation } from '../../types/CoveyTownSocket';
+import { PlayerID, PetLocation, PlayerLocation } from '../../types/CoveyTownSocket';
 import { Callback } from '../VideoCall/VideoFrontend/types';
 import Interactable from './Interactable';
 import ConversationArea from './interactables/ConversationArea';
@@ -17,9 +17,13 @@ import PetController, {
   PET_LABEL_Y_OFFSET,
   PET_OFFSET,
 } from '../../classes/PetController';
+import { EmoteController } from '../../classes/EmoteController';
 
 // prefix of pet sprite keys
 const PET_SPRITE_PREFIX = 'Pet_Sprite_';
+// prefix of pet emotes
+const PET_EMOTE_PREFIX = 'Pet_Emote_';
+
 // Still not sure what the right type is here... "Interactable" doesn't do it
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function interactableTypeForObjectType(type: string): any {
@@ -52,6 +56,8 @@ export default class TownGameScene extends Phaser.Scene {
   private _players: PlayerController[] = [];
 
   private _pets: PetController[] = [];
+
+  private _emotes: EmoteController[] = [];
 
   private _interactables: Interactable[] = [];
 
@@ -199,10 +205,35 @@ export default class TownGameScene extends Phaser.Scene {
       PET_SPRITE_PREFIX + 12,
       this._resourcePathPrefix + '/assets/pet-shop/pet-sprites/12.png',
     );
+    // loading emotes
+    this.load.image(
+      PET_EMOTE_PREFIX + 'alert',
+      this._resourcePathPrefix + '/assets/pet-shop/emotes/alert.png',
+    );
+    this.load.image(
+      PET_EMOTE_PREFIX + 'disgust',
+      this._resourcePathPrefix + '/assets/pet-shop/emotes/disgust.png',
+    );
+    this.load.image(
+      PET_EMOTE_PREFIX + 'happy',
+      this._resourcePathPrefix + '/assets/pet-shop/emotes/happy.png',
+    );
+    this.load.image(
+      PET_EMOTE_PREFIX + 'love',
+      this._resourcePathPrefix + '/assets/pet-shop/emotes/love.png',
+    );
+    this.load.image(
+      PET_EMOTE_PREFIX + 'sad',
+      this._resourcePathPrefix + '/assets/pet-shop/emotes/sad.png',
+    );
   }
 
+  /**
+   * Make sure each player in the list has sprites and disconnected players are filtered out of the local list
+   * @param players the new list of players
+   */
   updatePlayers(players: PlayerController[]) {
-    //Make sure that each player has sprites
+    // Make sure that each player has sprites
     players.map(eachPlayer => {
       this.createPlayerSprites(eachPlayer);
     });
@@ -248,6 +279,62 @@ export default class TownGameScene extends Phaser.Scene {
 
     // Remove unequipped pets from the local list
     this._pets = pets;
+  }
+
+  /**
+   * Make sure each emote in the list has sprites and old emotes are filtered out of the local list
+   * @param emotes the new list of emotes
+   */
+  updateEmotes(emotes: EmoteController[]) {
+    emotes.forEach(emote => this.createEmote(emote));
+
+    // remove old emotes from the board
+    const oldEmotes = this._emotes.filter(
+      emote => !emotes.find(e => e.playerID === emote.playerID),
+    );
+
+    oldEmotes.forEach(e => this.deleteEmote(e));
+
+    // Remove old emotes from list
+    this._emotes = emotes;
+  }
+
+  /**
+   * Create the sprite for the emote
+   * @param emote the emote to be added as a sprite
+   */
+  createEmote(emote: EmoteController) {
+    if (!emote.gameObjects) {
+      const imgKey = PET_EMOTE_PREFIX + emote.emote;
+      const sprite = this.physics.add
+        .sprite(emote.location.x - 10, emote.location.y - 20, imgKey)
+        .setSize(30, 40)
+        .setOffset(0, 24);
+      this._collidingLayers.forEach(layer => this.physics.add.collider(sprite, layer));
+      emote.gameObjects = {
+        sprite,
+        locationManagedByGameScene: false,
+      };
+
+      // set a timer on the sprite to disappear after 2 seconds
+      setTimeout(() => {
+        this.deleteEmote(emote);
+        this.coveyTownController.emitEmoteDestruction(emote);
+      }, 2000);
+    }
+  }
+
+  /**
+   * Delete an emote sprite
+   * @param emote the emote that has to be removed
+   */
+  deleteEmote(emote: EmoteController) {
+    if (emote.gameObjects) {
+      const { sprite } = emote.gameObjects;
+      if (sprite) {
+        sprite.destroy();
+      }
+    }
   }
 
   getNewMovementDirection() {
@@ -588,7 +675,6 @@ export default class TownGameScene extends Phaser.Scene {
       .text(spawnPoint.x, spawnPoint.y - 20, '(You)', {
         font: '18px monospace',
         color: '#000000',
-        // padding: {x: 20, y: 10},
         backgroundColor: '#ffffff',
       })
       .setDepth(6);
@@ -678,11 +764,13 @@ export default class TownGameScene extends Phaser.Scene {
     this._ready = true;
     this.updatePlayers(this.coveyTownController.players);
     this.updatePets(this.coveyTownController.pets);
+    this.updateEmotes(this.coveyTownController.emotes);
     // Call any listeners that are waiting for the game to be initialized
     this._onGameReadyListeners.forEach(listener => listener());
     this._onGameReadyListeners = [];
     this.coveyTownController.addListener('playersChanged', players => this.updatePlayers(players));
     this.coveyTownController.addListener('equippedPetsChanged', pets => this.updatePets(pets));
+    this.coveyTownController.addListener('emotesChanged', emotes => this.updateEmotes(emotes));
   }
 
   createPlayerSprites(player: PlayerController) {
@@ -698,7 +786,6 @@ export default class TownGameScene extends Phaser.Scene {
         {
           font: '18px monospace',
           color: '#000000',
-          // padding: {x: 20, y: 10},
           backgroundColor: '#ffffff',
         },
       );
@@ -721,7 +808,9 @@ export default class TownGameScene extends Phaser.Scene {
       const sprite = this.physics.add
         .sprite(pet.location.x, pet.location.y, imgKey)
         .setSize(30, 40)
-        .setOffset(0, 24);
+        .setOffset(0, 24)
+        .setInteractive()
+        .on('pointerdown', () => this.onClickSprite(pet.playerID, pet.location));
       const label = this.add.text(
         pet.location.x - PET_LABEL_X_OFFSET,
         pet.location.y - PET_LABEL_Y_OFFSET,
@@ -729,7 +818,6 @@ export default class TownGameScene extends Phaser.Scene {
         {
           font: '10px monospace',
           color: '#000000',
-          // padding: {x: 20, y: 10},
           backgroundColor: '#ffffff',
         },
       );
@@ -743,6 +831,18 @@ export default class TownGameScene extends Phaser.Scene {
   }
 
   /**
+   * Randomise a new emote every time the user clicks on the pet
+   * @param petPlayerID the pet/player the emote is associated with
+   * @param location where the pet is located
+   */
+  onClickSprite(petPlayerID: PlayerID, location: PetLocation) {
+    const newEmote = new EmoteController(petPlayerID, location);
+    this._emotes.push(newEmote);
+    this.createEmote(newEmote);
+    this.coveyTownController.emitEmoteCreation(newEmote);
+  }
+
+  /**
    * Deletes the sprites of the given pet
    * @param pet
    */
@@ -752,6 +852,14 @@ export default class TownGameScene extends Phaser.Scene {
       if (sprite && label) {
         sprite.destroy();
         label.destroy();
+      }
+
+      // also delete all its associated emotes
+      const emotesToDelete = this._emotes.filter(emote => emote.playerID === pet.playerID);
+      console.log(`emotes to delete = `);
+      console.log(emotesToDelete);
+      if (emotesToDelete.length > 0) {
+        emotesToDelete.forEach(e => this.deleteEmote(e));
       }
     }
   }
