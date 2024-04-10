@@ -2,7 +2,7 @@ import assert from 'assert';
 import Phaser from 'phaser';
 import PlayerController from '../../classes/PlayerController';
 import TownController from '../../classes/TownController';
-import { PlayerID, PlayerLocation } from '../../types/CoveyTownSocket';
+import { PlayerID, PetLocation, PlayerLocation } from '../../types/CoveyTownSocket';
 import { Callback } from '../VideoCall/VideoFrontend/types';
 import Interactable from './Interactable';
 import ConversationArea from './interactables/ConversationArea';
@@ -11,7 +11,12 @@ import Inventory from './interactables/PetShop/Inventory';
 import PetShop from './interactables/PetShop/PetShop';
 import Transporter from './interactables/Transporter';
 import ViewingArea from './interactables/ViewingArea';
-import PetController from '../../classes/PetController';
+import PetController, {
+  PET_BASELINE_OFFSET,
+  PET_LABEL_X_OFFSET,
+  PET_LABEL_Y_OFFSET,
+  PET_OFFSET,
+} from '../../classes/PetController';
 import { EmoteController } from '../../classes/EmoteController';
 
 // prefix of pet sprite keys
@@ -244,23 +249,33 @@ export default class TownGameScene extends Phaser.Scene {
           label.destroy();
         }
 
+        // Remove the pets of the disconnected players from the board
         const equippedPets = this._pets.filter(pet => pet.playerID === disconnectedPlayer.id);
         equippedPets.forEach(equippedPet => this.deletePetSprite(equippedPet));
+        this._pets = this._pets.filter(pet => pet.playerID !== disconnectedPlayer.id);
       }
     });
     // Remove disconnected players from list
     this._players = players;
   }
 
+  /**
+   * Make sure each pet in the list has sprites and unequipped pets are filtered out of the local list
+   * @param pets the new list of pets
+   */
   updatePets(pets: PetController[]) {
+    // Make sure each pet has a sprite
     pets.forEach(pet => this.createPetSprite(pet));
 
-    // Remove unequipped pets from board
+    // Find unequipped pets by comparing local list to new list
     const unequippedPets = this._pets.filter(
       pet => !pets.find(p => p.playerID === pet.playerID && p.type === pet.type),
     );
 
+    // Remove unequipped pets from the board
     unequippedPets.forEach(unequippedPet => this.deletePetSprite(unequippedPet));
+
+    // Remove unequipped pets from the local list
     this._pets = pets;
   }
 
@@ -347,6 +362,9 @@ export default class TownGameScene extends Phaser.Scene {
       this._lastLocation.rotation = destination.rotation;
     }
     this.coveyTownController.emitMovement(this._lastLocation);
+
+    // also update pet locations
+    this.moveOurPets();
   }
 
   update() {
@@ -433,6 +451,9 @@ export default class TownGameScene extends Phaser.Scene {
           }
         });
         this.coveyTownController.emitMovement(this._lastLocation);
+
+        // Also update pet locations
+        this.moveOurPets();
       }
 
       //Update the location for the labels of all of the other players
@@ -443,6 +464,73 @@ export default class TownGameScene extends Phaser.Scene {
         }
       }
     }
+  }
+
+  /**
+   * Moves all of our pets to our current location
+   */
+  moveOurPets() {
+    const ourPets = this._pets.filter(
+      pet => pet.playerID === this.coveyTownController.ourPlayer.id,
+    );
+    const newLocation = this.coveyTownController.ourPlayer.location;
+    ourPets.forEach(pet => {
+      // Offsets the location so that the pet will be behind the player
+      switch (newLocation.rotation) {
+        case 'left':
+          newLocation.x += PET_OFFSET;
+          break;
+        case 'right':
+          newLocation.x -= PET_OFFSET;
+          break;
+        case 'front':
+          newLocation.y -= PET_OFFSET;
+          break;
+        case 'back':
+          newLocation.y += PET_OFFSET;
+          break;
+        default:
+          break;
+      }
+      this.movePetTo(pet, {
+        x: newLocation.x,
+        // offsets so that pet will be on the same baseline as player
+        y: newLocation.y + PET_BASELINE_OFFSET,
+        rotation: newLocation.rotation,
+      });
+    });
+  }
+
+  /**
+   * Moves the given pet to the destination
+   * @param pet pet to move
+   * @param destination desired destination
+   */
+  movePetTo(pet: PetController, destination: PetLocation) {
+    const gameObjects = pet.gameObjects;
+    if (!gameObjects) {
+      throw new Error('Unable to move pet without game objects created first');
+    }
+    if (destination.x !== undefined) {
+      gameObjects.sprite.x = destination.x;
+    }
+    if (destination.y !== undefined) {
+      gameObjects.sprite.y = destination.y;
+    }
+
+    gameObjects.label.setX(destination.x - PET_LABEL_X_OFFSET);
+    gameObjects.label.setY(destination.x - PET_LABEL_Y_OFFSET);
+
+    switch (destination.rotation) {
+      case 'left':
+        gameObjects.sprite.flipX = true;
+        break;
+      default:
+        gameObjects.sprite.flipX = false;
+        break;
+    }
+
+    this.coveyTownController.emitPetMovement(pet, destination);
   }
 
   private _map?: Phaser.Tilemaps.Tilemap;
@@ -698,6 +786,10 @@ export default class TownGameScene extends Phaser.Scene {
     }
   }
 
+  /**
+   * Creates a sprite for the given pet if it doesn't already have one
+   * @param pet
+   */
   createPetSprite(pet: PetController) {
     if (!pet.gameObjects) {
       const imgKey = PET_SPRITE_PREFIX + pet.imgID;
@@ -705,6 +797,17 @@ export default class TownGameScene extends Phaser.Scene {
         .sprite(pet.location.x, pet.location.y, imgKey)
         .setSize(30, 40)
         .setOffset(0, 24);
+      const label = this.add.text(
+        pet.location.x - PET_LABEL_X_OFFSET,
+        pet.location.y - PET_LABEL_Y_OFFSET,
+        pet.type,
+        {
+          font: '10px monospace',
+          color: '#000000',
+          // padding: {x: 20, y: 10},
+          backgroundColor: '#ffffff',
+        },
+      );
       const label = this.add.text(pet.location.x, pet.location.y - 25, pet.type, {
         font: '10px monospace',
         color: '#000000',
@@ -728,6 +831,10 @@ export default class TownGameScene extends Phaser.Scene {
     }
   }
 
+  /**
+   * Deletes the sprites of the given pet
+   * @param pet
+   */
   deletePetSprite(pet: PetController) {
     if (pet.gameObjects) {
       const { sprite, label } = pet.gameObjects;

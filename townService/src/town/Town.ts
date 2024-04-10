@@ -10,12 +10,14 @@ import { isViewingArea } from '../TestUtils';
 import {
   ChatMessage,
   ConversationArea as ConversationAreaModel,
+  PetShopArea as PetShopAreaModel,
   CoveyTownSocket,
   CurrencyMap,
   EquippedPet,
   Interactable,
   InteractableCommand,
   InteractableCommandBase,
+  PetLocation,
   PlayerID,
   ActiveEmote,
   PlayerLocation,
@@ -33,6 +35,7 @@ import InteractableArea from './InteractableArea';
 import PetShopArea from './PetShopArea';
 import ViewingArea from './ViewingArea';
 import InventoryArea from './InventoryArea';
+import ConnectFourGameArea from './games/ConnectFourGameArea';
 
 /**
  * The Town class implements the logic for each town: managing the various events that
@@ -245,7 +248,8 @@ export default class Town {
    * Adds a player to this Covey Town, provisioning the necessary credentials for the
    * player, and returning them
    *
-   * @param newPlayer The new player to add to the town
+   * @param userName username of the new player
+   * @param socket
    */
   async addPlayer(userName: string, socket: CoveyTownSocket): Promise<Player> {
     const newPlayer = new Player(userName, socket.to(this._townID));
@@ -292,6 +296,23 @@ export default class Town {
     socket.on('playerMovement', (movementData: PlayerLocation) => {
       try {
         this._updatePlayerLocation(newPlayer, movementData);
+      } catch (err) {
+        logError(err);
+      }
+    });
+
+    // Register an event listener for the client socket: if the client updates their
+    // location, inform the CoveyTownController
+    socket.on('petMovement', (pet: EquippedPet) => {
+      try {
+        const petsToUpdate = this.pets.filter(
+          p => p.playerID === pet.playerID && p.type === pet.type,
+        );
+        if (petsToUpdate.length === 1) {
+          this._updatePetLocation(petsToUpdate[0], pet.location);
+        } else {
+          throw new Error('Duplicates in local pets list in Town.');
+        }
       } catch (err) {
         logError(err);
       }
@@ -382,12 +403,40 @@ export default class Town {
                 // If winner's currency is undefined, set it to a default amount (1 in this case)
                 if (winnerCurrency === undefined) {
                   // Add default currency amount for the winner
-                  this.setPlayerCurrency(winnerID, 1); // TODO:
-                  this._awardCurrency(winnerID);
+                  this.setPlayerCurrency(winnerID, 1);
+                  this._awardCurrency(winnerID, 1);
                 } else {
                   // Increment currency for the winner
-                  this.setPlayerCurrency(winnerID, winnerCurrency + 1); // TODO:
-                  this._awardCurrency(winnerID);
+                  this.setPlayerCurrency(winnerID, winnerCurrency + 1);
+                  this._awardCurrency(winnerID, 1);
+                }
+                // Mark that currency has been awarded for this game
+                this._gameCurrencyAwardedMap.set(gameID, true);
+              }
+            }
+          }
+          // If the interactable type is 'ConnectFourArea'
+          if (interactableModel.type === 'ConnectFourArea') {
+            // Narrows down the interactable object to ConnectFourGameArea type
+            const connectFourGameArea = interactable as ConnectFourGameArea;
+            // If the Connect Four game is over and there's a winner
+            if (connectFourGameArea.game?.state.winner) {
+              const gameID = connectFourGameArea.game.id;
+              // Ensure currency for this game hasn't been awarded yet
+              if (!this._gameCurrencyAwardedMap.has(gameID)) {
+                // Gets the winning player's ID
+                const winnerID = connectFourGameArea.game.state.winner;
+                // Get the current currency amount for the winner
+                const winnerCurrency = this.getPlayerCurrency(winnerID);
+                // If winner's currency is undefined, set it to a default amount (1 in this case)
+                if (winnerCurrency === undefined) {
+                  // Add default currency amount for the winner
+                  this.setPlayerCurrency(winnerID, 2);
+                  this._awardCurrency(winnerID, 2);
+                } else {
+                  // Increment currency for the winner
+                  this.setPlayerCurrency(winnerID, winnerCurrency + 2);
+                  this._awardCurrency(winnerID, 2);
                 }
                 // Mark that currency has been awarded for this game
                 this._gameCurrencyAwardedMap.set(gameID, true);
@@ -431,14 +480,15 @@ export default class Town {
   }
 
   /**
+   * Updates the database with the currency upon a Tic Tac Toe or Connect Four
    *
    * @param winner the ID of the winning player
    * @param currency the updated currency of the winner
    */
-  private async _awardCurrency(winner: PlayerID) {
+  private async _awardCurrency(winner: PlayerID, addedCurrency: number) {
     try {
       const currency = await findOnePlayerCurrency(winner);
-      await updateOnePlayerCurrency(winner, currency + 1);
+      await updateOnePlayerCurrency(winner, currency + addedCurrency);
     } catch (error) {
       throw new Error(
         `Could not update database with the awarded currency: ${(error as Error).message}`,
@@ -449,7 +499,7 @@ export default class Town {
   /**
    * Destroys all data related to a player in this town.
    *
-   * @param session PlayerSession to destroy
+   * @param player
    */
   private _removePlayer(player: Player): void {
     if (player.location.interactableID) {
@@ -505,6 +555,33 @@ export default class Town {
     this._broadcastEmitter.emit('emoteDestroyed', emote);
   }
 
+  private _updateEmoteCreation(emote: ActiveEmote) {
+    this._emotes.filter(e => e.playerID !== emote.playerID);
+    this._emotes.push(emote);
+    this._broadcastEmitter.emit('emoteCreated', emote);
+  }
+
+  private _updateEmoteDestruction(emote: ActiveEmote) {
+    this._emotes = this._emotes.filter(e => e.playerID !== emote.playerID);
+    this._broadcastEmitter.emit('emoteDestroyed', emote);
+  }
+
+  /**
+   * Updates the location of a pet within the town
+   *
+   * @param pet Pet to update location for
+   * @param location New location for this pet
+   */
+  private _updatePetLocation(pet: EquippedPet, location: PetLocation): void {
+    pet.location = location;
+    this._broadcastEmitter.emit('petMoved', pet);
+  }
+
+  /**
+   * Equips a pet within the town
+   *
+   * @param toBeEquipped pet to equip
+   */
   private _updatePetEquipment(toBeEquipped: EquippedPet) {
     if (
       !this._pets.find(
@@ -516,6 +593,12 @@ export default class Town {
     }
   }
 
+  /**
+   * Unequips a pet within the town
+   *
+   * @param type type of pet to be unequipped
+   * @param playerID playerID of the player the pet belongs to
+   */
   private _updatePetUnequipment(type: string, playerID: PlayerID) {
     this._pets = this._pets.filter(pet => pet.playerID !== playerID && pet.type !== type);
     this._emotes = this._emotes.filter(emote => emote.playerID !== playerID);
@@ -591,6 +674,34 @@ export default class Town {
       return false;
     }
     area.updateModel(viewingArea);
+    area.addPlayersWithinBounds(this._players);
+    this._broadcastEmitter.emit('interactableUpdate', area.toModel());
+    return true;
+  }
+
+  /**
+   * Creates a new pet shop area in this town if there is not currently an active
+   * pet area with the same ID. The pet area ID must match the name of a
+   * pet area that exists in this town's map
+   *
+   * If successful creating the pet shop area, this method:
+   *    Adds any players who are in the region defined by the pet area to it
+   *    Notifies all players in the town that the pet area has been updated by
+   *      emitting an interactableUpdate event
+   *
+   * @param petArea Information describing the pet area to create.
+   *
+   * @returns True if the pet area was created or false if there is no known
+   * pet area with the specified ID or if there is already an active pet area
+   * with the specified ID
+   */
+  public addPetShopArea(petShopArea: PetShopAreaModel): boolean {
+    const area = this._interactables.find(
+      eachArea => eachArea.id === petShopArea.id,
+    ) as PetShopArea;
+    if (!area) {
+      return false;
+    }
     area.addPlayersWithinBounds(this._players);
     this._broadcastEmitter.emit('interactableUpdate', area.toModel());
     return true;
