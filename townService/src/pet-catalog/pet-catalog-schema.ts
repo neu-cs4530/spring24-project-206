@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 
-const petsCatalogSchema = new mongoose.Schema(
+const petCatalogSchema = new mongoose.Schema(
   {
     type: { type: String, required: true },
     price: { type: Number, required: true },
@@ -10,4 +10,4 @@ const petsCatalogSchema = new mongoose.Schema(
   },
   { collection: 'pet-shop' },
 );
-export default petsCatalogSchema;
+export default petCatalogSchema;

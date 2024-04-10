@@ -15,7 +15,7 @@ import { ClientToServerEvents, ServerToClientEvents } from './types/CoveyTownSoc
 import { TownsController } from './town/TownsController';
 import { logError } from './Utils';
 import petsController from './pets/pets-controller';
-import petsCatalogController from './pet-catalog/pet-catalog-controller';
+import petCatalogController from './pet-catalog/pet-catalog-controller';
 import leaderboardController from './leaderboard/leaderboard-controller';
 
 // Create the server instances
@@ -81,7 +81,7 @@ mongoose
   .catch(err => console.log('Failed to connect to MongoDB:', err));
 
 petsController(app);
-petsCatalogController(app);
+petCatalogController(app);
 leaderboardController(app);
 
 // Start the configured server, defaulting to port 8081 if $PORT is not set

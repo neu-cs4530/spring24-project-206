@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import petsCatalogSchema from './pet-catalog-schema';
+import petCatalogSchema from './pet-catalog-schema';
 
-const petsCatalogModel = mongoose.model('pet-shop', petsCatalogSchema);
-export default petsCatalogModel;
+const petCatalogModel = mongoose.model('pet-shop', petCatalogSchema);
+export default petCatalogModel;
