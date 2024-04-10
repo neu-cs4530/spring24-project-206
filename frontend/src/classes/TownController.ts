@@ -50,7 +50,7 @@ import PlayerController from './PlayerController';
 import PetShop from '../components/Town/interactables/PetShop/PetShop';
 import InventoryAreaController from './interactable/InventoryAreaController';
 import PetController from './PetController';
-import { PetEmote } from './PetEmote';
+import { EmoteController } from './EmoteController';
 
 const CALCULATE_NEARBY_PLAYERS_DELAY_MS = 300;
 const SOCKET_COMMAND_TIMEOUT_MS = 5000;
@@ -94,12 +94,6 @@ export type TownEvents = {
    * the new location can be found on the PlayerController.
    */
   playerMoved: (movedPlayer: PlayerController) => void;
-
-  /**
-   * An event that indicates that a pet has a new emotion. This event is dispatched after updating the pet's emotion -
-   * the new emotion can be found on the PetEmote.
-   */
-  petEmotion: (petEmote: PetEmote) => void;
 
   /**
    * An event that indicates that the set of active interactable areas has changed. This event is dispatched
@@ -152,6 +146,12 @@ export type TownEvents = {
    * @param update the new list of equipped pets.
    */
   equippedPetsChanged: (newPets: PetController[]) => void;
+
+  /**
+   * An event that indicates that there are new emotes. This event is dispatched after updating the pet's emote -
+   * the new emote can be found on the list of PetEmote.
+   */
+  emotesChanged: (petEmotes: EmoteController[]) => void;
 
   /**
    * Event handler for the 'petEquipped' event.
@@ -208,6 +208,12 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
    * with a new one; clients should take note not to retain stale references.
    */
   private _petsInternal: PetController[] = [];
+
+  /**
+   * The current list of equipped pets in the town. Adding or removing pets might replace the array
+   * with a new one; clients should take note not to retain stale references.
+   */
+  private _emotesInternal: EmoteController[] = [];
 
   /**
    * The current list of interactable areas in the town. Adding or removing interactable areas might replace the array.
@@ -407,6 +413,15 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
     return this._petsInternal;
   }
 
+  private set _emotes(newEmotes: EmoteController[]) {
+    this.emit('emotesChanged', newEmotes);
+    this._emotesInternal = newEmotes;
+  }
+
+  public get emotes(): EmoteController[] {
+    return this._emotesInternal;
+  }
+
   public get conversationAreas(): ConversationAreaController[] {
     const ret = this._interactableControllers.filter(
       eachInteractable => eachInteractable instanceof ConversationAreaController,
@@ -530,7 +545,6 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
      */
     this._socket.on('playerMoved', movedPlayer => {
       const playerToUpdate = this.players.find(eachPlayer => eachPlayer.id === movedPlayer.id);
-      // TODO: move the pet
       if (playerToUpdate) {
         if (playerToUpdate === this._ourPlayer) {
           /*
@@ -545,8 +559,10 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
       }
     });
 
-    this._socket.on('petEmoted', emote => {
-      this.emit('petEmotion', emote);
+    this._socket.on('emoteCreated', emote => {
+      const newEmotes = this.emotes.filter(e => e.playerID !== emote.playerID);
+      newEmotes.push(EmoteController.fromActiveEmote(emote));
+      this._emotes = newEmotes;
     });
 
     /**
@@ -643,21 +659,22 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
     assert(ourPlayer);
     ourPlayer.location = newLocation;
     this.emit('playerMoved', ourPlayer);
-    // check for nearby players, for all the nearby players - assign a new emotion to the current pet controller
-    const nearbyPlayers = this.nearbyPlayers();
-    if (nearbyPlayers.length > 1) {
-      const emotions: PetEmote[] = [];
-      for (const nearbyPlayer of nearbyPlayers) {
-        const emotion = {
-          playerID: nearbyPlayer.id,
-          emotion: nearbyPlayer.emote,
-        };
-        emotions.push(emotion);
-        this.emit('petEmotion', emotion);
-      }
-    }
-    // only check for whether or not there is nearby player, and if there is, emit the change emote event
-    // if not, emit the change emote event to undefined
+  }
+
+  public emitEmoteCreation(emote: EmoteController) {
+    this._socket.emit('emoteCreation', emote.toActiveEmote());
+
+    const newEmotes = this.emotes.filter(e => e.playerID !== emote.playerID);
+    newEmotes.push(emote);
+    this._emotes = newEmotes;
+  }
+
+  public emitEmoteDestruction(emote: EmoteController) {
+    this._socket.emit('emoteDestruction', emote.toActiveEmote());
+
+    const newEmotes = this.emotes.filter(e => e.playerID !== emote.playerID);
+    newEmotes.push(emote);
+    this._emotes = newEmotes;
   }
 
   /**
@@ -685,9 +702,8 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
    */
   public unequipPet(type: string, playerID: PlayerID) {
     this._pets = this.pets.filter(pet => pet.playerID !== playerID && pet.type !== type);
-
+    this._emotes = this.emotes.filter(e => e.playerID !== playerID);
     this._socket.emit('petUnequipment', { type, playerID });
-    this.emit('petEmotion', { playerID });
   }
 
   /**

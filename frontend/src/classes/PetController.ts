@@ -27,8 +27,6 @@ export default class PetController extends (EventEmitter as new () => TypedEmitt
 
   public gameObjects?: PetGameObjects;
 
-  public _emote?: string;
-
   constructor(type: string, playerID: PlayerID, location: PetLocation, imgID: number) {
     super();
     this._type = type;
@@ -57,14 +55,6 @@ export default class PetController extends (EventEmitter as new () => TypedEmitt
 
   get imgID(): number {
     return this._imgID;
-  }
-
-  get emote(): string | undefined {
-    return this._emote;
-  }
-
-  set emote(emote: string | undefined) {
-    this._emote = emote;
   }
 
   toPetModel(): PetModel {

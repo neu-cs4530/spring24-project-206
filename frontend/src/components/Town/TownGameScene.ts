@@ -2,7 +2,7 @@ import assert from 'assert';
 import Phaser from 'phaser';
 import PlayerController from '../../classes/PlayerController';
 import TownController from '../../classes/TownController';
-import { PlayerLocation } from '../../types/CoveyTownSocket';
+import { PetLocation, PlayerID, PlayerLocation } from '../../types/CoveyTownSocket';
 import { Callback } from '../VideoCall/VideoFrontend/types';
 import Interactable from './Interactable';
 import ConversationArea from './interactables/ConversationArea';
@@ -12,7 +12,7 @@ import PetShop from './interactables/PetShop/PetShop';
 import Transporter from './interactables/Transporter';
 import ViewingArea from './interactables/ViewingArea';
 import PetController from '../../classes/PetController';
-import { PetEmote } from '../../classes/PetEmote';
+import { EmoteController } from '../../classes/EmoteController';
 
 // prefix of pet sprite keys
 const PET_SPRITE_PREFIX = 'Pet_Sprite_';
@@ -52,7 +52,9 @@ export default class TownGameScene extends Phaser.Scene {
 
   private _pets: PetController[] = [];
 
-  private _emotes: PetEmote[] = [];
+  private _emotes: EmoteController[] = [];
+
+  private _emoteTimers: Record<PlayerID, ReturnType<typeof setTimeout>> = {};
 
   private _interactables: Interactable[] = [];
 
@@ -262,68 +264,45 @@ export default class TownGameScene extends Phaser.Scene {
     this._pets = pets;
   }
 
-  updateEmote(emote: PetEmote) {
-    // if the player doesn't have a sprite, add it
-    const emotingPet = this._pets.find(pet => pet.playerID === emote.playerID);
-    if (emotingPet) {
-      console.log(
-        `emoting pet is ${
-          emote.playerID === this.coveyTownController.ourPlayer.id ? '' : 'not'
-        } our player`,
-      );
-      if (emote.emotion) {
-        console.log(`creating ${emote.emotion} emote for ${emote.playerID}`);
-        this.addEmote(emote, emotingPet);
-        this._emotes.push(emotingPet);
-      } else {
-        console.log(`deleting emote for ${emote.playerID}`);
-        const toBeDeleted = this._emotes.filter(e => e.playerID === emote.playerID);
-        toBeDeleted.forEach(e => this.deleteEmote(e));
-        emotingPet.emote = undefined;
-        this._emotes.filter(e => e.playerID !== emote.playerID);
-      }
-    }
+  updateEmotes(emotes: EmoteController[]) {
+    emotes.forEach(emote => this.createEmote(emote));
 
-    // if the emote has a sprite, don't add it
+    // remove old emotes from the board
+    const oldEmotes = this._emotes.filter(
+      emote => !emotes.find(e => e.playerID === emote.playerID),
+    );
 
-    // if the emote has an undefined emotion, remove the emote sprite
-    // // remove old emotions
-    // const oldEmotions = this._emotions.filter(
-    //   emotion =>
-    //     !emotions.find(e => e.playerID === emotion.playerID && e.emotion === emotion.emotion),
-    // );
-    // console.log('old emotions');
-    // console.log(oldEmotions);
-    // oldEmotions.forEach(emote => this.deletePetEmotion(emote));
+    oldEmotes.forEach(e => this.deleteEmote(e));
 
-    // for (const emotion of emotions) {
-    //   if (!oldEmotions.includes(emotion)) {
-    //     const emotingPets = this._pets.filter(pet => pet.playerID === emotion.playerID);
-    //     emotingPets.forEach(emotingPet => this.addPetEmotion(emotion, emotingPet, emotion.emotion));
-    //   }
-    // }
-    // this._emotions = emotions;
+    // Remove old emotes from list
+    this._emotes = emotes;
   }
 
-  addEmote(emote: PetEmote, emotingPet: PetController) {
+  createEmote(emote: EmoteController) {
+    console.log(`creating emote: ${emote.emote}`);
     if (!emote.gameObjects) {
-      if (this._pets.includes(emotingPet)) {
-        emotingPet._emote = emote.emotion;
-        const imgKey = PET_ANIMATION_PREFIX + emotingPet._emote;
-        const sprite = this.physics.add
-          .sprite(emotingPet.location.x - 10, emotingPet.location.y - 23, imgKey)
-          .setSize(30, 40)
-          .setOffset(0, 24);
-        this._collidingLayers.forEach(layer => this.physics.add.collider(sprite, layer));
-        emote.gameObjects = {
-          sprite,
-          locationManagedByGameScene: false,
-        };
-      }
+      const imgKey = PET_ANIMATION_PREFIX + emote.emote;
+      const sprite = this.physics.add
+        .sprite(emote.location.x - 10, emote.location.y - 23, imgKey)
+        .setSize(30, 40)
+        .setOffset(0, 24);
+      this._collidingLayers.forEach(layer => this.physics.add.collider(sprite, layer));
+      emote.gameObjects = {
+        sprite,
+        locationManagedByGameScene: false,
+      };
+
+      // this.coveyTownController.emitEmoteCreation(emote);
+
+      // add the emote to a record of timers and delete the emote after 2 seconds
+      this._emoteTimers[emote.playerID] = setTimeout(() => {
+        this.deleteEmote(emote);
+        this.coveyTownController.emitEmoteDestruction(emote);
+      }, 2000);
     }
   }
 
-  deleteEmote(emote: PetEmote) {
+  deleteEmote(emote: EmoteController) {
     if (emote.gameObjects) {
       const { sprite } = emote.gameObjects;
       if (sprite) {
@@ -687,12 +666,13 @@ export default class TownGameScene extends Phaser.Scene {
     this._ready = true;
     this.updatePlayers(this.coveyTownController.players);
     this.updatePets(this.coveyTownController.pets);
+    this.updateEmotes(this.coveyTownController.emotes);
     // Call any listeners that are waiting for the game to be initialized
     this._onGameReadyListeners.forEach(listener => listener());
     this._onGameReadyListeners = [];
     this.coveyTownController.addListener('playersChanged', players => this.updatePlayers(players));
     this.coveyTownController.addListener('equippedPetsChanged', pets => this.updatePets(pets));
-    this.coveyTownController.addListener('petEmotion', emote => this.updateEmote(emote));
+    this.coveyTownController.addListener('emotesChanged', emotes => this.updateEmotes(emotes));
   }
 
   createPlayerSprites(player: PlayerController) {
@@ -732,6 +712,14 @@ export default class TownGameScene extends Phaser.Scene {
         font: '10px monospace',
         color: '#000000',
         backgroundColor: '#ffffff',
+      });
+      sprite.setInteractive();
+      this.input.on('gameobjectdown', () => {
+        const newEmote = new EmoteController(pet.playerID, pet.location);
+
+        this._emotes.push(newEmote);
+        this.createEmote(newEmote);
+        this.coveyTownController.emitEmoteCreation(newEmote);
       });
       pet.gameObjects = {
         sprite,

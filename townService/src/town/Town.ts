@@ -17,6 +17,7 @@ import {
   InteractableCommand,
   InteractableCommandBase,
   PlayerID,
+  ActiveEmote,
   PlayerLocation,
   ServerToClientEvents,
   SocketData,
@@ -63,6 +64,10 @@ export default class Town {
     return this._pets;
   }
 
+  get emotes(): ActiveEmote[] {
+    return this._emotes;
+  }
+
   get occupancy(): number {
     return this.players.length;
   }
@@ -89,6 +94,9 @@ export default class Town {
 
   /** The list of pets that are equipped in the town */
   private _pets: EquippedPet[] = [];
+
+  /** The list of pets that are equipped in the town */
+  private _emotes: ActiveEmote[] = [];
 
   /** The list of all players that have been in the town * */
   private _allPlayers: Player[] = [];
@@ -289,6 +297,22 @@ export default class Town {
       }
     });
 
+    socket.on('emoteCreation', emote => {
+      try {
+        this._updateEmoteCreation(emote);
+      } catch (err) {
+        logError(err);
+      }
+    });
+
+    socket.on('emoteDestruction', emote => {
+      try {
+        this._updateEmoteDestruction(emote);
+      } catch (err) {
+        logError(err);
+      }
+    });
+
     // Register an event listener for the client socket: if the client equips a pet,
     // inform the CoveyTownController
     socket.on('petEquipment', (toBeEquipped: EquippedPet) => {
@@ -433,6 +457,7 @@ export default class Town {
     }
     this._players = this._players.filter(p => p.id !== player.id);
     this._pets = this._pets.filter(pet => pet.playerID !== player.id);
+    this._emotes = this._emotes.filter(emote => emote.playerID !== player.id);
     this._broadcastEmitter.emit('playerDisconnect', player.toPlayerModel());
   }
 
@@ -469,18 +494,31 @@ export default class Town {
     this._broadcastEmitter.emit('playerMoved', player.toPlayerModel());
   }
 
+  private _updateEmoteCreation(emote: ActiveEmote) {
+    this._emotes.filter(e => e.playerID !== emote.playerID);
+    this._emotes.push(emote);
+    this._broadcastEmitter.emit('emoteCreated', emote);
+  }
+
+  private _updateEmoteDestruction(emote: ActiveEmote) {
+    this._emotes = this._emotes.filter(e => e.playerID !== emote.playerID);
+    this._broadcastEmitter.emit('emoteDestroyed', emote);
+  }
+
   private _updatePetEquipment(toBeEquipped: EquippedPet) {
     if (
       !this._pets.find(
         pet => pet.playerID === toBeEquipped.playerID && pet.type === toBeEquipped.type,
       )
     ) {
+      this._pets = this._pets.filter(pet => pet.playerID !== toBeEquipped.playerID);
       this._pets.push(toBeEquipped);
     }
   }
 
   private _updatePetUnequipment(type: string, playerID: PlayerID) {
     this._pets = this._pets.filter(pet => pet.playerID !== playerID && pet.type !== type);
+    this._emotes = this._emotes.filter(emote => emote.playerID !== playerID);
   }
 
   /**

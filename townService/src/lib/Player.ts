@@ -23,9 +23,6 @@ export default class Player {
   /** A special town emitter that will emit events to the entire town BUT NOT to this player */
   public readonly townEmitter: TownEmitter;
 
-  /** A random emote assigned to the player on creation */
-  private readonly _emote: string;
-
   constructor(userName: string, townEmitter: TownEmitter) {
     this.location = {
       x: 0,
@@ -35,19 +32,8 @@ export default class Player {
     };
     this._userName = userName;
     this._id = nanoid();
-    this._emote = this._randomAnimation();
     this._sessionToken = nanoid();
     this.townEmitter = townEmitter;
-  }
-
-  private _randomAnimation() {
-    const animations = ['alert', 'disgust', 'happy', 'love', 'sad'];
-    const minCeiled = Math.ceil(0);
-    const maxFloored = Math.floor(5);
-    // The maximum is exclusive and the minimum is inclusive
-    const randomIndex = Math.floor(Math.random() * (maxFloored - minCeiled) + minCeiled);
-
-    return animations.slice(randomIndex)[0];
   }
 
   get userName(): string {
@@ -56,10 +42,6 @@ export default class Player {
 
   get id(): string {
     return this._id;
-  }
-
-  get emote(): string {
-    return this._emote;
   }
 
   set videoToken(value: string | undefined) {
@@ -79,7 +61,6 @@ export default class Player {
       id: this._id,
       location: this.location,
       userName: this._userName,
-      emote: this.emote,
     };
   }
 }
