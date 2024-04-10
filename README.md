@@ -34,6 +34,23 @@ To create an account and configure your local environment:
 | `TWILIO_API_KEY_SECRET` | The secret for the API key you created.   |
 | `TWILIO_API_AUTH_TOKEN` | Visible on your twilio account dashboard. |
 
+4. In the `.env` file in the `townService`, you will need to add credentials for connecting to the MongoDB back-end. Please use these credentials:
+```
+MONGODB_USERNAME='guest'
+MONGODB_PASSWORD='guest123'
+MONGODB_URI='personal-pet-collection.hbmnsu4.mongodb.net/pet-collection?retryWrites=true&w=majority&appName=personal-pet-collection'
+```
+5. You will also need to add the base URL for the server we are running on the back-end. Please also make these additions to your `townService/.env` file:
+```
+NEXT_PUBLIC_AXIOS_BASE_URL=http://localhost:8081/api
+NEXT_PUBLIC_API_KEY='Vt2V6gBuDw3AU4LnZngwv'
+```
+6. In the `.env` file in the `frontEnd`, you will need to add the server information in addition to the previous variables:
+```
+NEXT_PUBLIC_AXIOS_BASE_URL=http://localhost:8081/api
+NEXT_PUBLIC_API_KEY='Vt2V6gBuDw3AU4LnZngwv'
+```
+
 ### Starting the backend
 
 Once your backend is configured, you can start it by running `npm start` in the `townService` directory (the first time you run it, you will also need to run `npm install`).
