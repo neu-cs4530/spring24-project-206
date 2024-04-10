@@ -348,6 +348,7 @@ export type InteractableCommandResponse<MessageType> = {
 
 export interface ServerToClientEvents {
   playerMoved: (movedPlayer: Player) => void;
+  petMoved: (movedPet: EquippedPet) => void;
   playerDisconnect: (disconnectedPlayer: Player) => void;
   playerJoined: (newPlayer: Player) => void;
   initialize: (initialData: TownJoinResponse) => void;
@@ -366,6 +367,7 @@ export interface ServerToClientEvents {
 export interface ClientToServerEvents {
   chatMessage: (message: ChatMessage) => void;
   playerMovement: (movementData: PlayerLocation) => void;
+  petMovement: (movementData: EquippedPet) => void;
   interactableUpdate: (update: Interactable) => void;
   interactableCommand: (
     command: InteractableCommand & InteractableCommandBase

@@ -23,6 +23,7 @@ import {
   InteractableCommandBase,
   InteractableCommandResponse,
   InteractableID,
+  PetLocation,
   PlayerID,
   PlayerLocation,
   TownSettingsUpdate,
@@ -93,6 +94,12 @@ export type TownEvents = {
    * the new location can be found on the PlayerController.
    */
   playerMoved: (movedPlayer: PlayerController) => void;
+
+  /**
+   * An event that indicates that a pet has moved. This event is dispatched after updating the pet's location -
+   * the new location can be found on the PetController.
+   */
+  petMoved: (movedPet: PetController) => void;
 
   /**
    * An event that indicates that the set of active interactable areas has changed. This event is dispatched
@@ -523,7 +530,6 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
      */
     this._socket.on('playerMoved', movedPlayer => {
       const playerToUpdate = this.players.find(eachPlayer => eachPlayer.id === movedPlayer.id);
-      // TODO: move the pet
       if (playerToUpdate) {
         if (playerToUpdate === this._ourPlayer) {
           /*
@@ -535,6 +541,21 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
           playerToUpdate.location = movedPlayer.location;
         }
         this.emit('playerMoved', playerToUpdate);
+      }
+    });
+    /**
+     * When a pet moves, update local state and emit an event to the controller's event listeners
+     */
+    this._socket.on('petMoved', movedPet => {
+      const petToUpdate = this.pets.find(
+        eachPet => eachPet.playerID === movedPet.playerID && eachPet.type === movedPet.type,
+      );
+      if (petToUpdate && this._ourPlayer) {
+        // We should only update the pet location if it's not our pet
+        // (since our pets should be updated elsewhere)
+        if (petToUpdate.playerID !== this._ourPlayer.id) {
+          petToUpdate.location = movedPet.location;
+        }
       }
     });
     /**
@@ -631,6 +652,23 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
     assert(ourPlayer);
     ourPlayer.location = newLocation;
     this.emit('playerMoved', ourPlayer);
+  }
+
+  /**
+   * Emit a movement event for the given pet, updating the state locally and
+   * also notifying the townService that the given pet moved.
+   *
+   * @param pet the pet to be moved
+   * @param newLocation the desired destination
+   */
+  public emitPetMovement(pet: PetController, newLocation: PetLocation) {
+    this._socket.emit('petMovement', {
+      type: pet.type,
+      playerID: pet.playerID,
+      location: newLocation,
+      imgID: pet.imgID,
+    });
+    pet.location = newLocation;
   }
 
   /**

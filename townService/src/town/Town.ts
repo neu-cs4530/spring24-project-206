@@ -17,6 +17,7 @@ import {
   Interactable,
   InteractableCommand,
   InteractableCommandBase,
+  PetLocation,
   PlayerID,
   PlayerLocation,
   ServerToClientEvents,
@@ -239,7 +240,8 @@ export default class Town {
    * Adds a player to this Covey Town, provisioning the necessary credentials for the
    * player, and returning them
    *
-   * @param newPlayer The new player to add to the town
+   * @param userName username of the new player
+   * @param socket
    */
   async addPlayer(userName: string, socket: CoveyTownSocket): Promise<Player> {
     const newPlayer = new Player(userName, socket.to(this._townID));
@@ -286,6 +288,23 @@ export default class Town {
     socket.on('playerMovement', (movementData: PlayerLocation) => {
       try {
         this._updatePlayerLocation(newPlayer, movementData);
+      } catch (err) {
+        logError(err);
+      }
+    });
+
+    // Register an event listener for the client socket: if the client updates their
+    // location, inform the CoveyTownController
+    socket.on('petMovement', (pet: EquippedPet) => {
+      try {
+        const petsToUpdate = this.pets.filter(
+          p => p.playerID === pet.playerID && p.type === pet.type,
+        );
+        if (petsToUpdate.length === 1) {
+          this._updatePetLocation(petsToUpdate[0], pet.location);
+        } else {
+          throw new Error('Duplicates in local pets list in Town.');
+        }
       } catch (err) {
         logError(err);
       }
@@ -456,7 +475,7 @@ export default class Town {
   /**
    * Destroys all data related to a player in this town.
    *
-   * @param session PlayerSession to destroy
+   * @param player
    */
   private _removePlayer(player: Player): void {
     if (player.location.interactableID) {
@@ -500,6 +519,22 @@ export default class Town {
     this._broadcastEmitter.emit('playerMoved', player.toPlayerModel());
   }
 
+  /**
+   * Updates the location of a pet within the town
+   *
+   * @param pet Pet to update location for
+   * @param location New location for this pet
+   */
+  private _updatePetLocation(pet: EquippedPet, location: PetLocation): void {
+    pet.location = location;
+    this._broadcastEmitter.emit('petMoved', pet);
+  }
+
+  /**
+   * Equips a pet within the town
+   *
+   * @param toBeEquipped pet to equip
+   */
   private _updatePetEquipment(toBeEquipped: EquippedPet) {
     if (
       !this._pets.find(
@@ -510,6 +545,12 @@ export default class Town {
     }
   }
 
+  /**
+   * Unequips a pet within the town
+   *
+   * @param type type of pet to be unequipped
+   * @param playerID playerID of the player the pet belongs to
+   */
   private _updatePetUnequipment(type: string, playerID: PlayerID) {
     this._pets = this._pets.filter(pet => pet.playerID !== playerID && pet.type !== type);
   }
