@@ -60,6 +60,7 @@ const TEXT_COLOR = '#88643e';
 function PetShopSlot({ petCatalog, controller, playersPets }: PetShopProps): JSX.Element {
   const [isButtonDisabled, setButtonDisabled] = useState(false);
   // Initializes the background and adoptElement based on player's ownership of the pet
+  let petPopularity: number = petCatalog.counter;
   let background = <Image src={slotBackground.src} />;
   let adoptElement = (
     <IconButton
@@ -79,10 +80,11 @@ function PetShopSlot({ petCatalog, controller, playersPets }: PetShopProps): JSX
       aria-label={'adopt-button'}
     />
   );
-  // if the player has not bought the pet, make the
+  // If the player has bought the pet, adopt button disappears
   if (playersPets.map(pet => pet.type).includes(petCatalog.type)) {
     background = <Image src={slotBackgroundDisabled.src} />;
     adoptElement = <></>;
+    petPopularity = petCatalog.counter + 1;
   }
 
   // Initializes the petImages array to map pet images to their respective IDs
@@ -118,7 +120,7 @@ function PetShopSlot({ petCatalog, controller, playersPets }: PetShopProps): JSX
         fontSize='9px'
         color={TEXT_COLOR}
         textAlign='center'>
-        Price: {petCatalog.price} <br /> Popularity: {petCatalog.counter} <br /> Speed:{' '}
+        Price: {petCatalog.price} <br /> Popularity: {petPopularity} <br /> Speed:{' '}
         {petCatalog.speed}
       </Text>
       <Text
@@ -231,7 +233,7 @@ function PetShopArea({
     };
     // Immediately invokes the async function
     getTheCurrency();
-  }, [playerID, currency, pets]);
+  }, [playerID, pets]);
 
   const petsPerPage = 6; // Number of pets to display per page
   // Calculate the index range for the current page
