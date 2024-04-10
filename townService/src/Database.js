@@ -10,26 +10,10 @@ export const findPetsInCatalogFromDatabase = async () => {
   return response.data;
 };
 
-export const findPetPriceFromDatabase = async type => {
-  const response = await instance.get(`/pets-catalog/type/${type}`);
-  const { price } = response.data;
-  return price;
-};
-
-export const findAllCurrencyFromDatabase = async () => {
-  const response = await instance.get(`/leaderboard`);
-  return response.data;
-};
-
 export const findOnePlayerCurrencyFromDatabase = async playerID => {
   const response = await instance.get(`/leaderboard/player/${playerID}`);
   const { currency } = response.data;
   return currency;
-};
-
-export const addPlayerCurrencyToDatabase = async leaderboardEntry => {
-  const response = await instance.post(`/leaderboard`, leaderboardEntry);
-  return response.data;
 };
 
 export const findPetImgIdFromDatabase = async type => {
