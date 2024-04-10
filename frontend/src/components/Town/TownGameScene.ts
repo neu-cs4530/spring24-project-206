@@ -299,6 +299,10 @@ export default class TownGameScene extends Phaser.Scene {
     this._emotes = emotes;
   }
 
+  /**
+   * Create the sprite for the emote
+   * @param emote the emote to be added as a sprite
+   */
   createEmote(emote: EmoteController) {
     if (!emote.gameObjects) {
       const imgKey = PET_EMOTE_PREFIX + emote.emote;
@@ -320,6 +324,10 @@ export default class TownGameScene extends Phaser.Scene {
     }
   }
 
+  /**
+   * Delete an emote sprite
+   * @param emote the emote that has to be removed
+   */
   deleteEmote(emote: EmoteController) {
     if (emote.gameObjects) {
       const { sprite } = emote.gameObjects;
@@ -667,7 +675,6 @@ export default class TownGameScene extends Phaser.Scene {
       .text(spawnPoint.x, spawnPoint.y - 20, '(You)', {
         font: '18px monospace',
         color: '#000000',
-        // padding: {x: 20, y: 10},
         backgroundColor: '#ffffff',
       })
       .setDepth(6);
@@ -823,6 +830,11 @@ export default class TownGameScene extends Phaser.Scene {
     }
   }
 
+  /**
+   * Randomise a new emote every time the user clicks on the pet
+   * @param petPlayerID the pet/player the emote is associated with
+   * @param location where the pet is located
+   */
   onClickSprite(petPlayerID: PlayerID, location: PetLocation) {
     const newEmote = new EmoteController(petPlayerID, location);
     this._emotes.push(newEmote);
