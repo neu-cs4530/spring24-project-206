@@ -164,6 +164,7 @@ export async function mockTownControllerConnection(
         },
       ],
       currentPets: [],
+      currentEmotes: [],
       friendlyName: nanoid(),
       isPubliclyListed: true,
       providerVideoToken: nanoid(),
