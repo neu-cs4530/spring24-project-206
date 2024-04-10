@@ -1,5 +1,9 @@
 import axios from 'axios';
 
+axios.defaults.baseURL =
+  process.env.NEXT_PUBLIC_AXIOS_BASE_URL ??
+  'https://covey-town-deployment-28400a9c8dfd.herokuapp.com';
+
 export const findPetsByPlayerFromDatabase = async playerID => {
   const response = await axios.get(`/api/pets/player/${playerID}`);
   return response.data;
