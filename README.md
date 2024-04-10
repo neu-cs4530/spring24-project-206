@@ -18,6 +18,8 @@ A backend service (in the `townService` directory) implements the application lo
 
 Running the application locally entails running both the backend service and a frontend.
 
+test
+
 ### Setting up the backend
 
 To run the backend, you will need a Twilio account. Twilio provides new accounts with $15 of credit, which is more than enough to get started.
