@@ -16,7 +16,7 @@ import useTownController from '../../../../hooks/useTownController';
 import PetShop from './PetShop';
 import { PetCatalog } from '../../../../../../townService/src/lib/PetCatalog';
 import { Pet } from '../../../../../../townService/src/lib/Pet';
-import PetShopController from '../../../../classes/interactable/PetShopController';
+import PetShopAreaController from '../../../../classes/interactable/PetShopAreaController';
 import { InteractableID, PlayerID } from '../../../../types/CoveyTownSocket';
 import {
   findOnePlayerCurrencyFromDatabase,
@@ -47,7 +47,7 @@ import twelve from '../../../../../public/assets/pet-shop/pet-sprites/12.png';
 // Defines the props for PetShopSlot component
 interface PetShopProps {
   petCatalog: PetCatalog;
-  controller: PetShopController;
+  controller: PetShopAreaController;
   playersPets: Pet[];
 }
 
