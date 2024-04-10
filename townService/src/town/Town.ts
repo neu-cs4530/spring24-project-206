@@ -1,7 +1,10 @@
 import { ITiledMap, ITiledMapObjectLayer } from '@jonbell/tiled-map-type-guard';
 import { nanoid } from 'nanoid';
 import { BroadcastOperator } from 'socket.io';
-import { updateOnePlayerCurrency } from '../leaderboard/leaderboard-dao';
+import {
+  addPlayerCurrencyToDao,
+  updateOnePlayerCurrencyInDao,
+} from '../leaderboard/leaderboard-dao';
 import InvalidParametersError from '../lib/InvalidParametersError';
 import IVideoClient from '../lib/IVideoClient';
 import Player from '../lib/Player';
@@ -27,7 +30,7 @@ import {
 } from '../types/CoveyTownSocket';
 import { logError } from '../Utils';
 import ConversationArea from './ConversationArea';
-import { addPlayerCurrency, findOnePlayerCurrency } from './Database';
+import { findOnePlayerCurrencyFromDatabase } from '../Database';
 // eslint-disable-next-line import/no-cycle
 import GameAreaFactory from './games/GameAreaFactory';
 import TicTacToeGameArea from './games/TicTacToeGameArea';
@@ -256,7 +259,7 @@ export default class Town {
     this._players.push(newPlayer);
     this._allPlayers.push(newPlayer);
     try {
-      await addPlayerCurrency({ playerID: newPlayer.id, currency: 0 });
+      await addPlayerCurrencyToDao({ playerID: newPlayer.id, currency: 0 });
     } catch (error) {
       throw new Error(`Could not add new player currency to database: ${(error as Error).message}`);
     }
@@ -487,8 +490,8 @@ export default class Town {
    */
   private async _awardCurrency(winner: PlayerID, addedCurrency: number) {
     try {
-      const currency = await findOnePlayerCurrency(winner);
-      await updateOnePlayerCurrency(winner, currency + addedCurrency);
+      const currency = await findOnePlayerCurrencyFromDatabase(winner);
+      await updateOnePlayerCurrencyInDao(winner, currency + addedCurrency);
     } catch (error) {
       throw new Error(
         `Could not update database with the awarded currency: ${(error as Error).message}`,

@@ -16,13 +16,13 @@ import useTownController from '../../../../hooks/useTownController';
 import PetShop from './PetShop';
 import { PetCatalog } from '../../../../../../townService/src/lib/PetCatalog';
 import { Pet } from '../../../../../../townService/src/lib/Pet';
-import PetShopController from '../../../../classes/interactable/PetShopController';
+import PetShopAreaController from '../../../../classes/interactable/PetShopAreaController';
 import { InteractableID, PlayerID } from '../../../../types/CoveyTownSocket';
 import {
-  findOnePlayerCurrency,
-  findPetsByPlayer,
-  findPetsInCatalog,
-} from '../../../../../../townService/src/town/Database';
+  findOnePlayerCurrencyFromDatabase,
+  findPetsByPlayerFromDatabase,
+  findPetsInCatalogFromDatabase,
+} from '../../../../../../townService/src/Database';
 import CurrencyDisplay from './CurrencyDisplay';
 import shopBackground from '../../../../../public/assets/pet-shop/ui/shop_bg.png';
 import closeButton from '../../../../../public/assets/pet-shop/ui/close_btn.png';
@@ -47,7 +47,7 @@ import twelve from '../../../../../public/assets/pet-shop/pet-sprites/12.png';
 // Defines the props for PetShopSlot component
 interface PetShopProps {
   petCatalog: PetCatalog;
-  controller: PetShopController;
+  controller: PetShopAreaController;
   playersPets: Pet[];
 }
 
@@ -197,7 +197,7 @@ function PetShopArea({
   useEffect(() => {
     const getCatalog = async () => {
       try {
-        const catalog = await findPetsInCatalog();
+        const catalog = await findPetsInCatalogFromDatabase();
         setPlayerCatalog(catalog);
       } catch (error) {
         console.error('Error fetching data: ', error);
@@ -210,7 +210,7 @@ function PetShopArea({
   useEffect(() => {
     const getPets = async () => {
       try {
-        const playerPets = await findPetsByPlayer(playerID);
+        const playerPets = await findPetsByPlayerFromDatabase(playerID);
         setPets(playerPets);
       } catch (error) {
         console.error('Error fetching data: ', error);
@@ -225,7 +225,7 @@ function PetShopArea({
   useEffect(() => {
     const getTheCurrency = async () => {
       try {
-        const playerCurrency = await findOnePlayerCurrency(playerID);
+        const playerCurrency = await findOnePlayerCurrencyFromDatabase(playerID);
         setCurrency(playerCurrency);
       } catch (error) {
         console.error('Error fetching currency: ', error);

@@ -15,7 +15,7 @@ import { ClientToServerEvents, ServerToClientEvents } from './types/CoveyTownSoc
 import { TownsController } from './town/TownsController';
 import { logError } from './Utils';
 import petsController from './pets/pets-controller';
-import petsCatalogController from './pet-shop/pet-shop-controller';
+import petCatalogController from './pet-catalog/pet-catalog-controller';
 import leaderboardController from './leaderboard/leaderboard-controller';
 
 // Create the server instances
@@ -73,15 +73,13 @@ app.use(
 );
 
 // connect to mongo
-const CONNECTION_STRING = `mongodb+srv://${process.env.MONGODB_USERNAME}:${process.env.MONGODB_PASSWORD}@personal-pet-collection.hbmnsu4.mongodb.net/pet-collection?retryWrites=true&w=majority&appName=personal-pet-collection`;
-console.log('Trying to connect to MongoDB...');
+const CONNECTION_STRING = `mongodb+srv://${process.env.MONGODB_USERNAME}:${process.env.MONGODB_PASSWORD}@${process.env.MONGODB_URI}`;
 mongoose
   .connect(CONNECTION_STRING)
-  .then(() => console.log('Successfully connected to MongoDB'))
-  .catch(err => console.log('Failed to connect to MongoDB:', err));
+  .catch(err => logError(`Failed to connect to MongoDB:${(err as Error).message}`));
 
 petsController(app);
-petsCatalogController(app);
+petCatalogController(app);
 leaderboardController(app);
 
 // Start the configured server, defaulting to port 8081 if $PORT is not set

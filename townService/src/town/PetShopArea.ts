@@ -9,10 +9,12 @@ import {
   TownEmitter,
 } from '../types/CoveyTownSocket';
 import InteractableArea from './InteractableArea';
-import { updateCounterForPet } from '../pet-shop/pets-catalog-dao';
-import { createPet } from '../pets/pets-dao';
-import { findOnePlayerCurrency, findPetPrice } from './Database';
-import { updateOnePlayerCurrency } from '../leaderboard/leaderboard-dao';
+import { findPetPriceFromDao, updateCounterForPetInDao } from '../pet-catalog/pet-catalog-dao';
+import { createPetFromDao } from '../pets/pets-dao';
+import {
+  getOnePlayerCurrencyFromDao,
+  updateOnePlayerCurrencyInDao,
+} from '../leaderboard/leaderboard-dao';
 
 export default class PetShopArea extends InteractableArea {
   public pets?: Pet[];
@@ -69,7 +71,7 @@ export default class PetShopArea extends InteractableArea {
    */
   private async _incrementPopularity(type: string) {
     try {
-      await updateCounterForPet(type);
+      await updateCounterForPetInDao(type);
     } catch (error) {
       throw new Error(`Could not update popularity counter: ${(error as Error).message}`);
     }
@@ -81,7 +83,7 @@ export default class PetShopArea extends InteractableArea {
    */
   private async _updateCurrency(playerID: string, newValue: number) {
     try {
-      await updateOnePlayerCurrency(playerID, newValue);
+      await updateOnePlayerCurrencyInDao(playerID, newValue);
     } catch (error) {
       throw new Error(`Could not update currency: ${(error as Error).message}`);
     }
@@ -93,18 +95,18 @@ export default class PetShopArea extends InteractableArea {
    * @param petType the type of the pet being adopted
    */
   private async _adoptPet(playerID: string, petType: string) {
-    const currency = await findOnePlayerCurrency(playerID);
-    const petPrice = await findPetPrice(petType);
+    const currency = (await getOnePlayerCurrencyFromDao(playerID))?.currency;
+    const petPrice = (await findPetPriceFromDao(petType))?.price;
 
-    if (currency === null || petPrice === null) {
-      throw new Error('why null');
+    if (currency === undefined || petPrice === undefined) {
+      throw new Error('Currency or pet price is undefined');
     }
 
     if (currency < petPrice) {
       // emit an insufficient currency event to the front end
       this._emitter.emit('insufficientCurrency');
     } else {
-      const newPet = await createPet({
+      const newPet = await createPetFromDao({
         type: petType,
         playerID,
         equipped: false,

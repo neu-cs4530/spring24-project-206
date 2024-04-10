@@ -19,10 +19,10 @@ import { InteractableID, PlayerID } from '../../../../../../shared/types/CoveyTo
 import { PetCatalog } from '../../../../../../townService/src/lib/PetCatalog';
 import { Pet } from '../../../../../../townService/src/lib/Pet';
 import {
-  findOnePlayerCurrency,
-  findPetsByPlayer,
-  findPetsInCatalog,
-} from '../../../../../../townService/src/town/Database';
+  findOnePlayerCurrencyFromDatabase,
+  findPetsByPlayerFromDatabase,
+  findPetsInCatalogFromDatabase,
+} from '../../../../../../townService/src/Database';
 import closeButton from '../../../../../public/assets/pet-shop/ui/close_btn.png';
 import inventoryBackground from '../../../../../public/assets/pet-shop/ui/inventory_bg.png';
 import unequippedSlot from '../../../../../public/assets/pet-shop/ui/inventory_slot_bg.png';
@@ -187,7 +187,7 @@ function InventoryArea({
     // get pets catalog
     const getCatalog = async () => {
       try {
-        const catalog = await findPetsInCatalog();
+        const catalog = await findPetsInCatalogFromDatabase();
         setPetsCatalog(catalog);
       } catch (e) {
         console.error('Error fetching data: ', e);
@@ -201,7 +201,7 @@ function InventoryArea({
     // get the player's pets
     const getPets = async () => {
       try {
-        const playerPets = await findPetsByPlayer(playerID);
+        const playerPets = await findPetsByPlayerFromDatabase(playerID);
         setPets(playerPets);
       } catch (e) {
         console.error('Error fetching data: ', e);
@@ -216,7 +216,7 @@ function InventoryArea({
   useEffect(() => {
     const getTheCurrency = async () => {
       try {
-        const playerCurrency = await findOnePlayerCurrency(playerID);
+        const playerCurrency = await findOnePlayerCurrencyFromDatabase(playerID);
         setCurrency(playerCurrency);
       } catch (error) {
         console.error('Error fetching currency: ', error);

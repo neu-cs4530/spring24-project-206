@@ -108,7 +108,8 @@ describe('TownController', () => {
     });
     it('Initializes the properties of the controller', () => {
       expect(testController.providerVideoToken).toEqual(townJoinResponse.providerVideoToken);
-      expect(testController.pets).toEqual(townJoinResponse.currentPets); // TODO:
+      expect(testController.pets).toEqual(townJoinResponse.currentPets);
+      expect(testController.emotes).toEqual(townJoinResponse.currentEmotes);
       expect(testController.friendlyName).toEqual(townJoinResponse.friendlyName);
       expect(testController.townIsPubliclyListed).toEqual(townJoinResponse.isPubliclyListed);
       expect(testController.sessionToken).toEqual(townJoinResponse.sessionToken);
