@@ -58,7 +58,6 @@ export interface Player {
   id: PlayerID;
   userName: string;
   location: PlayerLocation;
-  emote?: string;
 }
 
 export interface EquippedPet {
