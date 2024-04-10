@@ -59,8 +59,6 @@ export default class TownGameScene extends Phaser.Scene {
 
   private _emotes: EmoteController[] = [];
 
-  private _emoteTimers: Record<PlayerID, ReturnType<typeof setTimeout>> = {};
-
   private _interactables: Interactable[] = [];
 
   private _cursors: Phaser.Types.Input.Keyboard.CursorKeys[] = [];
@@ -230,6 +228,10 @@ export default class TownGameScene extends Phaser.Scene {
     );
   }
 
+  /**
+   * Make sure each player in the list has sprites and disconnected players are filtered out of the local list
+   * @param players the new list of players
+   */
   updatePlayers(players: PlayerController[]) {
     // Make sure that each player has sprites
     players.map(eachPlayer => {
@@ -279,6 +281,10 @@ export default class TownGameScene extends Phaser.Scene {
     this._pets = pets;
   }
 
+  /**
+   * Make sure each emote in the list has sprites and old emotes are filtered out of the local list
+   * @param emotes the new list of emotes
+   */
   updateEmotes(emotes: EmoteController[]) {
     emotes.forEach(emote => this.createEmote(emote));
 
@@ -306,8 +312,8 @@ export default class TownGameScene extends Phaser.Scene {
         locationManagedByGameScene: false,
       };
 
-      // add the emote to a record of timers and delete the emote after 2 seconds
-      this._emoteTimers[emote.playerID] = setTimeout(() => {
+      // set a timer on the sprite to disappear after 2 seconds
+      setTimeout(() => {
         this.deleteEmote(emote);
         this.coveyTownController.emitEmoteDestruction(emote);
       }, 2000);
