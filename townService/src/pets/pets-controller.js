@@ -13,19 +13,6 @@ const findAllPets = async (req, res) => {
 };
 
 /**
- * Get all pets that are of the same type
- */
-const findPetByType = async (req, res) => {
-  try {
-    const { type } = req.params;
-    const pet = await petsDao.findPetByTypeFromDao(type);
-    res.json(pet);
-  } catch (error) {
-    res.status(500).json({ error: 'Error fetching pets of a type from the inventory' });
-  }
-};
-
-/**
  * Get all pets that belong to one player
  */
 const findPetsByPlayer = async (req, res) => {
@@ -69,6 +56,15 @@ const createPet = async (req, res) => {
   }
 };
 
+const deletePets = async (req, res) => {
+  try {
+    const result = await petsDao.deletePetsInDao();
+    res.json(result);
+  } catch (error) {
+    res.status(500).json({ error: 'Error deleting pets in the database' });
+  }
+};
+
 const API_BASE_PATH = '/api/pets';
 
 const petsController = app => {
@@ -76,6 +72,7 @@ const petsController = app => {
   app.get(`${API_BASE_PATH}/player/:playerID`, findPetsByPlayer);
   app.get(`${API_BASE_PATH}/player/:playerID/type/:type`, findPetsByPlayerAndType);
   app.post(API_BASE_PATH, createPet);
+  app.delete(API_BASE_PATH, deletePets);
 };
 
 export default petsController;

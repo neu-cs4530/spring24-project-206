@@ -30,3 +30,5 @@ export const equipPetInDao = async (playerID: string, type: string) => {
 
   return updatedPet;
 };
+
+export const deletePetsInDao = async () => petsModel.deleteMany();
