@@ -58,17 +58,21 @@ const TEXT_COLOR = '#88643e';
 
 // Defines the PetShopSlot component
 function PetShopSlot({ petCatalog, controller, playersPets }: PetShopProps): JSX.Element {
+  const [isButtonDisabled, setButtonDisabled] = useState(false);
   // Initializes the background and adoptElement based on player's ownership of the pet
   let background = <Image src={slotBackground.src} />;
   let adoptElement = (
     <IconButton
       bg='transparent'
       _hover={{ bg: 'transparent' }}
+      disabled={isButtonDisabled}
       icon={
         <Image
           src={adoptButton.src}
           onClick={async () => {
+            setButtonDisabled(true);
             await controller.adopt(petCatalog.type);
+            setButtonDisabled(false);
           }}
         />
       }

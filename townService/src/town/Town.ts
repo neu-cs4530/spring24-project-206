@@ -246,7 +246,7 @@ export default class Town {
     this._players.push(newPlayer);
     this._allPlayers.push(newPlayer);
     try {
-      await addPlayerCurrency({ playerID: newPlayer.id, currency: 0 });
+      await addPlayerCurrency({ playerID: newPlayer.id, currency: 800 });
     } catch (error) {
       throw new Error(`Could not add new player currency to database: ${(error as Error).message}`);
     }
