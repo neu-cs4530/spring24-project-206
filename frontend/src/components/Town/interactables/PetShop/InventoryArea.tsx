@@ -22,7 +22,7 @@ import {
   findOnePlayerCurrencyFromDatabase,
   findPetsByPlayerFromDatabase,
   findPetsInCatalogFromDatabase,
-} from '../../../../../../townService/src/town/Database';
+} from '../../../../../../townService/src/Database';
 import closeButton from '../../../../../public/assets/pet-shop/ui/close_btn.png';
 import inventoryBackground from '../../../../../public/assets/pet-shop/ui/inventory_bg.png';
 import unequippedSlot from '../../../../../public/assets/pet-shop/ui/inventory_slot_bg.png';

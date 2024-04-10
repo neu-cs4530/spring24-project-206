@@ -8,7 +8,7 @@ import TownController from '../TownController';
 import {
   findPetImgIdFromDatabase,
   findPetSpeedFromDatabase,
-} from '../../../../townService/src/town/Database';
+} from '../../../../townService/src/Database';
 import { PET_BASELINE_OFFSET, PET_OFFSET } from '../PetController';
 
 export type InventoryAreaEvents = BaseInteractableEventMap & {
