@@ -217,6 +217,7 @@ export class TownsController extends Controller {
       providerVideoToken: newPlayer.videoToken,
       currentPlayers: town.players.map(eachPlayer => eachPlayer.toPlayerModel()),
       currentPets: town.pets,
+      currentEmotes: town.emotes,
       friendlyName: town.friendlyName,
       isPubliclyListed: town.isPubliclyListed,
       interactables: town.interactables.map(eachInteractable => eachInteractable.toModel()),

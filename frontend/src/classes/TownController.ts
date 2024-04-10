@@ -23,6 +23,7 @@ import {
   InteractableCommandBase,
   InteractableCommandResponse,
   InteractableID,
+  PetLocation,
   PlayerID,
   PlayerLocation,
   TownSettingsUpdate,
@@ -50,6 +51,7 @@ import PlayerController from './PlayerController';
 import PetShop from '../components/Town/interactables/PetShop/PetShop';
 import InventoryAreaController from './interactable/InventoryAreaController';
 import PetController from './PetController';
+import { EmoteController } from './EmoteController';
 
 const CALCULATE_NEARBY_PLAYERS_DELAY_MS = 300;
 const SOCKET_COMMAND_TIMEOUT_MS = 5000;
@@ -93,6 +95,12 @@ export type TownEvents = {
    * the new location can be found on the PlayerController.
    */
   playerMoved: (movedPlayer: PlayerController) => void;
+
+  /**
+   * An event that indicates that a pet has moved. This event is dispatched after updating the pet's location -
+   * the new location can be found on the PetController.
+   */
+  petMoved: (movedPet: PetController) => void;
 
   /**
    * An event that indicates that the set of active interactable areas has changed. This event is dispatched
@@ -145,6 +153,12 @@ export type TownEvents = {
    * @param update the new list of equipped pets.
    */
   equippedPetsChanged: (newPets: PetController[]) => void;
+
+  /**
+   * An event that indicates that there are new emotes. This event is dispatched after updating the pet's emote -
+   * the new emote can be found on the list of PetEmote.
+   */
+  emotesChanged: (petEmotes: EmoteController[]) => void;
 
   /**
    * Event handler for the 'petEquipped' event.
@@ -201,6 +215,12 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
    * with a new one; clients should take note not to retain stale references.
    */
   private _petsInternal: PetController[] = [];
+
+  /**
+   * The current list of equipped pets in the town. Adding or removing pets might replace the array
+   * with a new one; clients should take note not to retain stale references.
+   */
+  private _emotesInternal: EmoteController[] = [];
 
   /**
    * The current list of interactable areas in the town. Adding or removing interactable areas might replace the array.
@@ -400,6 +420,15 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
     return this._petsInternal;
   }
 
+  private set _emotes(newEmotes: EmoteController[]) {
+    this.emit('emotesChanged', newEmotes);
+    this._emotesInternal = newEmotes;
+  }
+
+  public get emotes(): EmoteController[] {
+    return this._emotesInternal;
+  }
+
   public get conversationAreas(): ConversationAreaController[] {
     const ret = this._interactableControllers.filter(
       eachInteractable => eachInteractable instanceof ConversationAreaController,
@@ -536,6 +565,28 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
         this.emit('playerMoved', playerToUpdate);
       }
     });
+
+    this._socket.on('emoteCreated', emote => {
+      const newEmotes = this.emotes.filter(e => e.playerID !== emote.playerID);
+      newEmotes.push(EmoteController.fromActiveEmote(emote));
+      this._emotes = newEmotes;
+    });
+
+    /**
+     * When a pet moves, update local state and emit an event to the controller's event listeners
+     */
+    this._socket.on('petMoved', movedPet => {
+      const petToUpdate = this.pets.find(
+        eachPet => eachPet.playerID === movedPet.playerID && eachPet.type === movedPet.type,
+      );
+      if (petToUpdate && this._ourPlayer) {
+        // We should only update the pet location if it's not our pet
+        // (since our pets should be updated elsewhere)
+        if (petToUpdate.playerID !== this._ourPlayer.id) {
+          petToUpdate.location = movedPet.location;
+        }
+      }
+    });
     /**
      * When an interactable's state changes, push that update into the relevant controller
      *
@@ -632,6 +683,39 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
     this.emit('playerMoved', ourPlayer);
   }
 
+  public emitEmoteCreation(emote: EmoteController) {
+    this._socket.emit('emoteCreation', emote.toActiveEmote());
+
+    const newEmotes = this.emotes.filter(e => e.playerID !== emote.playerID);
+    newEmotes.push(emote);
+    this._emotes = newEmotes;
+  }
+
+  public emitEmoteDestruction(emote: EmoteController) {
+    this._socket.emit('emoteDestruction', emote.toActiveEmote());
+
+    const newEmotes = this.emotes.filter(e => e.playerID !== emote.playerID);
+    newEmotes.push(emote);
+    this._emotes = newEmotes;
+  }
+
+  /**
+   * Emit a movement event for the given pet, updating the state locally and
+   * also notifying the townService that the given pet moved.
+   *
+   * @param pet the pet to be moved
+   * @param newLocation the desired destination
+   */
+  public emitPetMovement(pet: PetController, newLocation: PetLocation) {
+    this._socket.emit('petMovement', {
+      type: pet.type,
+      playerID: pet.playerID,
+      location: newLocation,
+      imgID: pet.imgID,
+    });
+    pet.location = newLocation;
+  }
+
   /**
    * Emit a chat message to the townService
    *
@@ -657,7 +741,7 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
    */
   public unequipPet(type: string, playerID: PlayerID) {
     this._pets = this.pets.filter(pet => pet.playerID !== playerID && pet.type !== type);
-
+    this._emotes = this.emotes.filter(e => e.playerID !== playerID);
     this._socket.emit('petUnequipment', { type, playerID });
   }
 

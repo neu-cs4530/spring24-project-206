@@ -6,6 +6,26 @@ import {
   PlayerID,
 } from '../../../shared/types/CoveyTownSocket';
 
+/**
+ * The offset of the pet label's x coordinate so that it's position correctly above the pet
+ */
+export const PET_LABEL_X_OFFSET = 20;
+
+/**
+ * The offset of the pet label's y coordinate so that it's position correctly above the pet
+ */
+export const PET_LABEL_Y_OFFSET = 30;
+
+/**
+ * The offset of the pet's location so that it's behind the player
+ */
+export const PET_OFFSET = 40;
+
+/**
+ * The offset of the pet's y coordinate so that it appears on the same baseline as the player
+ */
+export const PET_BASELINE_OFFSET = 15;
+
 export type PetEvents = {
   petMovement: (newLocation: PetLocation) => void;
 };
@@ -16,6 +36,9 @@ export type PetGameObjects = {
   locationManagedByGameScene: boolean;
 };
 
+/**
+ * This class is responsible for managing the state of an EquippedPet
+ */
 export default class PetController extends (EventEmitter as new () => TypedEmitter<PetEvents>) {
   private _location: PetLocation;
 
@@ -35,6 +58,10 @@ export default class PetController extends (EventEmitter as new () => TypedEmitt
     this._imgID = imgID;
   }
 
+  /**
+   * Updates the location field and sprite location
+   * @param newLocation
+   */
   set location(newLocation: PetLocation) {
     this._location = newLocation;
     this._updateGameComponentLocation();
@@ -61,14 +88,23 @@ export default class PetController extends (EventEmitter as new () => TypedEmitt
     return { type: this.type, playerID: this.playerID, location: this.location, imgID: this.imgID };
   }
 
+  // Moves the pet's game objects
   private _updateGameComponentLocation() {
     if (this.gameObjects && !this.gameObjects.locationManagedByGameScene) {
       const { sprite, label } = this.gameObjects;
       sprite.setX(this.location.x);
       sprite.setY(this.location.y);
+      switch (this.location.rotation) {
+        case 'left':
+          sprite.flipX = true;
+          break;
+        default:
+          sprite.flipX = false;
+          break;
+      }
 
-      label.setX(sprite.body.x);
-      label.setY(sprite.body.y - 20);
+      label.setX(this.location.x - PET_LABEL_X_OFFSET);
+      label.setY(this.location.y - PET_LABEL_Y_OFFSET);
     }
   }
 

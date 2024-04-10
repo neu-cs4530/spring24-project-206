@@ -11,6 +11,8 @@ export type TownJoinResponse = {
   currentPlayers: Player[];
   /** List of pets currently in this town * */
   currentPets: EquippedPet[];
+  /** List of emotes currently in this town * */
+  currentEmotes: ActiveEmote[];
   /** Friendly name of this town * */
   friendlyName: string;
   /** Is this a private town? * */
@@ -64,6 +66,14 @@ export interface EquippedPet {
   location: PetLocation;
   imgID: number;
 }
+
+export interface ActiveEmote {
+  emote: EmoteType;
+  playerID: PlayerID;
+  location: PetLocation;
+}
+
+export type EmoteType = "alert" | "disgust" | "happy" | "love" | "sad";
 
 export type XY = { x: number; y: number };
 
@@ -348,6 +358,9 @@ export type InteractableCommandResponse<MessageType> = {
 
 export interface ServerToClientEvents {
   playerMoved: (movedPlayer: Player) => void;
+  petMoved: (movedPet: EquippedPet) => void;
+  emoteCreated: (emote: ActiveEmote) => void;
+  emoteDestroyed: (emote: ActiveEmote) => void;
   playerDisconnect: (disconnectedPlayer: Player) => void;
   playerJoined: (newPlayer: Player) => void;
   initialize: (initialData: TownJoinResponse) => void;
@@ -366,10 +379,13 @@ export interface ServerToClientEvents {
 export interface ClientToServerEvents {
   chatMessage: (message: ChatMessage) => void;
   playerMovement: (movementData: PlayerLocation) => void;
+  petMovement: (movementData: EquippedPet) => void;
   interactableUpdate: (update: Interactable) => void;
   interactableCommand: (
     command: InteractableCommand & InteractableCommandBase
   ) => void;
   petEquipment: (toBeEquipped: EquippedPet) => void;
   petUnequipment: (toBeUnequipped: Partial<EquippedPet>) => void;
+  emoteCreation: (emote: ActiveEmote) => void;
+  emoteDestruction: (emote: ActiveEmote) => void;
 }

@@ -62,22 +62,26 @@ interface InventoryProps {
  * Returns a pet slot in the inventory.
  */
 function InventorySlot({ pet, petCatalog, controller }: InventoryProps): JSX.Element {
+  const [isButtonDisabled, setButtonDisabled] = useState(false);
   const toast = useToast();
   const toastMessage = pet.equipped ? 'Error unequipping' : 'Error equipping';
   const slotButton = (
     <IconButton
       bg='transparent'
       _hover={{ bg: 'transparent' }}
+      disabled={isButtonDisabled}
       icon={
         <Image
           src={pet.equipped ? unequipBtnAsset.src : equipBtnAsset.src} // display "Unequip" button
           onClick={async () => {
             try {
+              setButtonDisabled(true);
               if (pet.equipped) {
                 await controller.unequip(pet.type);
               } else {
                 await controller.equip(pet.type);
               }
+              setButtonDisabled(false);
             } catch (e) {
               toast({
                 title: toastMessage,

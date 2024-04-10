@@ -9,6 +9,7 @@ import {
   findPetImgIdFromDatabase,
   findPetSpeedFromDatabase,
 } from '../../../../townService/src/town/Database';
+import { PET_BASELINE_OFFSET, PET_OFFSET } from '../PetController';
 
 export type InventoryAreaEvents = BaseInteractableEventMap & {
   petChange: (newPets: Pet[] | undefined) => void;
@@ -41,11 +42,32 @@ export default class InventoryAreaController extends InteractableAreaController<
     const playerController = this._townController.ourPlayer;
     const playerID = playerController.id;
     const playerLoc = playerController.location;
+    // Offsets the location so that the pet will stay behind the player
+    switch (playerLoc.rotation) {
+      case 'left':
+        playerLoc.x += PET_OFFSET;
+        break;
+      case 'right':
+        playerLoc.x -= PET_OFFSET;
+        break;
+      case 'front':
+        playerLoc.y -= PET_OFFSET;
+        break;
+      case 'back':
+        playerLoc.y += PET_OFFSET;
+        break;
+      default:
+        break;
+    }
     const imgID = await findPetImgIdFromDatabase(type);
     const toBeEquipped: EquippedPet = {
       type,
       playerID,
-      location: { x: playerLoc.x, y: playerLoc.y, rotation: playerLoc.rotation },
+      location: {
+        x: playerLoc.x,
+        y: playerLoc.y + PET_BASELINE_OFFSET,
+        rotation: playerLoc.rotation,
+      },
       imgID,
     };
 

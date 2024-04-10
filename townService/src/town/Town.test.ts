@@ -878,4 +878,17 @@ describe('Town', () => {
       });
     });
   });
+  describe('Currency Related Features', () => {
+    it('should set player currency correctly', () => {
+      const currency = 100;
+      town.setPlayerCurrency(player.id, currency);
+      expect(town.getPlayerCurrency(player.id)).toBe(currency);
+    });
+
+    it('should get player currency correctly', () => {
+      const currency = 100;
+      town.setPlayerCurrency(player.id, currency);
+      expect(town.getPlayerCurrency(player.id)).toBe(currency);
+    });
+  });
 });
