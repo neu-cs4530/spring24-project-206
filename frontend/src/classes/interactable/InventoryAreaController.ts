@@ -6,7 +6,7 @@ import { EquippedPet, InventoryArea as InventoryAreaModel } from '../../types/Co
 import { Pet } from '../../../../townService/src/lib/Pet';
 import TownController from '../TownController';
 import { findPetImgId, findPetSpeed } from '../../../../townService/src/town/Database';
-import { PET_BASELINE_OFFSET, PET_OFFSET} from '../PetController';
+import { PET_BASELINE_OFFSET, PET_OFFSET } from '../PetController';
 
 export type InventoryAreaEvents = BaseInteractableEventMap & {
   petChange: (newPets: Pet[] | undefined) => void;
@@ -39,6 +39,7 @@ export default class InventoryAreaController extends InteractableAreaController<
     const playerController = this._townController.ourPlayer;
     const playerID = playerController.id;
     const playerLoc = playerController.location;
+    // Offsets the location so that the pet will stay behind the player
     switch (playerLoc.rotation) {
       case 'left':
         playerLoc.x += PET_OFFSET;

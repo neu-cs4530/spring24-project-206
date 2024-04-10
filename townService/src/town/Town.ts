@@ -1,7 +1,6 @@
 import { ITiledMap, ITiledMapObjectLayer } from '@jonbell/tiled-map-type-guard';
 import { nanoid } from 'nanoid';
 import { BroadcastOperator } from 'socket.io';
-import assert from 'assert';
 import { updateOnePlayerCurrency } from '../leaderboard/leaderboard-dao';
 import InvalidParametersError from '../lib/InvalidParametersError';
 import IVideoClient from '../lib/IVideoClient';
@@ -445,7 +444,7 @@ export default class Town {
   /**
    * Destroys all data related to a player in this town.
    *
-   * @param session PlayerSession to destroy
+   * @param player
    */
   private _removePlayer(player: Player): void {
     if (player.location.interactableID) {
@@ -497,11 +496,14 @@ export default class Town {
    */
   private _updatePetLocation(pet: EquippedPet, location: PetLocation): void {
     pet.location = location;
-    console.log(`Town, _updatePetLocation for ${pet.type}`);
-    console.log(location);
     this._broadcastEmitter.emit('petMoved', pet);
   }
 
+  /**
+   * Equips a pet within the town
+   *
+   * @param toBeEquipped pet to equip
+   */
   private _updatePetEquipment(toBeEquipped: EquippedPet) {
     if (
       !this._pets.find(
@@ -512,6 +514,12 @@ export default class Town {
     }
   }
 
+  /**
+   * Unequips a pet within the town
+   *
+   * @param type type of pet to be unequipped
+   * @param playerID playerID of the player the pet belongs to
+   */
   private _updatePetUnequipment(type: string, playerID: PlayerID) {
     this._pets = this._pets.filter(pet => pet.playerID !== playerID && pet.type !== type);
   }

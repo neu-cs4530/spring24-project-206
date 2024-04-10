@@ -551,13 +551,9 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
         eachPet => eachPet.playerID === movedPet.playerID && eachPet.type === movedPet.type,
       );
       if (petToUpdate && this._ourPlayer) {
+        // We should only update the pet location if it's not our pet
+        // (since our pets should be updated elsewhere)
         if (petToUpdate.playerID !== this._ourPlayer.id) {
-          /*
-           * If we are told that WE moved, we shouldn't update our x,y because it's probably lagging behind
-           * real time. However: we SHOULD update our interactable ID, because its value is managed by the server
-           */
-          console.log(`TownController: socket.on petMoved, ${petToUpdate.type}`);
-          console.log(movedPet.location);
           petToUpdate.location = movedPet.location;
         }
       }

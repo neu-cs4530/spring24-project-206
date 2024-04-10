@@ -220,10 +220,9 @@ export default class TownGameScene extends Phaser.Scene {
           label.destroy();
         }
 
+        // Remove the pets of the disconnected players from the board
         const equippedPets = this._pets.filter(pet => pet.playerID === disconnectedPlayer.id);
         equippedPets.forEach(equippedPet => this.deletePetSprite(equippedPet));
-        console.log('disconnected player pets in updatePlayers');
-        console.log(equippedPets);
         this._pets = this._pets.filter(pet => pet.playerID !== disconnectedPlayer.id);
       }
     });
@@ -231,19 +230,23 @@ export default class TownGameScene extends Phaser.Scene {
     this._players = players;
   }
 
+  /**
+   * Make sure each pet in the list has sprites and unequipped pets are filtered out of the local list
+   * @param pets the new list of pets
+   */
   updatePets(pets: PetController[]) {
-    console.log('TownGameScene: list of pets');
-    console.log(pets);
+    // Make sure each pet has a sprite
     pets.forEach(pet => this.createPetSprite(pet));
 
-    // Remove unequipped pets from board
+    // Find unequipped pets by comparing local list to new list
     const unequippedPets = this._pets.filter(
       pet => !pets.find(p => p.playerID === pet.playerID && p.type === pet.type),
     );
-    console.log('unequippedPets in updatePets');
-    console.log(unequippedPets);
 
+    // Remove unequipped pets from the board
     unequippedPets.forEach(unequippedPet => this.deletePetSprite(unequippedPet));
+
+    // Remove unequipped pets from the local list
     this._pets = pets;
   }
 
@@ -286,6 +289,9 @@ export default class TownGameScene extends Phaser.Scene {
       this._lastLocation.rotation = destination.rotation;
     }
     this.coveyTownController.emitMovement(this._lastLocation);
+
+    // also update pet locations
+    this.moveOurPets();
   }
 
   update() {
@@ -373,30 +379,8 @@ export default class TownGameScene extends Phaser.Scene {
         });
         this.coveyTownController.emitMovement(this._lastLocation);
 
-        this.ourPets().forEach(pet => {
-          const newLocation = this.coveyTownController.ourPlayer.location;
-          switch (newLocation.rotation) {
-            case 'left':
-              newLocation.x += PET_OFFSET;
-              break;
-            case 'right':
-              newLocation.x -= PET_OFFSET;
-              break;
-            case 'front':
-              newLocation.y -= PET_OFFSET;
-              break;
-            case 'back':
-              newLocation.y += PET_OFFSET;
-              break;
-            default:
-              break;
-          }
-          this.movePetTo(pet, {
-            x: newLocation.x,
-            y: newLocation.y + PET_BASELINE_OFFSET,
-            rotation: newLocation.rotation,
-          });
-        });
+        // Also update pet locations
+        this.moveOurPets();
       }
 
       //Update the location for the labels of all of the other players
@@ -409,10 +393,46 @@ export default class TownGameScene extends Phaser.Scene {
     }
   }
 
-  ourPets(): PetController[] {
-    return this._pets.filter(pet => pet.playerID === this.coveyTownController.ourPlayer.id);
+  /**
+   * Moves all of our pets to our current location
+   */
+  moveOurPets() {
+    const ourPets = this._pets.filter(
+      pet => pet.playerID === this.coveyTownController.ourPlayer.id,
+    );
+    const newLocation = this.coveyTownController.ourPlayer.location;
+    ourPets.forEach(pet => {
+      // Offsets the location so that the pet will be behind the player
+      switch (newLocation.rotation) {
+        case 'left':
+          newLocation.x += PET_OFFSET;
+          break;
+        case 'right':
+          newLocation.x -= PET_OFFSET;
+          break;
+        case 'front':
+          newLocation.y -= PET_OFFSET;
+          break;
+        case 'back':
+          newLocation.y += PET_OFFSET;
+          break;
+        default:
+          break;
+      }
+      this.movePetTo(pet, {
+        x: newLocation.x,
+        // offsets so that pet will be on the same baseline as player
+        y: newLocation.y + PET_BASELINE_OFFSET,
+        rotation: newLocation.rotation,
+      });
+    });
   }
 
+  /**
+   * Moves the given pet to the destination
+   * @param pet pet to move
+   * @param destination desired destination
+   */
   movePetTo(pet: PetController, destination: PetLocation) {
     const gameObjects = pet.gameObjects;
     if (!gameObjects) {
@@ -438,8 +458,6 @@ export default class TownGameScene extends Phaser.Scene {
     }
 
     this.coveyTownController.emitPetMovement(pet, destination);
-    console.log(`emitPetMovement in movePetTo for ${pet.type}`);
-    console.log(destination);
   }
 
   private _map?: Phaser.Tilemaps.Tilemap;
@@ -693,6 +711,10 @@ export default class TownGameScene extends Phaser.Scene {
     }
   }
 
+  /**
+   * Creates a sprite for the given pet if it doesn't already have one
+   * @param pet
+   */
   createPetSprite(pet: PetController) {
     if (!pet.gameObjects) {
       const imgKey = PET_SPRITE_PREFIX + pet.imgID;
@@ -720,6 +742,10 @@ export default class TownGameScene extends Phaser.Scene {
     }
   }
 
+  /**
+   * Deletes the sprites of the given pet
+   * @param pet
+   */
   deletePetSprite(pet: PetController) {
     if (pet.gameObjects) {
       const { sprite, label } = pet.gameObjects;
